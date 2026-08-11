@@ -3,5 +3,12 @@ export {
   isBrowser,
   supportsPopover,
   getEventTarget,
+  getEventTargetPierceShadowDom,
+  getFocusedElementPierceShadowDom,
+  getShadowRoot,
   hasModifierKey,
+  normalizePassiveListenerOptions,
+  supportsPassiveEventListeners,
+  supportsShadowDom,
+  type ModifierKey,
 } from './platform';

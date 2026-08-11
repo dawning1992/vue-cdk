@@ -42,7 +42,13 @@
       "types": "./dist/emitter/index.d.ts",
       "import": "./dist/emitter/index.js",
       "require": "./dist/emitter/index.cjs"
-    }
+    },
+    "./a11y": {
+      "types": "./dist/a11y/index.d.ts",
+      "import": "./dist/a11y/index.js",
+      "require": "./dist/a11y/index.cjs"
+    },
+    "./a11y/style.css": "./dist/a11y/style.css"
   },
   "sideEffects": [
     "**/*.css"
@@ -61,7 +67,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite --config vite.demo.config.ts",
-    "build": "vite build",
+    "build": "vite build && node scripts/copy-a11y-css.mjs",
     "build:demo": "vite build --config vite.demo.config.ts",
     "preview:demo": "vite preview --config vite.demo.config.ts",
     "typecheck": "vue-tsc --noEmit",

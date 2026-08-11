@@ -9,6 +9,9 @@ import ScrollStrategies from './sections/ScrollStrategies.vue';
 import RtlDemo from './sections/RtlDemo.vue';
 import Stacking from './sections/Stacking.vue';
 import PopoverDemo from './sections/PopoverDemo.vue';
+import KeyManagerDemo from './sections/KeyManagerDemo.vue';
+import FocusTrapDemo from './sections/FocusTrapDemo.vue';
+import FocusMonitorDemo from './sections/FocusMonitorDemo.vue';
 
 /** 页签配置：每个页签对应一个独立功能演示组件。 */
 interface TabItem {
@@ -27,6 +30,9 @@ const tabs: TabItem[] = [
   {key: 'rtl', label: 'RTL 方向', component: RtlDemo},
   {key: 'stacking', label: '多层堆叠', component: Stacking},
   {key: 'popover', label: 'Popover 位置', component: PopoverDemo},
+  {key: 'key-manager', label: '键盘导航', component: KeyManagerDemo},
+  {key: 'focus-trap', label: '焦点陷阱', component: FocusTrapDemo},
+  {key: 'focus-monitor', label: '焦点来源', component: FocusMonitorDemo},
 ];
 
 const activeKey = ref(tabs[0].key);
@@ -37,7 +43,7 @@ const activeTab = computed(() => tabs.find(tab => tab.key === activeKey.value) ?
   <div class="page">
     <header class="page-header">
       <h1>Vue CDK 演示</h1>
-      <p>Vue 3 Composition API 实现的浮层面板库，设计移植自 Angular CDK Overlay</p>
+      <p>Vue 3 Composition API 组件开发工具包，设计移植自 Angular CDK（Overlay 与 a11y）</p>
     </header>
 
     <nav class="tabs" role="tablist" aria-label="功能演示">

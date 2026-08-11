@@ -11,6 +11,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/platform` | platform | 平台能力检测与事件工具（`isBrowser`、`supportsPopover`、`hasModifierKey`） |
 | `vue-cdk/scrolling` | scrolling | 全局滚动分发与视口测量（`ScrollDispatcher`、`ViewportRuler`） |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） |
+| `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） |
 
 根入口 `vue-cdk` 与 Angular CDK 一致，仅导出版本号；业务能力一律按子路径导入。
 
@@ -144,6 +145,118 @@ function openDialog() {
 
 emits：`backdropClick`、`positionChange`、`attach`、`detach`、`overlayKeydown`、`overlayOutsideClick`、`update:open`。
 
+## a11y 模块
+
+移植自 Angular CDK 的 `@angular/cdk/a11y`，提供三个主题能力：键盘导航、焦点陷阱与焦点来源监视。
+核心类保持 Angular API 语义一致（RxJS 由零依赖 `Emitter` 替代），并提供 Vue 专属的
+组合式函数（`useFocusTrap` / `useFocusMonitor`）与指令（`vFocusTrap` / `vFocusMonitor`）。
+
+### 键盘导航：ListKeyManager 系列
+
+```vue
+<script setup lang="ts">
+import {onBeforeUnmount, ref} from 'vue';
+import {ListKeyManager, type ListKeyManagerOption} from 'vue-cdk/a11y';
+
+interface Item extends ListKeyManagerOption {
+  id: string;
+  getLabel(): string;
+}
+
+const items = ref<Item[]>([]);
+const manager = new ListKeyManager(items).withWrap().withTypeAhead();
+
+function onKeydown(event: KeyboardEvent) {
+  manager.onKeydown(event);
+}
+
+onBeforeUnmount(() => manager.destroy());
+</script>
+
+<template>
+  <ul tabindex="0" @keydown="onKeydown">
+    <li v-for="(item, index) in items" :key="item.id"
+        :class="{active: index === manager.activeItemIndex}">
+      {{ item.getLabel() }}
+    </li>
+  </ul>
+</template>
+```
+
+`FocusKeyManager`（活动项自动 `focus(origin)`）与 `ActiveDescendantKeyManager`
+（活动项自动切换 `setActiveStyles` / `setInactiveStyles`）同样可用。
+
+### 焦点陷阱：FocusTrap
+
+声明式（指令）：
+
+```vue
+<div v-focus-trap.autoCapture role="dialog" aria-modal="true">
+  <!-- Tab 焦点被限制在区域内；autoCapture 打开时捕获、关闭时恢复 -->
+</div>
+```
+
+命令式 / 组合式（可配置陷阱接入栈管理，支持嵌套模态框）：
+
+```ts
+import {ref} from 'vue';
+import {useFocusTrap} from 'vue-cdk/a11y';
+
+const modalRoot = ref<HTMLElement | null>(null);
+const {enabled, focusInitial, destroy} = useFocusTrap(modalRoot, {configurable: true});
+```
+
+区域标记：`vcdk-focus-initial` 指定初始聚焦元素，`vcdk-focus-region-start/end`
+指定首/末 Tab 边界（对应 Angular 的 `cdkFocusInitial` / `cdkFocusRegionStart|End`）。
+
+### 焦点来源：FocusMonitor
+
+```vue
+<input v-focus-monitor="origin => console.log(origin)" />
+<div v-focus-monitor.subtree> <!-- 子元素聚焦也算父元素聚焦 --> </div>
+```
+
+```ts
+import {useFocusMonitor} from 'vue-cdk/a11y';
+
+const monitor = useFocusMonitor();
+const unsubscribe = monitor.monitor(inputRef).subscribe(origin => {
+  // origin: 'mouse' | 'keyboard' | 'touch' | 'program' | null
+});
+```
+
+监视器会自动维护焦点类：`vcdk-focused`、`vcdk-mouse-focused`、
+`vcdk-keyboard-focused`、`vcdk-touch-focused`、`vcdk-program-focused`。
+
+### Angular ↔ Vue API 映射（a11y）
+
+| Angular（`@angular/cdk/a11y`） | Vue CDK（`vue-cdk/a11y`） |
+| --- | --- |
+| `ListKeyManager` | `ListKeyManager`（条目源支持数组或 `Ref`） |
+| `FocusKeyManager` / `ActiveDescendantKeyManager` / `Typeahead` | 同名类 |
+| `CdkTrapFocus` 指令 | `vFocusTrap` 指令 + `useFocusTrap()` |
+| `FocusTrapFactory` / `ConfigurableFocusTrapFactory` | 同名类 + 模块级单例 |
+| `FocusTrapManager` / `FocusTrapInertStrategy` / `EventListenerFocusTrapInertStrategy` | 同名类（策略通过工厂/组合式 options 注入） |
+| `InteractivityChecker` | `InteractivityChecker` + 模块级单例 |
+| `CdkMonitorFocus` 指令 | `vFocusMonitor` 指令（`.subtree` 修饰符对应 `cdkMonitorSubtreeFocus`） |
+| `FocusMonitor` / `InputModalityDetector` | 同名类 + `useFocusMonitor()` + 模块级单例 |
+| `FocusMonitorDetectionMode` | 同名枚举（IMMEDIATE / EVENTUAL） |
+
+### 类名映射
+
+| Angular | Vue CDK |
+| --- | --- |
+| `cdk-focused` / `cdk-mouse-focused` / `cdk-keyboard-focused` / `cdk-touch-focused` / `cdk-program-focused` | `vcdk-focused` / `vcdk-mouse-focused` / `vcdk-keyboard-focused` / `vcdk-touch-focused` / `vcdk-program-focused` |
+| `cdk-visually-hidden` / `cdk-focus-trap-anchor` | `vcdk-visually-hidden` / `vcdk-focus-trap-anchor` |
+| `cdkFocusInitial` / `cdkFocusRegionStart` / `cdkFocusRegionEnd` | `vcdk-focus-initial`（或 `vcdkFocusInitial`）/ `vcdk-focus-region-start` / `vcdk-focus-region-end` |
+| `div.cdk-overlay-pane` 豁免 | `div.vcdk-overlay-pane` 豁免 |
+
+### 样式说明
+
+结构样式（`.vcdk-visually-hidden`）随 `vue-cdk/a11y` 入口自动注入；
+也可显式引入 `vue-cdk/a11y/style.css`（会与自动注入去重）。
+焦点来源类只负责标记，具体视觉样式由使用方自行定义（demo 中展示了色标示例）。
+
 ## 与 Angular CDK 的对应关系
 
 | Angular | Vue CDK（`vue-cdk/overlay`） |
@@ -159,6 +272,7 @@ emits：`backdropClick`、`positionChange`、`attach`、`detach`、`overlayKeydo
 | `@angular/cdk/scrolling` 的 `ScrollDispatcher` / `ViewportRuler` | `vue-cdk/scrolling` |
 | `@angular/cdk/platform` | `vue-cdk/platform` |
 | `@angular/cdk/coercion` | `vue-cdk/coercion` |
+| `@angular/cdk/a11y` | `vue-cdk/a11y` |
 | RxJS `Subject` | 内部 `Emitter`（`vue-cdk/emitter`，零依赖） |
 
 ## 开发

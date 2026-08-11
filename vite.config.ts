@@ -27,12 +27,15 @@ export default defineConfig({
         platform: 'src/platform/index.ts',
         scrolling: 'src/scrolling/index.ts',
         emitter: 'src/emitter/index.ts',
+        a11y: 'src/a11y/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) =>
         entryName === 'index'
           ? `index.${format === 'es' ? 'js' : 'cjs'}`
           : `${entryName}/index.${format === 'es' ? 'js' : 'cjs'}`,
+      // Vite 8 库模式仅支持字符串 cssFileName：所有入口的样式合并输出到
+      // overlay/style.css。a11y 样式以自动注入为主，显式 css 引入复用该文件。
       cssFileName: 'overlay/style',
     },
     sourcemap: true,

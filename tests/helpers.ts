@@ -53,3 +53,55 @@ export function createTestOverlay(config?: OverlayConfig): OverlayRef {
 export function flushPromises(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 0));
 }
+
+/**
+ * 使元素在 jsdom 中拥有几何尺寸。
+ * jsdom 默认 offsetWidth/offsetHeight 为 0，会导致可见性判断失败；
+ * 需要通过 defineProperty 模拟真实浏览器行为。
+ */
+export function mockVisible(element: Element): void {
+  Object.defineProperty(element, 'offsetWidth', {value: 100, configurable: true});
+  Object.defineProperty(element, 'offsetHeight', {value: 100, configurable: true});
+}
+
+/** 创建带 keyCode 的键盘事件（jsdom 支持构造器传入 keyCode）。 */
+export function createKeyboardEvent(
+  type: string,
+  keyCode: number,
+  init: {
+    altKey?: boolean;
+    ctrlKey?: boolean;
+    metaKey?: boolean;
+    shiftKey?: boolean;
+    key?: string;
+  } = {},
+): KeyboardEvent {
+  return new KeyboardEvent(type, {
+    bubbles: true,
+    cancelable: true,
+    ...init,
+    keyCode,
+  } as KeyboardEventInit);
+}
+
+/** 派发鼠标事件并返回事件对象。 */
+export function dispatchMouseEvent(
+  target: EventTarget,
+  type: string,
+  init: MouseEventInit = {},
+): MouseEvent {
+  const event = new MouseEvent(type, {bubbles: true, cancelable: true, ...init});
+  target.dispatchEvent(event);
+  return event;
+}
+
+/** 派发触摸事件；jsdom 的 Touch/TouchEvent 能力有限，必要时用 defineProperty 补充 touches。 */
+export function dispatchTouchEvent(target: EventTarget, touches?: unknown[]): TouchEvent {
+  const event = new TouchEvent('touchstart', {bubbles: true, cancelable: true});
+  if (touches) {
+    Object.defineProperty(event, 'touches', {get: () => touches});
+    Object.defineProperty(event, 'changedTouches', {get: () => touches});
+  }
+  target.dispatchEvent(event);
+  return event;
+}

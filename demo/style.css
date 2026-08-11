@@ -174,6 +174,237 @@ body {
   color: var(--demo-primary);
 }
 
+/* ---- a11y demo：键盘导航 / 焦点陷阱 / 焦点来源 ---- */
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.demo-card {
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fafbfe;
+}
+
+.demo-card h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+}
+
+.k-list {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+  outline: none;
+  min-height: 64px;
+}
+
+.k-list:focus {
+  border-color: var(--demo-primary);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
+}
+
+.k-item {
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.k-item.active {
+  background: var(--demo-primary);
+  color: #fff;
+}
+
+.k-item.disabled {
+  color: var(--demo-muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #fdeaea;
+  color: #c0392b;
+  font-size: 12px;
+}
+
+.k-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+  outline: none;
+}
+
+.k-row:focus {
+  border-color: var(--demo-primary);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
+}
+
+.k-chip {
+  padding: 6px 14px;
+  border: 1px solid var(--demo-border);
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.k-chip.active {
+  background: var(--demo-primary);
+  border-color: var(--demo-primary);
+  color: #fff;
+}
+
+.hint {
+  margin: 10px 0 0;
+  color: var(--demo-muted);
+  font-size: 13px;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(31, 36, 48, 0.45);
+  z-index: 50;
+}
+
+.modal h4 {
+  margin: 0;
+  background: #fff;
+  padding: 18px 24px 6px;
+  border-radius: 12px 12px 0 0;
+  width: 420px;
+  max-width: calc(100vw - 48px);
+  box-sizing: border-box;
+}
+
+.modal .hint,
+.modal .modal-row {
+  background: #fff;
+  padding: 0 24px;
+  width: 420px;
+  max-width: calc(100vw - 48px);
+  box-sizing: border-box;
+}
+
+.modal .modal-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-bottom: 18px;
+  border-radius: 0 0 12px 12px;
+}
+
+.modal.inner h4,
+.modal.inner .hint,
+.modal.inner .modal-row {
+  width: 320px;
+}
+
+.trap-box {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px;
+  border: 1px dashed var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.monitor-stack,
+.subtree-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.subtree-box {
+  padding: 14px;
+  border: 1px dashed var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.monitor-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.legend {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.legend-key {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.legend-key.keyboard {
+  background: #e7f0ff;
+  color: #2f5fd0;
+}
+
+.legend-key.mouse {
+  background: #e6f8ef;
+  color: #1d7a4f;
+}
+
+.legend-key.touch {
+  background: #fff2e3;
+  color: #b75e0e;
+}
+
+.legend-key.program {
+  background: #f3ecfe;
+  color: #6d3fc4;
+}
+
+/* FocusMonitor 自动添加的焦点来源类：与 Angular cdk-* 同名语义。 */
+.vcdk-keyboard-focused {
+  outline: 3px solid #4f6ef7 !important;
+}
+
+.vcdk-mouse-focused {
+  outline: 3px solid #22a06b !important;
+}
+
+.vcdk-touch-focused {
+  outline: 3px solid #e7832d !important;
+}
+
+.vcdk-program-focused {
+  outline: 3px solid #9b6bf0 !important;
+}
+
 .tooltip-box {
   background: #22262f;
   color: #fff;
