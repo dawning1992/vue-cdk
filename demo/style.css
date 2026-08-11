@@ -493,3 +493,32 @@ body {
   color: var(--demo-muted);
   font-size: 13px;
 }
+
+/*
+ * 渲染函数对话框内容的全局样式：该内容由 useDialog() 命令式渲染到 overlay 容器，
+ * 不经过宿主组件的作用域，因此样式必须放在全局层。
+ */
+.render-dialog {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 360px;
+  max-width: 90vw;
+  box-shadow: 0 16px 48px rgba(31, 36, 48, 0.18);
+}
+
+.render-dialog h3 {
+  margin: 0 0 10px;
+}
+
+.render-dialog p {
+  margin: 0 0 8px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.render-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}

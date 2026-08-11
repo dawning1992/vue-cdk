@@ -1,0 +1,17 @@
+/*
+ * Vue CDK dialog 结构样式（对齐 Angular CDK CdkDialogContainer 的最小样式）。
+ *
+ * 设计说明：
+ * - 容器铺满 overlay 面板，便于内容组件以百分比或继承方式控制自身尺寸；
+ * - 不包含任何业务样式（背景、圆角、阴影等由内容组件或 panelClass 提供）。
+ */
+
+.vcdk-dialog-container {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  max-height: inherit;
+  box-sizing: border-box;
+  outline: none;
+}

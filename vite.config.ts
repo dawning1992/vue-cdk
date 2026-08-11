@@ -28,6 +28,7 @@ export default defineConfig({
         scrolling: 'src/scrolling/index.ts',
         emitter: 'src/emitter/index.ts',
         a11y: 'src/a11y/index.ts',
+        dialog: 'src/dialog/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) =>

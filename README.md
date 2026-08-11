@@ -12,6 +12,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/scrolling` | scrolling | 全局滚动分发与视口测量（`ScrollDispatcher`、`ViewportRuler`） |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） |
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） |
+| `vue-cdk/dialog` | dialog | 模态对话框：命令式 `useDialog()`，对齐 Angular CDK `@angular/cdk/dialog` |
 
 根入口 `vue-cdk` 与 Angular CDK 一致，仅导出版本号；业务能力一律按子路径导入。
 
@@ -257,6 +258,81 @@ const unsubscribe = monitor.monitor(inputRef).subscribe(origin => {
 也可显式引入 `vue-cdk/a11y/style.css`（会与自动注入去重）。
 焦点来源类只负责标记，具体视觉样式由使用方自行定义（demo 中展示了色标示例）。
 
+## dialog 模块
+
+移植自 Angular CDK 的 `@angular/cdk/dialog`：以 `useDialog()` 命令式打开
+模态对话框，`DialogRef` 携带关闭结果与事件流，内容通过 `provide/inject`
+（`DIALOG_DATA` / `DIALOG_REF`）与 `contentProps` 双通道接收数据。
+焦点陷阱、autoFocus / restoreFocus、ARIA、滚动锁定等行为由默认容器
+`VDialogContainer` 内置，也可通过 `config.container` 传入自定义容器
+（复用 `useDialogContainerCore`）。
+
+### 快速开始
+
+```vue
+<!-- MyDialog.vue -->
+<script setup lang="ts">
+import {useDialogData, useDialogRef} from 'vue-cdk/dialog';
+
+const data = useDialogData<{title: string}>();
+const dialogRef = useDialogRef<string>();
+</script>
+
+<template>
+  <div class="my-dialog">
+    <h3>{{ data.title }}</h3>
+    <button @click="dialogRef.close('确定')">确定</button>
+    <button @click="dialogRef.close('取消')">取消</button>
+  </div>
+</template>
+```
+
+```ts
+import {useDialog} from 'vue-cdk/dialog';
+import MyDialog from './MyDialog.vue';
+
+const dialog = useDialog();
+const dialogRef = dialog.open(MyDialog, {
+  data: {title: '确认删除？'},
+  panelClass: 'my-dialog-panel',
+});
+
+dialogRef.closed.subscribe(result => {
+  console.log(result); // '确定' | '取消'
+});
+```
+
+打开内容支持组件、渲染函数与 VNode 三种形式；渲染函数等价 Angular 的
+`TemplateRef`，参数为上下文对象（含 `$implicit`（data）与 `dialogRef`，
+并合并 `templateContext`）。
+
+### 常用配置（`DialogConfig`）
+
+| 字段 | 默认值 | 说明 |
+| --- | --- | --- |
+| `id` / `role` | 自动生成 / `'dialog'` | 唯一 id 与 ARIA role（可设为 `'alertdialog'`） |
+| `data` | `null` | 注入给内容的数据（`useDialogData` / `contentProps` 双通道） |
+| `panelClass` / `backdropClass` / `hasBackdrop` | `''` / `''` / `true` | 面板、遮罩类与遮罩开关 |
+| `disableClose` / `closePredicate` | `false` / — | 关闭限制；`closePredicate` 返回 false 时阻止关闭并重捕获焦点 |
+| `width/height/minWidth/minHeight/maxWidth/maxHeight` | — | 面板尺寸（数字按像素） |
+| `autoFocus` | `'first-tabbable'` | `'dialog'` / `'first-heading'` / CSS 选择器 / `false` |
+| `restoreFocus` | `true` | 关闭后恢复焦点：`boolean` / CSS 选择器 / `HTMLElement` |
+| `scrollStrategy` / `closeOnNavigation` | block / `true` | 滚动策略与路由导航关闭 |
+| `closeOnOverlayDetachments` | `true` | overlay 被外部 detach 时是否关闭 |
+| `disableAnimations` / `direction` | `false` / 根元素 dir | 动画开关与文本方向 |
+| `container` | `VDialogContainer` | 自定义容器组件（复用 `useDialogContainerCore`） |
+| `contentProps` / `templateContext` | — | 内容 props（Vue 特有）与渲染函数上下文 |
+
+### 服务与引用
+
+- `useDialog()` / `dialogService`：`open(content, config?)`、`closeAll()`、
+  `getDialogById(id)`、`openDialogs`、`afterOpened`、`afterAllClosed`
+  （订阅时无打开对话框会立即触发，对齐 Angular 语义）；
+- `DialogRef`：`close(result?, {focusOrigin?})`、`closed` / `backdropClick` /
+  `keydownEvents` / `outsidePointerEvents` 事件流（`Emitter`）、
+  `updatePosition()` / `updateSize()` / `addPanelClass()` / `removePanelClass()`；
+- 结构样式随打开自动注入，也可显式引入 `vue-cdk/dialog/style.css`。
+
 ## 与 Angular CDK 的对应关系
 
 | Angular | Vue CDK（`vue-cdk/overlay`） |
@@ -273,6 +349,10 @@ const unsubscribe = monitor.monitor(inputRef).subscribe(origin => {
 | `@angular/cdk/platform` | `vue-cdk/platform` |
 | `@angular/cdk/coercion` | `vue-cdk/coercion` |
 | `@angular/cdk/a11y` | `vue-cdk/a11y` |
+| `@angular/cdk/dialog` 的 `Dialog` 服务 | `useDialog()` / `dialogService` |
+| `@angular/cdk/dialog` 的 `DialogRef` | `DialogRef`（RxJS → `Emitter`） |
+| `DIALOG_DATA` / `DEFAULT_DIALOG_CONFIG` | 同名 InjectionKey + `useDialogData()` |
+| `CdkDialogContainer` | `VDialogContainer` / `useDialogContainerCore()` |
 | RxJS `Subject` | 内部 `Emitter`（`vue-cdk/emitter`，零依赖） |
 
 ## 开发

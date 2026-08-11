@@ -12,6 +12,7 @@ export default defineConfig({
     alias: {
       'vue-cdk/overlay': fileURLToPath(new URL('./src/overlay/index.ts', import.meta.url)),
       'vue-cdk/a11y': fileURLToPath(new URL('./src/a11y/index.ts', import.meta.url)),
+      'vue-cdk/dialog': fileURLToPath(new URL('./src/dialog/index.ts', import.meta.url)),
     },
   },
 });
