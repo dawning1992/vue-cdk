@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {Reactive, reactive, ref} from 'vue';
 import {VConnectedOverlay, VOverlayOrigin} from 'vue-cdk/overlay';
 
 defineProps<{id?: string}>();
 
 const first = ref(false);
 const second = ref(false);
-const log: string[] = [];
+const log:Reactive<string[]> = reactive([]);
 
 function addLog(message: string) {
   log.unshift(message);
@@ -20,28 +20,33 @@ function addLog(message: string) {
   <section :id="id" class="section">
     <h2>多层堆叠<span class="badge">事件只派发给最上层</span></h2>
     <p class="desc">
-      同时打开两层浮层，键盘事件只会命中栈顶的 overlay；点击面板外部时
-      两个 overlay 都会收到 outsideClick（用于依次关闭）。
+      两个触发按钮共享同一个 origin，因此先打开第一层再点第二层不会误关第一层。
+      键盘事件只会命中栈顶的 overlay；点击触发按钮以外的空白区域时，
+      两个 overlay 都会收到 outsideClick 并各自关闭。
     </p>
     <div class="stage">
+      <!-- 两个按钮必须共用同一 origin：VConnectedOverlay 会把“落在 origin 内部的点击”
+           视为面板内点击而忽略，否则点第二层按钮会作为第一层的外部点击把它关闭。 -->
       <VOverlayOrigin>
         <button class="btn" @click="first = !first; addLog('切换 第一层')">第一层 {{ first ? '开' : '关' }}</button>
+        <button class="btn" @click="second = !second; addLog('切换 第二层')">第二层 {{ second ? '开' : '关' }}</button>
+
+        <!-- 第一层锚在 origin 左侧，第二层锚在右侧，两层同时打开时互不遮挡。 -->
         <VConnectedOverlay
           :open="first"
           :positions="[{originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top'}]"
           @overlay-keydown="addLog('keydown → 第一层')"
+          @update:open="first = $event; addLog('ESC → 第一层关闭')"
           @overlay-outside-click="first = false; addLog('outside → 第一层关闭')"
         >
-          <div class="panel" style="z-index: 1">第一层浮层<br /><span class="muted">按任意键看日志</span></div>
+          <div class="panel">第一层浮层<br /><span class="muted">按任意键看日志</span></div>
         </VConnectedOverlay>
-      </VOverlayOrigin>
 
-      <VOverlayOrigin>
-        <button class="btn" @click="second = !second; addLog('切换 第二层')">第二层 {{ second ? '开' : '关' }}</button>
         <VConnectedOverlay
           :open="second"
-          :positions="[{originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top'}]"
+          :positions="[{originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top'}]"
           @overlay-keydown="addLog('keydown → 第二层')"
+          @update:open="second = $event; addLog('ESC → 第二层关闭')"
           @overlay-outside-click="second = false; addLog('outside → 第二层关闭')"
         >
           <div class="panel">第二层浮层（栈顶）<br /><span class="muted">按任意键看日志</span></div>

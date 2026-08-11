@@ -158,6 +158,41 @@ describe('VConnectedOverlay 声明式 API', () => {
     wrapper.unmount();
   });
 
+  it('点击共享 origin 内的其他触发按钮不会派发 overlayOutsideClick', async () => {
+    const Wrapper = defineComponent({
+      components: {VOverlayOrigin, VConnectedOverlay},
+      template: `
+        <VOverlayOrigin>
+          <button class="trigger-a">第一层</button>
+          <button class="trigger-b">第二层</button>
+          <VConnectedOverlay :open="true">
+            <div>第一层面板</div>
+          </VConnectedOverlay>
+          <VConnectedOverlay :open="true">
+            <div>第二层面板</div>
+          </VConnectedOverlay>
+        </VOverlayOrigin>
+      `,
+    });
+    const wrapper = mount(Wrapper);
+    await flush();
+    const overlays = wrapper.findAllComponents(VConnectedOverlay);
+
+    // 点击另一个触发按钮：目标位于共享 origin 内部，两个 overlay 都不应视为外部点击。
+    const triggerB = wrapper.get('button.trigger-b');
+    triggerB.element.dispatchEvent(new MouseEvent('pointerdown', {bubbles: true}));
+    triggerB.element.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+    expect(overlays[0].emitted('overlayOutsideClick')).toBeFalsy();
+    expect(overlays[1].emitted('overlayOutsideClick')).toBeFalsy();
+
+    // 点击 origin 外部：两个 overlay 都应收到外部点击。
+    document.body.dispatchEvent(new MouseEvent('pointerdown', {bubbles: true}));
+    document.body.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+    expect(overlays[0].emitted('overlayOutsideClick')).toHaveLength(1);
+    expect(overlays[1].emitted('overlayOutsideClick')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
   it('打开后派发 positionChange', async () => {
     const Wrapper = defineComponent({
       props: {open: Boolean},
