@@ -1,0 +1,144 @@
+/*
+ * Vue CDK overlay 结构样式（对齐 Angular CDK overlay-prebuilt 的语义）。
+ *
+ * 布局思路：
+ * - 容器固定定位铺满视口且不拦截指针事件；
+ * - 每个 overlay 使用独立包装层（global wrapper 或 connected bounding box），
+ *   通过 flexbox 实现全局居中与连接定位，避免 transform 带来的亚像素模糊；
+ * - backdrop 淡入淡出由 transition 驱动，关闭时等待 transitionend（带兜底定时器）。
+ */
+
+:root {
+  --vcdk-overlay-container-z-index: 1000;
+  --vcdk-overlay-z-index: 1000;
+  --vcdk-overlay-backdrop-z-index: 1000;
+  --vcdk-overlay-backdrop-color: rgba(0, 0, 0, 0.32);
+  --vcdk-overlay-backdrop-animation-duration: 400ms;
+  --vcdk-overlay-backdrop-animation-timing-function: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.vcdk-overlay-container,
+.vue-global-overlay-wrapper {
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.vcdk-overlay-container {
+  position: fixed;
+  z-index: var(--vcdk-overlay-container-z-index);
+}
+
+.vcdk-overlay-container:empty {
+  display: none;
+}
+
+.vue-global-overlay-wrapper {
+  display: flex;
+  position: absolute;
+  z-index: var(--vcdk-overlay-z-index);
+}
+
+.vcdk-overlay-pane {
+  position: absolute;
+  pointer-events: auto;
+  box-sizing: border-box;
+  display: flex;
+  max-width: 100%;
+  max-height: 100%;
+  z-index: var(--vcdk-overlay-z-index);
+}
+
+.vcdk-overlay-backdrop {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  touch-action: manipulation;
+  z-index: var(--vcdk-overlay-backdrop-z-index);
+  transition:
+    opacity var(--vcdk-overlay-backdrop-animation-duration)
+    var(--vcdk-overlay-backdrop-animation-timing-function);
+}
+
+.vcdk-overlay-backdrop-showing {
+  opacity: 1;
+}
+
+.vcdk-overlay-dark-backdrop {
+  background: var(--vcdk-overlay-backdrop-color);
+}
+
+.vcdk-overlay-transparent-backdrop {
+  transition:
+    visibility 1ms linear,
+    opacity 1ms linear;
+  visibility: hidden;
+  opacity: 1;
+}
+
+.vcdk-overlay-transparent-backdrop.vcdk-overlay-backdrop-showing {
+  opacity: 0;
+  visibility: visible;
+}
+
+.vcdk-overlay-backdrop-noop-animation {
+  transition: none;
+}
+
+/* 连接定位策略的尺寸约束包装层。 */
+.vcdk-overlay-connected-position-bounding-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 1px;
+  min-height: 1px;
+  z-index: var(--vcdk-overlay-z-index);
+}
+
+/* 滚动锁定类：固定根元素并保持原有宽度。 */
+.vcdk-overlay-global-scrollblock {
+  position: fixed;
+  width: 100%;
+  overflow-y: scroll;
+}
+
+/* 原生 Popover 渲染时的宿主元素外观，与 Angular 保持一致。 */
+.vcdk-overlay-popover {
+  background: none;
+  border: none;
+  padding: 0;
+  outline: 0;
+  overflow: visible;
+  position: fixed;
+  pointer-events: none;
+  white-space: normal;
+  color: inherit;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+  inset: auto;
+  top: 0;
+  left: 0;
+}
+
+.vcdk-overlay-popover::backdrop {
+  display: none;
+}
+
+.vcdk-overlay-popover .vcdk-overlay-backdrop {
+  position: fixed;
+  z-index: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vcdk-overlay-backdrop {
+    transition-duration: 1ms;
+  }
+}

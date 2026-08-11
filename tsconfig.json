@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "vue-cdk/overlay": ["./src/overlay/index.ts"],
+      "vue-cdk/coercion": ["./src/coercion/index.ts"],
+      "vue-cdk/platform": ["./src/platform/index.ts"],
+      "vue-cdk/scrolling": ["./src/scrolling/index.ts"],
+      "vue-cdk/emitter": ["./src/emitter/index.ts"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "demo/**/*.ts",
+    "demo/**/*.vue",
+    "tests/**/*.ts",
+    "vite.config.ts",
+    "vite.demo.config.ts",
+    "vitest.config.ts"
+  ]
+}
