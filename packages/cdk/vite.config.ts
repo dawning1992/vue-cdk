@@ -14,6 +14,10 @@ export default defineConfig({
       include: ['src'],
       exclude: ['src/**/*.spec.ts', 'tests/**/*.ts'],
       outDirs: ['dist'],
+      // tsconfig 启用了 composite（供根工程引用），插件默认会把 entryRoot
+      // 推断为 tsconfig 所在目录，导致声明输出到 dist/src 下；显式指定 src，
+      // 使声明按模块镜像到 dist/<module>/，与 package.json 的 exports 保持一致。
+      entryRoot: 'src',
       insertTypesEntry: true,
       tsconfigPath: './tsconfig.json',
     }),

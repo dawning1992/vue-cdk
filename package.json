@@ -1,108 +1,19 @@
 {
-  "name": "vue-cdk",
-  "version": "0.1.0",
-  "description": "Vue 3 组件开发工具包（CDK），借鉴 Angular CDK 的设计模式，以模块化子路径提供可组合的基础能力",
+  "name": "vue-cdk-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Vue CDK monorepo：packages/cdk 为可发布库，apps/document 为文档站点。",
   "type": "module",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./overlay": {
-      "types": "./dist/overlay/index.d.ts",
-      "import": "./dist/overlay/index.js",
-      "require": "./dist/overlay/index.cjs"
-    },
-    "./overlay/style.css": "./dist/overlay/style.css",
-    "./coercion": {
-      "types": "./dist/coercion/index.d.ts",
-      "import": "./dist/coercion/index.js",
-      "require": "./dist/coercion/index.cjs"
-    },
-    "./platform": {
-      "types": "./dist/platform/index.d.ts",
-      "import": "./dist/platform/index.js",
-      "require": "./dist/platform/index.cjs"
-    },
-    "./scrolling": {
-      "types": "./dist/scrolling/index.d.ts",
-      "import": "./dist/scrolling/index.js",
-      "require": "./dist/scrolling/index.cjs"
-    },
-    "./scrolling/style.css": "./dist/scrolling/style.css",
-    "./collections": {
-      "types": "./dist/collections/index.d.ts",
-      "import": "./dist/collections/index.js",
-      "require": "./dist/collections/index.cjs"
-    },
-    "./emitter": {
-      "types": "./dist/emitter/index.d.ts",
-      "import": "./dist/emitter/index.js",
-      "require": "./dist/emitter/index.cjs"
-    },
-    "./a11y": {
-      "types": "./dist/a11y/index.d.ts",
-      "import": "./dist/a11y/index.js",
-      "require": "./dist/a11y/index.cjs"
-    },
-    "./a11y/style.css": "./dist/a11y/style.css",
-    "./dialog": {
-      "types": "./dist/dialog/index.d.ts",
-      "import": "./dist/dialog/index.js",
-      "require": "./dist/dialog/index.cjs"
-    },
-    "./dialog/style.css": "./dist/dialog/style.css"
-  },
-  "sideEffects": [
-    "**/*.css"
-  ],
-  "keywords": [
-    "vue",
-    "vue3",
-    "cdk",
-    "component",
-    "overlay",
-    "popover",
-    "dropdown",
-    "tooltip",
-    "teleport"
-  ],
+  "packageManager": "pnpm",
   "license": "MIT",
   "scripts": {
-    "dev": "vite --config vite.document.config.ts",
-    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs",
-    "dev:document": "vite --config vite.document.config.ts",
-    "build:document": "vite build --config vite.document.config.ts",
-    "preview:document": "vite preview --config vite.document.config.ts",
-    "typecheck": "vue-tsc --noEmit",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
-  },
-  "peerDependencies": {
-    "vue": "^3.3.0"
-  },
-  "devDependencies": {
-    "@types/node": "^26.2.0",
-    "@vitejs/plugin-vue": "^6.0.8",
-    "@vue/test-utils": "^2.4.11",
-    "jsdom": "^30.0.1",
-    "shiki": "^4.4.3",
-    "typescript": "~5.9.0",
-    "vite": "^8.2.1",
-    "vite-plugin-dts": "^5.0.3",
-    "vitest": "^4.1.10",
-    "vue": "^3.5.41",
-    "vue-router": "^4.6.4",
-    "vue-tsc": "^3.3.9"
+    "dev": "pnpm --filter vue-cdk-document dev",
+    "build": "pnpm --filter vue-cdk build",
+    "build:document": "pnpm --filter vue-cdk-document build",
+    "dev:document": "pnpm --filter vue-cdk-document dev",
+    "preview:document": "pnpm --filter vue-cdk-document preview",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm --filter vue-cdk test:watch"
   }
 }

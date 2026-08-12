@@ -1,0 +1,4 @@
+# 工作区定义：packages 存放可发布库，apps 存放应用/文档站点。
+packages:
+  - packages/*
+  - apps/*

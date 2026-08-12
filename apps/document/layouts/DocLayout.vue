@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {useRoute} from 'vue-router';
-import pkg from '../../package.json';
+// 页头展示 CDK 库版本：通过 workspace 符号链接读取 vue-cdk 包的真实版本。
+import pkg from '../node_modules/vue-cdk/package.json';
 import {docModules, type DocModule} from '../config';
 
 const route = useRoute();
