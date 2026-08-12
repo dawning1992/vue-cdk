@@ -16,6 +16,14 @@ import BackdropEventsOverlay from '../demos/overlay/BackdropEventsOverlay.vue';
 import BackdropEventsOverlaySource from '../demos/overlay/BackdropEventsOverlay.vue?raw';
 import DeclarativeAdvancedOverlay from '../demos/overlay/DeclarativeAdvancedOverlay.vue';
 import DeclarativeAdvancedOverlaySource from '../demos/overlay/DeclarativeAdvancedOverlay.vue?raw';
+import ContextMenuOverlay from '../demos/overlay/ContextMenuOverlay.vue';
+import ContextMenuOverlaySource from '../demos/overlay/ContextMenuOverlay.vue?raw';
+import StackingOverlay from '../demos/overlay/StackingOverlay.vue';
+import StackingOverlaySource from '../demos/overlay/StackingOverlay.vue?raw';
+import RtlOverlay from '../demos/overlay/RtlOverlay.vue';
+import RtlOverlaySource from '../demos/overlay/RtlOverlay.vue?raw';
+import PopoverPositionsOverlay from '../demos/overlay/PopoverPositionsOverlay.vue';
+import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOverlay.vue?raw';
 </script>
 
 <template>
@@ -86,6 +94,42 @@ import DeclarativeAdvancedOverlaySource from '../demos/overlay/DeclarativeAdvanc
       filename="DeclarativeAdvancedOverlay.vue"
     >
       <DeclarativeAdvancedOverlay />
+    </DemoCard>
+
+    <DemoCard
+      title="右键菜单（命令式 + 坐标原点）"
+      description="以鼠标坐标（Point）为 origin 的上下文菜单：右键任意位置打开，贴近视口边缘时自动 push 回屏；打开后 ↑/↓/Home/End 导航、Enter 激活，ESC / 外部点击 / 再次右键关闭。"
+      :source="ContextMenuOverlaySource"
+      filename="ContextMenuOverlay.vue"
+    >
+      <ContextMenuOverlay />
+    </DemoCard>
+
+    <DemoCard
+      title="多层堆叠"
+      description="两个触发按钮共享同一 origin：先开第一层再开第二层不会误关第一层；键盘事件只命中栈顶 overlay，点击外部时两层同时收到 outsideClick。"
+      :source="StackingOverlaySource"
+      filename="StackingOverlay.vue"
+    >
+      <StackingOverlay />
+    </DemoCard>
+
+    <DemoCard
+      title="RTL 方向镜像"
+      description="切换文本方向：RTL 下 start 对齐右边缘，下拉菜单的连接点与 transform-origin 全部镜像；方向键导航行为保持不变。"
+      :source="RtlOverlaySource"
+      filename="RtlOverlay.vue"
+    >
+      <RtlOverlay />
+    </DemoCard>
+
+    <DemoCard
+      title="Popover 插入位置"
+      description="use-popover 支持 global（容器）、inline（紧随触发元素）、parent（自定义父元素）三种 DOM 插入位置；浏览器不支持 Popover API 时自动降级为容器渲染。"
+      :source="PopoverPositionsOverlaySource"
+      filename="PopoverPositionsOverlay.vue"
+    >
+      <PopoverPositionsOverlay />
     </DemoCard>
   </ModulePage>
 </template>

@@ -3,8 +3,6 @@ import {onBeforeUnmount, ref, watch} from 'vue';
 import {ListKeyManager, type ListKeyManagerOption} from 'vue-cdk/a11y';
 import {STANDARD_DROPDOWN_BELOW_POSITIONS, VConnectedOverlay, VOverlayOrigin} from 'vue-cdk/overlay';
 
-defineProps<{id?: string}>();
-
 /** 菜单条目：getLabel 供 ListKeyManager 的 typeahead 能力使用。 */
 interface MenuItem extends ListKeyManagerOption {
   label: string;
@@ -78,16 +76,17 @@ onBeforeUnmount(() => manager.destroy());
 </script>
 
 <template>
-  <section :id="id" class="section">
-    <h2>RTL 方向<span class="badge">start/end 镜像 · 键盘导航</span></h2>
-    <p class="desc">
+  <div class="wrap">
+    <p class="hint">
       切换文本方向：RTL 下 <code>start</code> 对齐右边缘，下拉菜单的连接点与
       transform-origin 全部镜像；打开后 ↑/↓/Home/End 导航、Enter 选中。
     </p>
-    <div class="stage">
-      <button class="btn" @click="rtl = !rtl">切换到 {{ rtl ? 'LTR' : 'RTL' }}</button>
+    <div class="row">
+      <button type="button" class="doc-btn" @click="rtl = !rtl">
+        切换到 {{ rtl ? 'LTR' : 'RTL' }}
+      </button>
       <VOverlayOrigin>
-        <button class="btn primary" @click="open = !open" @keydown="onTriggerKeydown">
+        <button type="button" class="doc-btn primary" @click="open = !open" @keydown="onTriggerKeydown">
           RTL 下拉菜单：{{ selected }} ▾
         </button>
         <VConnectedOverlay
@@ -98,7 +97,7 @@ onBeforeUnmount(() => manager.destroy());
           @overlay-outside-click="open = false"
           @update:open="open = $event"
         >
-          <div class="panel" style="direction: rtl">
+          <div class="panel" :style="{direction: rtl ? 'rtl' : 'ltr'}">
             <div
               v-for="(item, index) in items"
               :key="item.label"
@@ -113,5 +112,47 @@ onBeforeUnmount(() => manager.destroy());
         </VConnectedOverlay>
       </VOverlayOrigin>
     </div>
-  </section>
+  </div>
 </template>
+
+<style scoped>
+.wrap {
+  width: 100%;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: var(--doc-muted);
+  font-size: 13px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.panel {
+  min-width: 180px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  box-shadow: var(--doc-shadow);
+}
+
+.menu-item {
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--doc-text);
+  cursor: pointer;
+}
+
+.menu-item:hover,
+.menu-item.active {
+  background: var(--doc-primary-soft);
+  color: var(--doc-primary);
+}
+</style>

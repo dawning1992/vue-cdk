@@ -2,8 +2,6 @@
 import {computed, ref} from 'vue';
 import {VConnectedOverlay, VOverlayOrigin} from 'vue-cdk/overlay';
 
-defineProps<{id?: string}>();
-
 const supported =
   typeof document !== 'undefined' &&
   'showPopover' in document.body;
@@ -21,19 +19,18 @@ const parentLocation = computed(() =>
 </script>
 
 <template>
-  <section :id="id" class="section">
-    <h2>Popover 位置<span class="badge">原生 Popover API</span></h2>
-    <p class="desc">
+  <div class="wrap">
+    <p class="hint">
       <code>use-popover</code> 支持 <code>global</code>（容器）、<code>inline</code>
       （紧随触发元素）、<code>parent</code>（自定义父元素）三种 DOM 插入位置；
       浏览器不支持 Popover API 时自动降级为容器渲染。
     </p>
-    <div v-if="!supported" class="stage">
-      <span class="muted">当前浏览器不支持原生 Popover API，将演示降级为容器渲染。</span>
-    </div>
-    <div v-else class="stage">
+    <p v-if="!supported" class="hint">当前浏览器不支持原生 Popover API，将演示降级为容器渲染。</p>
+    <div v-else class="row">
       <VOverlayOrigin>
-        <button class="btn" @click="open = open === 'global' ? null : 'global'">global 位置</button>
+        <button type="button" class="doc-btn" @click="open = open === 'global' ? null : 'global'">
+          global 位置
+        </button>
         <VConnectedOverlay
           :open="open === 'global'"
           :use-popover="globalLocation"
@@ -45,7 +42,9 @@ const parentLocation = computed(() =>
       </VOverlayOrigin>
 
       <VOverlayOrigin>
-        <button class="btn" @click="open = open === 'inline' ? null : 'inline'">inline 位置</button>
+        <button type="button" class="doc-btn" @click="open = open === 'inline' ? null : 'inline'">
+          inline 位置
+        </button>
         <VConnectedOverlay
           :open="open === 'inline'"
           :use-popover="inlineLocation"
@@ -56,9 +55,11 @@ const parentLocation = computed(() =>
         </VConnectedOverlay>
       </VOverlayOrigin>
 
-      <div ref="parentElement" class="stage" style="min-height: 80px; flex: 1">
+      <div ref="parentElement" class="parent-stage">
         <VOverlayOrigin>
-          <button class="btn" @click="open = open === 'parent' ? null : 'parent'">parent 位置</button>
+          <button type="button" class="doc-btn" @click="open = open === 'parent' ? null : 'parent'">
+            parent 位置
+          </button>
           <VConnectedOverlay
             :open="open === 'parent'"
             :use-popover="parentLocation"
@@ -70,5 +71,46 @@ const parentLocation = computed(() =>
         </VOverlayOrigin>
       </div>
     </div>
-  </section>
+  </div>
 </template>
+
+<style scoped>
+.wrap {
+  width: 100%;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: var(--doc-muted);
+  font-size: 13px;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.parent-stage {
+  flex: 1;
+  min-width: 220px;
+  min-height: 90px;
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border: 1px dashed var(--doc-border);
+  border-radius: 8px;
+  background: #fafbfe;
+}
+
+.panel {
+  padding: 12px 16px;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  box-shadow: var(--doc-shadow);
+  font-size: 13px;
+}
+</style>

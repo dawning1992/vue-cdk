@@ -300,7 +300,7 @@ const unsubscribe = monitor.monitor(inputRef).subscribe(origin => {
 
 结构样式（`.vcdk-visually-hidden`）随 `vue-cdk/a11y` 入口自动注入；
 也可显式引入 `vue-cdk/a11y/style.css`（会与自动注入去重）。
-焦点来源类只负责标记，具体视觉样式由使用方自行定义（demo 中展示了色标示例）。
+焦点来源类只负责标记，具体视觉样式由使用方自行定义（文档站点「无障碍」页展示了色标示例）。
 
 ## dialog 模块
 
@@ -409,8 +409,7 @@ dialogRef.closed.subscribe(result => {
 
 ```bash
 npm install        # 安装依赖
-npm run dev        # 启动 demo
-npm run dev:document    # 启动文档站点（document/，路由懒加载）
+npm run dev        # 启动文档站点（document/，路由懒加载）
 npm run build:document  # 构建文档站点静态产物
 npm run test       # 运行单元测试（Vitest + jsdom）
 npm run typecheck  # 类型检查

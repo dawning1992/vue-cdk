@@ -14,6 +14,8 @@ import ActiveDescendantDemo from '../demos/a11y/ActiveDescendantDemo.vue';
 import ActiveDescendantDemoSource from '../demos/a11y/ActiveDescendantDemo.vue?raw';
 import ImperativeFocusTrapDemo from '../demos/a11y/ImperativeFocusTrapDemo.vue';
 import ImperativeFocusTrapDemoSource from '../demos/a11y/ImperativeFocusTrapDemo.vue?raw';
+import AutocompleteDemo from '../demos/a11y/AutocompleteDemo.vue';
+import AutocompleteDemoSource from '../demos/a11y/AutocompleteDemo.vue?raw';
 </script>
 
 <template>
@@ -66,6 +68,15 @@ import ImperativeFocusTrapDemoSource from '../demos/a11y/ImperativeFocusTrapDemo
       filename="ActiveDescendantDemo.vue"
     >
       <ActiveDescendantDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="自动补全（组合示例）"
+      description="ActiveDescendantKeyManager 与 VConnectedOverlay 组合成真实自动补全：match-width 对齐输入框，↑/↓/Home/End 选择、Enter 确认、ESC 关闭。"
+      :source="AutocompleteDemoSource"
+      filename="AutocompleteDemo.vue"
+    >
+      <AutocompleteDemo />
     </DemoCard>
 
     <DemoCard

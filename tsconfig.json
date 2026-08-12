@@ -28,13 +28,10 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
-    "demo/**/*.ts",
-    "demo/**/*.vue",
     "document/**/*.ts",
     "document/**/*.vue",
     "tests/**/*.ts",
     "vite.config.ts",
-    "vite.demo.config.ts",
     "vite.document.config.ts",
     "vitest.config.ts"
   ]

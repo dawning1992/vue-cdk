@@ -3,8 +3,6 @@ import {computed, onBeforeUnmount, ref, watch} from 'vue';
 import {ActiveDescendantKeyManager, type Highlightable} from 'vue-cdk/a11y';
 import {VConnectedOverlay, VOverlayOrigin} from 'vue-cdk/overlay';
 
-defineProps<{id?: string}>();
-
 /** 自动补全选项：id 供 aria-activedescendant 引用，active 由管理器样式回调维护。 */
 interface CityOption extends Highlightable {
   id: string;
@@ -45,7 +43,7 @@ const cities = ref<CityOption[]>([
   makeCity('suzhou', '苏州'),
 ]);
 
-const listboxId = 'autocomplete-listbox';
+const listboxId = 'doc-autocomplete-listbox';
 
 /** 过滤结果即键盘管理器的条目源：列表变化时管理器自动同步活动项。 */
 const filtered = computed(() =>
@@ -56,7 +54,7 @@ const manager = new ActiveDescendantKeyManager(filtered).withWrap().withHomeAndE
 
 /** 当前活动项对应的 option id，供 combobox 的 aria-activedescendant 指向。 */
 const activeOptionId = computed(() =>
-  manager.activeItemIndex >= 0 ? `autocomplete-option-${manager.activeItemIndex}` : undefined,
+  manager.activeItemIndex >= 0 ? `doc-autocomplete-option-${manager.activeItemIndex}` : undefined,
 );
 
 function choose(city: CityOption) {
@@ -111,50 +109,90 @@ onBeforeUnmount(() => manager.destroy());
 </script>
 
 <template>
-  <section :id="id" class="section">
-    <h2>自动补全<span class="badge">matchWidth · ActiveDescendant 键盘导航</span></h2>
-    <p class="desc">
+  <div class="wrap">
+    <p class="hint">
       输入关键字过滤城市列表；<code>match-width</code> 让面板宽度与输入框一致，
       <code>ActiveDescendantKeyManager</code> 驱动 <code>aria-activedescendant</code>，
       支持 ↑/↓/Home/End 选择、Enter 确认、ESC 关闭。
     </p>
-    <div class="stage">
-      <VOverlayOrigin>
-        <input
-          v-model="query"
-          class="input"
-          placeholder="输入城市名，如「京」"
-          role="combobox"
-          aria-autocomplete="list"
-          :aria-expanded="open"
-          :aria-controls="listboxId"
-          :aria-activedescendant="activeOptionId"
-          @focus="open = true"
-          @keydown="onKeydown"
-        />
-        <VConnectedOverlay
-          :open="open && filtered.length > 0"
-          match-width
-          :positions="[{originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top'}]"
-          @overlay-outside-click="open = false"
-          @update:open="open = $event"
-        >
-          <ul :id="listboxId" class="panel autocomplete-list" role="listbox">
-            <li
-              v-for="(city, index) in filtered"
-              :key="city.id"
-              :id="`autocomplete-option-${index}`"
-              role="option"
-              :aria-selected="city.active"
-              :class="{active: city.active}"
-              @mousedown.prevent="choose(city)"
-            >
-              {{ city.label }}
-            </li>
-            <li v-if="filtered.length === 0" class="muted">无匹配结果</li>
-          </ul>
-        </VConnectedOverlay>
-      </VOverlayOrigin>
-    </div>
-  </section>
+    <VOverlayOrigin>
+      <input
+        v-model="query"
+        class="doc-input"
+        placeholder="输入城市名，如「京」"
+        role="combobox"
+        aria-autocomplete="list"
+        :aria-expanded="open"
+        :aria-controls="listboxId"
+        :aria-activedescendant="activeOptionId"
+        @focus="open = true"
+        @keydown="onKeydown"
+      />
+      <VConnectedOverlay
+        :open="open && filtered.length > 0"
+        match-width
+        :positions="[{originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top'}]"
+        @overlay-outside-click="open = false"
+        @update:open="open = $event"
+      >
+        <ul :id="listboxId" class="listbox" role="listbox">
+          <li
+            v-for="(city, index) in filtered"
+            :key="city.id"
+            :id="`doc-autocomplete-option-${index}`"
+            role="option"
+            :aria-selected="city.active"
+            :class="{active: city.active}"
+            @mousedown.prevent="choose(city)"
+          >
+            {{ city.label }}
+          </li>
+          <li v-if="filtered.length === 0" class="empty">无匹配结果</li>
+        </ul>
+      </VConnectedOverlay>
+    </VOverlayOrigin>
+  </div>
 </template>
+
+<style scoped>
+.wrap {
+  width: 100%;
+}
+
+.hint {
+  margin: 0 0 12px;
+  color: var(--doc-muted);
+  font-size: 13px;
+}
+
+.listbox {
+  list-style: none;
+  margin: 0;
+  padding: 6px;
+  min-width: 100%;
+  max-height: 240px;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  box-shadow: var(--doc-shadow);
+}
+
+.listbox li {
+  padding: 7px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--doc-text);
+  cursor: pointer;
+}
+
+.listbox li.active {
+  background: var(--doc-primary-soft);
+  color: var(--doc-primary);
+}
+
+.listbox .empty {
+  color: var(--doc-muted);
+  cursor: default;
+}
+</style>

@@ -78,10 +78,8 @@
   ],
   "license": "MIT",
   "scripts": {
-    "dev": "vite --config vite.demo.config.ts",
+    "dev": "vite --config vite.document.config.ts",
     "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs",
-    "build:demo": "vite build --config vite.demo.config.ts",
-    "preview:demo": "vite preview --config vite.demo.config.ts",
     "dev:document": "vite --config vite.document.config.ts",
     "build:document": "vite build --config vite.document.config.ts",
     "preview:document": "vite preview --config vite.document.config.ts",

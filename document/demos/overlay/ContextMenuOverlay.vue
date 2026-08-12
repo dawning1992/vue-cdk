@@ -3,8 +3,6 @@ import {defineComponent, h, onBeforeUnmount, ref, type PropType} from 'vue';
 import {ListKeyManager} from 'vue-cdk/a11y';
 import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
 
-defineProps<{id?: string}>();
-
 /** 右键菜单条目：action 在点击或按 Enter 激活时执行。 */
 interface MenuItem {
   label: string;
@@ -31,6 +29,7 @@ manager.tabOut.subscribe(() => closeMenu());
 /**
  * 菜单面板组件：overlay.attach 只渲染一次，必须借助组件渲染的响应式
  * （读取 manager.activeItemIndex）才能在键盘导航时更新高亮。
+ * 面板经 overlay 容器渲染进 body，其样式只能放在非 scoped 的 <style> 块中。
  */
 const MenuPanel = defineComponent({
   name: 'ContextMenuPanel',
@@ -43,12 +42,12 @@ const MenuPanel = defineComponent({
     return () =>
       h(
         'div',
-        {class: 'panel context-menu'},
+        {class: 'doc-ctx-menu'},
         props.items.map((item, index) =>
           h(
             'div',
             {
-              class: ['menu-item', {active: index === props.manager.activeItemIndex}],
+              class: ['doc-ctx-item', {active: index === props.manager.activeItemIndex}],
               onMouseenter: () => props.manager.setActiveItem(index),
               onClick: () => props.onChoose(item),
             },
@@ -102,7 +101,7 @@ function onContextMenu(event: MouseEvent) {
 
   overlayRef = overlay.create({
     positionStrategy: strategy,
-    panelClass: 'context-menu-panel',
+    panelClass: 'doc-ctx-panel',
   });
   lastPosition.value = `(${event.clientX}, ${event.clientY})`;
   overlayRef.outsidePointerEvents().subscribe(() => closeMenu());
@@ -125,18 +124,65 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section :id="id" class="section">
-    <h2>右键菜单<span class="badge">命令式 · 坐标原点 · 键盘导航</span></h2>
-    <p class="desc">
-      以鼠标坐标（Point）为 origin 的上下文菜单：右键任意位置打开，
-      贴近视口边缘时自动 push 回屏，点击外部、再次右键或 ESC 关闭；
-      打开后 ↑/↓/Home/End 导航、Enter 激活。
-    </p>
-    <div class="stage" @contextmenu="onContextMenu">
-      <div class="muted">
+  <div class="wrap">
+    <div class="context-stage" @contextmenu="onContextMenu">
+      <p class="hint">
         在此区域右键打开菜单（macOS 触控板：双指点按，或 Control + 点击）
-      </div>
-      <span class="muted">上次打开位置：{{ lastPosition }}</span>
+      </p>
+      <p class="hint">上次打开位置：{{ lastPosition }}</p>
     </div>
-  </section>
+  </div>
 </template>
+
+<style scoped>
+.wrap {
+  width: 100%;
+}
+
+.context-stage {
+  width: 100%;
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--doc-border);
+  border-radius: 8px;
+  background: #fafbfe;
+  user-select: none;
+}
+
+.hint {
+  margin: 0;
+  color: var(--doc-muted);
+  font-size: 13px;
+}
+</style>
+
+<!-- 命令式浮层面板渲染进 body（overlay 容器），scoped 样式无法命中，需要全局样式。 -->
+<style>
+.doc-ctx-menu {
+  min-width: 140px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  box-shadow: var(--doc-shadow);
+  user-select: none;
+}
+
+.doc-ctx-item {
+  padding: 7px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: var(--doc-text);
+  cursor: pointer;
+}
+
+.doc-ctx-item:hover,
+.doc-ctx-item.active {
+  background: var(--doc-primary-soft);
+  color: var(--doc-primary);
+}
+</style>

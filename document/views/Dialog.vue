@@ -14,6 +14,9 @@ import DialogConfigDemo from '../demos/dialog/DialogConfigDemo.vue';
 import DialogConfigDemoSource from '../demos/dialog/DialogConfigDemo.vue?raw';
 import DialogStackDemo from '../demos/dialog/DialogStackDemo.vue';
 import DialogStackDemoSource from '../demos/dialog/DialogStackDemo.vue?raw';
+import CustomContainerDialog from '../demos/dialog/CustomContainerDialog.vue';
+import CustomContainerDialogSource from '../demos/dialog/CustomContainerDialog.vue?raw';
+import CustomContainerSource from '../demos/dialog/CustomContainer.vue?raw';
 </script>
 
 <template>
@@ -68,6 +71,16 @@ import DialogStackDemoSource from '../demos/dialog/DialogStackDemo.vue?raw';
       filename="DialogStackDemo.vue"
     >
       <DialogStackDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="自定义容器（useDialogContainerCore）"
+      description="通过 config.container 传入自定义容器组件，复用 useDialogContainerCore 获得焦点陷阱、ARIA 状态、数据注入与焦点恢复；内容与关闭结果通道不变。"
+      :source="CustomContainerDialogSource"
+      filename="CustomContainerDialog.vue"
+      :extra-sources="[{filename: 'CustomContainer.vue', code: CustomContainerSource}]"
+    >
+      <CustomContainerDialog />
     </DemoCard>
   </ModulePage>
 </template>
