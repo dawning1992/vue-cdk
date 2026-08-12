@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onBeforeUnmount, ref} from 'vue';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {ListKeyManager, type ListKeyManagerOption} from 'vue-cdk/a11y';
 
 interface Item extends ListKeyManagerOption {
@@ -16,40 +16,129 @@ const items = ref<Item[]>([
   makeItem('2', '文档'),
   makeItem('3', '示例', true),
   makeItem('4', '下载'),
+  makeItem('5', '关于'),
+  makeItem('6', '设置'),
 ]);
 
-/** 支持循环与拼音首字母快速定位。 */
-const manager = new ListKeyManager(items).withWrap().withTypeAhead();
+const wrap = ref(true);
+const homeEnd = ref(true);
+const pageUpDown = ref(false);
+const typeahead = ref(true);
+const vertical = ref(true);
+const horizontal = ref<'off' | 'ltr' | 'rtl'>('off');
 
-function onKeydown(event: KeyboardEvent): void {
-  manager.onKeydown(event);
+/** 选项均为运行时可配置，变更后重建 manager 使全部配置生效。 */
+function createManager(): ListKeyManager<Item> {
+  const next = new ListKeyManager<Item>(items)
+    .withWrap(wrap.value)
+    .withHomeAndEnd(homeEnd.value)
+    .withPageUpDown(pageUpDown.value)
+    .withVerticalOrientation(vertical.value);
+  if (horizontal.value !== 'off') {
+    next.withHorizontalOrientation(horizontal.value);
+  }
+  if (typeahead.value) {
+    next.withTypeAhead();
+  }
+  return next;
 }
 
-onBeforeUnmount(() => manager.destroy());
+const manager = shallowRef(createManager());
+
+function rebuild(): void {
+  manager.value.destroy();
+  manager.value = createManager();
+}
+
+function onKeydown(event: KeyboardEvent): void {
+  manager.value.onKeydown(event);
+}
+
+onBeforeUnmount(() => manager.value.destroy());
 </script>
 
 <template>
   <div class="wrap">
-    <ul class="list" tabindex="0" @keydown="onKeydown">
-      <li
-        v-for="(item, index) in items"
-        :key="item.id"
-        :class="{
-          active: index === manager.activeItemIndex,
-          disabled: item.disabled,
-        }"
-        @click="manager.setActiveItem(index)"
-      >
-        {{ item.label }}
-      </li>
-    </ul>
-    <p class="hint">点击列表后使用 ↑ ↓ 方向键导航（Home/End、字母快速定位均可用）。</p>
+    <div class="options">
+      <label class="check">
+        <input v-model="wrap" type="checkbox" @change="rebuild" />
+        withWrap（循环）
+      </label>
+      <label class="check">
+        <input v-model="homeEnd" type="checkbox" @change="rebuild" />
+        withHomeAndEnd
+      </label>
+      <label class="check">
+        <input v-model="pageUpDown" type="checkbox" @change="rebuild" />
+        withPageUpDown
+      </label>
+      <label class="check">
+        <input v-model="typeahead" type="checkbox" @change="rebuild" />
+        withTypeAhead（字母定位）
+      </label>
+      <label class="check">
+        <input v-model="vertical" type="checkbox" @change="rebuild" />
+        垂直方向键
+      </label>
+      <label class="field">
+        水平方向键
+        <select v-model="horizontal" class="doc-input" @change="rebuild">
+          <option value="off">关闭</option>
+          <option value="ltr">LTR</option>
+          <option value="rtl">RTL</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="play">
+      <ul class="list" tabindex="0" @keydown="onKeydown">
+        <li
+          v-for="(item, index) in items"
+          :key="item.id"
+          :class="{
+            active: index === manager.activeItemIndex,
+            disabled: item.disabled,
+          }"
+          @click="manager.setActiveItem(index)"
+        >
+          {{ item.label }}
+        </li>
+      </ul>
+      <div class="doc-output">
+        {{ manager.activeItem ? `活动项：${manager.activeItem.label}` : '尚未激活' }}
+      </div>
+    </div>
+    <p class="hint">
+      点击列表后使用方向键导航；Home/End、PageUp/PageDown 与字母快速定位按开关生效，禁用项自动跳过。
+    </p>
   </div>
 </template>
 
 <style scoped>
 .wrap {
   width: 100%;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.check,
+.field {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--doc-muted);
+}
+
+.play {
+  display: flex;
+  gap: 16px;
 }
 
 .list {

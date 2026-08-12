@@ -4,6 +4,10 @@ import ModulePage from '../components/ModulePage.vue';
 import {apiGroups} from '../apis/platform';
 import PlatformDemo from '../demos/platform/PlatformDemo.vue';
 import PlatformDemoSource from '../demos/platform/PlatformDemo.vue?raw';
+import ShadowDomPlatformDemo from '../demos/platform/ShadowDomPlatformDemo.vue';
+import ShadowDomPlatformDemoSource from '../demos/platform/ShadowDomPlatformDemo.vue?raw';
+import PassiveRtlPlatformDemo from '../demos/platform/PassiveRtlPlatformDemo.vue';
+import PassiveRtlPlatformDemoSource from '../demos/platform/PassiveRtlPlatformDemo.vue?raw';
 </script>
 
 <template>
@@ -20,6 +24,24 @@ import PlatformDemoSource from '../demos/platform/PlatformDemo.vue?raw';
       filename="PlatformDemo.vue"
     >
       <PlatformDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="Shadow DOM 事件穿透"
+      description="动态挂载 shadow root，演示 getEventTargetPierceShadowDom / getFocusedElementPierceShadowDom / getShadowRoot / supportsShadowDom 的穿透行为。"
+      :source="ShadowDomPlatformDemoSource"
+      filename="ShadowDomPlatformDemo.vue"
+    >
+      <ShadowDomPlatformDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="被动监听与 RTL 滚动轴"
+      description="supportsPassiveEventListeners 与 normalizePassiveListenerOptions 实际用于 addEventListener；getRtlScrollAxisType 与 supportsScrollBehavior 输出检测结果。"
+      :source="PassiveRtlPlatformDemoSource"
+      filename="PassiveRtlPlatformDemo.vue"
+    >
+      <PassiveRtlPlatformDemo />
     </DemoCard>
   </ModulePage>
 </template>

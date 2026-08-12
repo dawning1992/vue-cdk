@@ -11,6 +11,8 @@ function runArray(): void {
       单个值: coerceArray('a'),
       数组: coerceArray(['a', 'b']),
       空值: coerceArray(null),
+      undefined: coerceArray(undefined),
+      空数组: coerceArray([]),
     },
     null,
     2,
@@ -21,7 +23,11 @@ function runPixel(): void {
   output.value = JSON.stringify(
     {
       数字: coerceCssPixelValue(12),
+      零: coerceCssPixelValue(0),
+      负数: coerceCssPixelValue(-12),
       字符串: coerceCssPixelValue('100%'),
+      auto: coerceCssPixelValue('auto'),
+      空字符串: coerceCssPixelValue(''),
       空值: coerceCssPixelValue(null),
     },
     null,

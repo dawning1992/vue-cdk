@@ -7,6 +7,13 @@ import ComponentDialogSource from '../demos/dialog/ComponentDialog.vue?raw';
 import ConfirmContentSource from '../demos/dialog/ConfirmContent.vue?raw';
 import RenderFnDialog from '../demos/dialog/RenderFnDialog.vue';
 import RenderFnDialogSource from '../demos/dialog/RenderFnDialog.vue?raw';
+import VNodeDialog from '../demos/dialog/VNodeDialog.vue';
+import VNodeDialogSource from '../demos/dialog/VNodeDialog.vue?raw';
+import ConfigContentSource from '../demos/dialog/ConfigContent.vue?raw';
+import DialogConfigDemo from '../demos/dialog/DialogConfigDemo.vue';
+import DialogConfigDemoSource from '../demos/dialog/DialogConfigDemo.vue?raw';
+import DialogStackDemo from '../demos/dialog/DialogStackDemo.vue';
+import DialogStackDemoSource from '../demos/dialog/DialogStackDemo.vue?raw';
 </script>
 
 <template>
@@ -33,6 +40,34 @@ import RenderFnDialogSource from '../demos/dialog/RenderFnDialog.vue?raw';
       filename="RenderFnDialog.vue"
     >
       <RenderFnDialog />
+    </DemoCard>
+
+    <DemoCard
+      title="VNode 对话框与数据通道"
+      description="VNode 内容经 h() 创建；data 通过 DIALOG_DATA / useDialogData 注入，contentProps 提供 Vue 特有 props 通道，templateContext 合并进渲染函数上下文。"
+      :source="VNodeDialogSource"
+      filename="VNodeDialog.vue"
+    >
+      <VNodeDialog />
+    </DemoCard>
+
+    <DemoCard
+      title="对话框配置项面板"
+      description="勾选与输入驱动 DialogConfig：disableClose、closePredicate（阻止取消并重捕获焦点）、autoFocus / restoreFocus、role、ariaModal、宽高与 panelClass。"
+      :source="DialogConfigDemoSource"
+      filename="DialogConfigDemo.vue"
+      :extra-sources="[{filename: 'ConfigContent.vue', code: ConfigContentSource}]"
+    >
+      <DialogConfigDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="多对话框与服务级 API"
+      description="连续打开两个对话框观察 LIFO 关闭顺序；演示 openDialogs、getDialogById、closeAll 与 afterOpened / afterAllClosed 事件流。"
+      :source="DialogStackDemoSource"
+      filename="DialogStackDemo.vue"
+    >
+      <DialogStackDemo />
     </DemoCard>
   </ModulePage>
 </template>
