@@ -47,6 +47,47 @@ describe('OverlayContainer', () => {
   });
 });
 
+describe('OverlayContainer 自定义宿主元素', () => {
+  it('复用调用方提供的元素作为容器，且不改变其 DOM 位置', () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const container = new OverlayContainer(host);
+    expect(container.hasContainerElement()).toBe(false);
+    const element = container.getContainerElement();
+    expect(element).toBe(host);
+    expect(host.parentElement).toBe(document.body);
+    expect(element.classList.contains('vcdk-overlay-container')).toBe(true);
+    container.dispose();
+    host.remove();
+  });
+
+  it('document 取宿主元素所属文档', () => {
+    const host = document.createElement('div');
+    const container = new OverlayContainer(host);
+    expect(container.document).toBe(host.ownerDocument);
+    container.dispose();
+  });
+
+  it('dispose 不移除调用方元素，再次获取仍返回同一元素', () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+    const container = new OverlayContainer(host);
+    container.getContainerElement();
+    container.dispose();
+    expect(document.body.contains(host)).toBe(true);
+    expect(container.hasContainerElement()).toBe(false);
+    expect(container.getContainerElement()).toBe(host);
+    container.dispose();
+    host.remove();
+  });
+
+  it('兼容旧签名：传入 document 时绑定该 document', () => {
+    const container = new OverlayContainer(document);
+    expect(container.document).toBe(document);
+    container.dispose();
+  });
+});
+
 describe('FullscreenOverlayContainer', () => {
   it('全屏变化时把容器移入全屏元素，退出后移回 body', () => {
     const container = new FullscreenOverlayContainer();

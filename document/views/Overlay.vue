@@ -6,6 +6,8 @@ import DeclarativeOverlay from '../demos/overlay/DeclarativeOverlay.vue';
 import DeclarativeOverlaySource from '../demos/overlay/DeclarativeOverlay.vue?raw';
 import ImperativeOverlay from '../demos/overlay/ImperativeOverlay.vue';
 import ImperativeOverlaySource from '../demos/overlay/ImperativeOverlay.vue?raw';
+import OverlayContainerOverlay from '../demos/overlay/OverlayContainerOverlay.vue';
+import OverlayContainerOverlaySource from '../demos/overlay/OverlayContainerOverlay.vue?raw';
 import ConnectedTooltipOverlay from '../demos/overlay/ConnectedTooltipOverlay.vue';
 import ConnectedTooltipOverlaySource from '../demos/overlay/ConnectedTooltipOverlay.vue?raw';
 import ScrollStrategyOverlay from '../demos/overlay/ScrollStrategyOverlay.vue';
@@ -39,6 +41,15 @@ import DeclarativeAdvancedOverlaySource from '../demos/overlay/DeclarativeAdvanc
       filename="ImperativeOverlay.vue"
     >
       <ImperativeOverlay />
+    </DemoCard>
+
+    <DemoCard
+      title="自定义 OverlayContainer"
+      description="在模板中放置自定义 div 作为容器，通过 createOverlayRef 的 container 选项（OverlayContainer 实例或 HTMLElement）挂载浮层；面板被限制在区域内渲染，dispose 不会移除调用方元素。"
+      :source="OverlayContainerOverlaySource"
+      filename="OverlayContainerOverlay.vue"
+    >
+      <OverlayContainerOverlay />
     </DemoCard>
 
     <DemoCard

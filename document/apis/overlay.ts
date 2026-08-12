@@ -19,8 +19,8 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'CreateOverlayRefOptions',
-        signature: 'interface CreateOverlayRefOptions { appContext?: AppContext | null; container?: OverlayContainer }',
-        description: 'createOverlayRef 的附加选项：自定义渲染上下文与容器。',
+        signature: 'interface CreateOverlayRefOptions { appContext?: AppContext | null; container?: OverlayContainer | HTMLElement }',
+        description: 'createOverlayRef 的附加选项：自定义渲染上下文与容器；container 支持 OverlayContainer 实例或任意 HTML 元素，默认使用全局单例容器。',
       },
     ],
   },
@@ -70,7 +70,7 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'OverlayContainer',
         signature: 'class OverlayContainer',
-        description: '浮层容器：getContainerElement() 惰性创建 .cdk-overlay-container 元素，dispose() 清理。',
+        description: '浮层容器：可传入自定义宿主元素（new OverlayContainer(element)），getContainerElement() 惰性返回该元素并自动补齐 .vcdk-overlay-container 类；不传时自建元素并挂到 body。dispose() 只清理库自建容器，不移除调用方元素。',
       },
       {
         name: 'FullscreenOverlayContainer',

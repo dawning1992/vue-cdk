@@ -5,6 +5,7 @@ import {
   useOverlay,
 } from './overlay';
 import {OverlayConfig} from './overlay-config';
+import {OverlayContainer} from './overlay-container';
 
 describe('useOverlay 命令式 API', () => {
   it('create 返回可用的 OverlayRef，内容渲染进容器', async () => {
@@ -95,5 +96,21 @@ describe('createOverlayRef 配置处理', () => {
     expect(config.scrollStrategy).toBeTruthy();
     expect(config.backdropClass).toBe('vcdk-overlay-dark-backdrop');
     expect(config.usePopover).toBe(true);
+  });
+
+  it('container 选项接受自定义元素或容器实例，浮层挂载到该元素', () => {
+    const host = document.createElement('div');
+    document.body.appendChild(host);
+
+    const ref = createOverlayRef(undefined, {container: host});
+    expect(ref.hostElement.parentElement).toBe(host);
+    ref.dispose();
+
+    const customContainer = new OverlayContainer(host);
+    const ref2 = createOverlayRef(undefined, {container: customContainer});
+    expect(ref2.hostElement.parentElement).toBe(host);
+    ref2.dispose();
+    customContainer.dispose();
+    host.remove();
   });
 });

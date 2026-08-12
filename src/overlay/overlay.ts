@@ -13,8 +13,11 @@ import {isBrowser, supportsPopover} from '../platform';
 export interface CreateOverlayRefOptions {
   /** 渲染内容时使用的应用上下文（提供 provide/inject 支持）。 */
   appContext?: AppContext | null;
-  /** 自定义容器；默认使用全局单例容器。 */
-  container?: OverlayContainer;
+  /**
+   * 自定义容器：`OverlayContainer` 实例或任意 HTML 元素（如自定义 div），
+   * 元素会被自动包装为容器实例并作为浮层宿主；默认使用全局单例容器。
+   */
+  container?: OverlayContainer | HTMLElement;
 }
 
 /**
@@ -32,7 +35,7 @@ export function createOverlayRef(
   // 与 Angular 一致：创建时确保结构样式可用，开箱即用。
   injectOverlayStyles();
 
-  const container = options.container ?? overlayContainer;
+  const container = resolveContainer(options.container);
   const documentRef = getDocumentFor(container);
   const overlayConfig = new OverlayConfig(config);
 
@@ -108,4 +111,16 @@ function getDocumentFor(container: OverlayContainer): Document {
     return window.document;
   }
   throw new Error('Overlay: 当前环境没有可用的 document（SSR 环境不应创建 overlay）。');
+}
+
+/** 归一化容器参数：实例直接复用，HTML 元素包装为容器实例，缺省回退到全局单例。 */
+function resolveContainer(container: OverlayContainer | HTMLElement | undefined): OverlayContainer {
+  if (!container) {
+    return overlayContainer;
+  }
+  // 用鸭子类型判断而非 instanceof，避免双包副本导致实例判定失败。
+  if ('getContainerElement' in container) {
+    return container;
+  }
+  return new OverlayContainer(container);
 }
