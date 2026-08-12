@@ -410,6 +410,8 @@ dialogRef.closed.subscribe(result => {
 ```bash
 npm install        # 安装依赖
 npm run dev        # 启动 demo
+npm run dev:document    # 启动文档站点（document/，路由懒加载）
+npm run build:document  # 构建文档站点静态产物
 npm run test       # 运行单元测试（Vitest + jsdom）
 npm run typecheck  # 类型检查
 npm run build      # 构建库（多入口 ESM/CJS + .d.ts + CSS）

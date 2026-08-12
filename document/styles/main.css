@@ -1,0 +1,114 @@
+:root {
+  --doc-bg: #f6f7fb;
+  --doc-card: #ffffff;
+  --doc-border: #e3e6ee;
+  --doc-text: #1f2430;
+  --doc-muted: #6b7280;
+  --doc-primary: #4f6ef7;
+  --doc-primary-soft: #eef1fe;
+  --doc-radius: 10px;
+  --doc-shadow: 0 6px 20px rgba(31, 36, 48, 0.08);
+  --doc-code-bg: #24292e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--doc-bg);
+  color: var(--doc-text);
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* shiki 输出内容共享样式：代码块内不重复内边距，允许横向滚动。 */
+.code-content pre.shiki {
+  background: transparent !important;
+  margin: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.code-content code,
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* 演示区通用控件样式，各示例组件直接复用。 */
+.doc-btn {
+  appearance: none;
+  border: 1px solid var(--doc-border);
+  background: #fff;
+  color: var(--doc-text);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.doc-btn:hover {
+  background: var(--doc-primary-soft);
+  border-color: var(--doc-primary);
+}
+
+.doc-btn.primary {
+  background: var(--doc-primary);
+  border-color: var(--doc-primary);
+  color: #fff;
+}
+
+.doc-btn.primary:hover {
+  filter: brightness(1.05);
+  background: var(--doc-primary);
+}
+
+.doc-input {
+  border: 1px solid var(--doc-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--doc-text);
+}
+
+.doc-input:focus {
+  outline: 2px solid var(--doc-primary-soft);
+  border-color: var(--doc-primary);
+}
+
+.doc-output {
+  min-height: 44px;
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px dashed var(--doc-border);
+  border-radius: 8px;
+  background: #fafbfe;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 焦点监视演示：来源标记类视觉反馈（文档示例专用）。 */
+.vcdk-focused {
+  outline: 2px solid var(--doc-primary);
+  outline-offset: 1px;
+}
+
+.vcdk-keyboard-focused {
+  box-shadow: 0 0 0 3px var(--doc-primary-soft);
+}

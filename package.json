@@ -82,6 +82,9 @@
     "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs",
     "build:demo": "vite build --config vite.demo.config.ts",
     "preview:demo": "vite preview --config vite.demo.config.ts",
+    "dev:document": "vite --config vite.document.config.ts",
+    "build:document": "vite build --config vite.document.config.ts",
+    "preview:document": "vite preview --config vite.document.config.ts",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -95,11 +98,13 @@
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.4.11",
     "jsdom": "^30.0.1",
+    "shiki": "^4.4.3",
     "typescript": "~5.9.0",
     "vite": "^8.2.1",
     "vite-plugin-dts": "^5.0.3",
     "vitest": "^4.1.10",
     "vue": "^3.5.41",
+    "vue-router": "^4.6.4",
     "vue-tsc": "^3.3.9"
   }
 }
