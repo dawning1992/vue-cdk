@@ -76,4 +76,11 @@ export const docModules: DocModule[] = [
     view: 'Dialog',
     summary: '命令式 useDialog() 模态对话框，对齐 Angular CDK dialog。',
   },
+  {
+    path: '/drag-drop',
+    name: 'drag-drop',
+    label: '拖拽',
+    view: 'DragDrop',
+    summary: '拖拽排序：VDropList / VDrag / vDragHandle，对齐 Angular CDK drag-drop。',
+  },
 ];

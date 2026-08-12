@@ -2,9 +2,8 @@
   "name": "vue-cdk-monorepo",
   "version": "0.0.0",
   "private": true,
-  "description": "Vue CDK monorepo：packages/cdk 为可发布库，apps/document 为文档站点。",
+  "description": "Vue CDK 源码以及文档",
   "type": "module",
-  "packageManager": "pnpm",
   "license": "MIT",
   "scripts": {
     "dev": "pnpm --filter vue-cdk-document dev",

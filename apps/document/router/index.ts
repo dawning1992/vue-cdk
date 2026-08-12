@@ -13,6 +13,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   Emitter: () => import('../views/Emitter.vue'),
   A11y: () => import('../views/A11y.vue'),
   Dialog: () => import('../views/Dialog.vue'),
+  DragDrop: () => import('../views/DragDrop.vue'),
 };
 
 /**

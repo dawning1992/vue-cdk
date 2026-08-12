@@ -37,3 +37,15 @@ export function coerceCssPixelValue(value: number | string | null | undefined): 
   }
   return typeof value === 'string' ? value : `${value}px`;
 }
+
+/**
+ * 将输入值强制转换为数字，与 Angular CDK 的 coerceNumberProperty 语义一致。
+ * 空值（null/undefined/空串）与无法解析的值使用兜底值。
+ */
+export function coerceNumberProperty(value: unknown, fallback = 0): number {
+  if (value == null || value === '') {
+    return fallback;
+  }
+  const numberValue = typeof value === 'number' ? value : Number(value);
+  return Number.isNaN(numberValue) ? fallback : numberValue;
+}

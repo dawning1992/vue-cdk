@@ -1,6 +1,6 @@
 # Vue CDK
 
-Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular CDK](https://material.angular.io/cdk/overview)：以**一个 npm 包、多个子路径模块**的形式，提供可组合、零业务样式的基础能力。`overlay` 是其中第一个业务模块，后续模块按相同约定扩展。
+Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular CDK](https://material.angular.io/cdk/overview)
 
 ## 模块一览
 
@@ -14,6 +14,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） |
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） |
 | `vue-cdk/dialog` | dialog | 模态对话框：命令式 `useDialog()`，对齐 Angular CDK `@angular/cdk/dialog` |
+| `vue-cdk/drag-drop` | drag-drop | 拖拽排序：`VDropList` / `VDrag` / `VDropListGroup` / `vDragHandle`，对齐 Angular CDK `@angular/cdk/drag-drop` |
 
 根入口 `vue-cdk` 与 Angular CDK 一致，仅导出版本号；业务能力一律按子路径导入。
 
@@ -33,6 +34,51 @@ npm install vue-cdk
 ```
 
 需要 Vue 3.3+（仅使用 Composition API）。
+
+## drag-drop 特性
+
+- 与 Angular CDK drag-drop 对应的完整 API：声明式 `VDropList` / `VDrag` 组件、`vDragHandle` 手柄指令、`VDropListGroup` 分组，命令式 `createDragRef` / `createDropListRef` / `DragRef` / `DropListRef` / `DragDropRegistry`
+- 全部输入与事件载荷对齐 Angular：`lockAxis` / `boundaryElement` / `constrainPosition` / `dragStartDelay` / `freeDragPosition` / `previewClass` / `previewContainer` / `scale` / `rootElementSelector`；`started` / `released` / `ended` / `entered` / `exited` / `dropped` / `moved` / `sorted` 事件携带 `previousIndex` / `currentIndex` / `container` / `previousContainer` / `isPointerOverContainer` / `distance` / `dropPoint` 等字段
+- 排序能力：纵向/横向（含 RTL 视觉序反转）、`mixed` 换行网格、`connectedTo` 与分组跨容器传输、`enterPredicate` / `sortPredicate`、边缘自动滚动、`sortingDisabled` / `disabled` / `hasAnchor`
+- 自定义预览与占位符：`#preview="{data}"` / `#placeholder="{data}"` 插槽，支持 `previewMatchSize` 对齐原条目尺寸
+- 结构样式自动注入，开箱即用；也可显式引入 `vue-cdk/drag-drop/style.css`
+
+### 拖拽排序快速开始
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {moveItemInArray, VDrag, VDropList} from 'vue-cdk/drag-drop';
+import type {VDragDrop} from 'vue-cdk/drag-drop';
+
+const items = ref(['甲', '乙', '丙']);
+
+function onDrop(event: VDragDrop<string>) {
+  moveItemInArray(items.value, event.previousIndex, event.currentIndex);
+}
+</script>
+
+<template>
+  <VDropList :data="items" @dropped="onDrop">
+    <VDrag v-for="item in items" :key="item" :data="item">{{ item }}</VDrag>
+  </VDropList>
+</template>
+```
+
+### 跨容器传输
+
+```ts
+import {transferArrayItem} from 'vue-cdk/drag-drop';
+
+function onDrop(event: VDragDrop<string>) {
+  transferArrayItem(
+    event.previousContainer.data as string[],
+    event.container.data as string[],
+    event.previousIndex,
+    event.currentIndex,
+  );
+}
+```
 
 ## scrolling 特性
 

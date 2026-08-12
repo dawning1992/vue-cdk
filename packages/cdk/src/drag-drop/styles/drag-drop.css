@@ -1,0 +1,22 @@
+/*
+ * 拖拽结构样式，对应 Angular CDK drag-drop 的 resets.scss。
+ * 类名使用 vcdk- 前缀；样式随模块入口自动注入，
+ * 也可显式引入 `vue-cdk/drag-drop/style.css`。
+ */
+
+.vcdk-drag-preview {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  overflow: visible;
+  /* Chrome 会对 popover 元素设置 inset: 0，与 align-self 组合会破坏定位。 */
+  inset: auto;
+}
+
+/* 预览与占位符在创建时会被设置为 pointer-events: none，
+   但后代可能覆盖回 auto 并干扰 elementFromPoint 判定。 */
+.vcdk-drag-placeholder *,
+.vcdk-drag-preview * {
+  pointer-events: none !important;
+}

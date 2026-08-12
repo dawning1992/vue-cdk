@@ -132,10 +132,15 @@ export function createKeyboardEvent(
 }
 
 /** 派发鼠标事件并返回事件对象。 */
+export type TestMouseEventInit = MouseEventInit & {
+  pageX?: number;
+  pageY?: number;
+};
+
 export function dispatchMouseEvent(
   target: EventTarget,
   type: string,
-  init: MouseEventInit = {},
+  init: TestMouseEventInit = {},
 ): MouseEvent {
   const event = new MouseEvent(type, {bubbles: true, cancelable: true, ...init});
   target.dispatchEvent(event);
@@ -143,11 +148,18 @@ export function dispatchMouseEvent(
 }
 
 /** 派发触摸事件；jsdom 的 Touch/TouchEvent 能力有限，必要时用 defineProperty 补充 touches。 */
-export function dispatchTouchEvent(target: EventTarget, touches?: unknown[]): TouchEvent {
-  const event = new TouchEvent('touchstart', {bubbles: true, cancelable: true});
-  if (touches) {
-    Object.defineProperty(event, 'touches', {get: () => touches});
-    Object.defineProperty(event, 'changedTouches', {get: () => touches});
+export function dispatchTouchEvent(
+  target: EventTarget,
+  typeOrTouches: string | unknown[] = 'touchstart',
+  touches?: unknown[],
+): TouchEvent {
+  const type = typeof typeOrTouches === 'string' ? typeOrTouches : 'touchstart';
+  const touchList = typeof typeOrTouches === 'string' ? touches : typeOrTouches;
+  const event = new TouchEvent(type, {bubbles: true, cancelable: true});
+  if (touchList) {
+    Object.defineProperty(event, 'touches', {get: () => touchList});
+    Object.defineProperty(event, 'targetTouches', {get: () => touchList});
+    Object.defineProperty(event, 'changedTouches', {get: () => touchList});
   }
   target.dispatchEvent(event);
   return event;

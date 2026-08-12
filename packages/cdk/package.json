@@ -60,7 +60,13 @@
       "import": "./dist/dialog/index.js",
       "require": "./dist/dialog/index.cjs"
     },
-    "./dialog/style.css": "./dist/dialog/style.css"
+    "./dialog/style.css": "./dist/dialog/style.css",
+    "./drag-drop": {
+      "types": "./dist/drag-drop/index.d.ts",
+      "import": "./dist/drag-drop/index.js",
+      "require": "./dist/drag-drop/index.cjs"
+    },
+    "./drag-drop/style.css": "./dist/drag-drop/style.css"
   },
   "sideEffects": [
     "**/*.css"
@@ -74,11 +80,13 @@
     "popover",
     "dropdown",
     "tooltip",
-    "teleport"
+    "teleport",
+    "drag-drop",
+    "draggable"
   ],
   "license": "MIT",
   "scripts": {
-    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs",
+    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs && node scripts/copy-drag-drop-css.mjs",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
