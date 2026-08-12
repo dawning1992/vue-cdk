@@ -522,3 +522,119 @@ body {
   justify-content: flex-end;
   margin-top: 16px;
 }
+
+/* ---- 虚拟滚动 demo ---- */
+.vs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.vs-list {
+  height: 260px;
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.vs-list-horizontal {
+  height: 140px;
+}
+
+.vs-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-bottom: 1px solid #f0f2f7;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.vs-item.even {
+  background: #fafbfe;
+}
+
+.vs-item-horizontal {
+  border-right: 1px solid #f0f2f7;
+  border-bottom: none;
+  flex: none;
+}
+
+.vs-index {
+  color: var(--demo-muted);
+  font-size: 12px;
+  min-width: 72px;
+}
+
+.vs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.vs-scroller {
+  height: 320px;
+  overflow: auto;
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.vs-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 14px;
+  background: var(--demo-primary-soft);
+  color: var(--demo-primary);
+  font-size: 13px;
+  border-bottom: 1px solid var(--demo-border);
+}
+
+/* ---- 滚动分发 demo ---- */
+.sd-scroll-area {
+  height: 180px;
+  overflow: auto;
+  border: 1px solid var(--demo-border);
+  border-radius: 8px;
+  padding: 10px;
+  background: #fafbfe;
+}
+
+.sd-inner {
+  height: 120px;
+  margin-top: 10px;
+  background: #fff;
+}
+
+.sd-ancestor {
+  height: 200px;
+}
+
+.sd-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 64px;
+  margin: 6px 0;
+  border: 1px dashed var(--demo-border);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+  color: var(--demo-muted);
+}
+
+.sd-logs {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--demo-muted);
+}
+
+.sd-logs li {
+  padding: 2px 0;
+  border-bottom: 1px dashed #eef0f5;
+}

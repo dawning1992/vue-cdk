@@ -12,3 +12,8 @@ export {
   supportsShadowDom,
   type ModifierKey,
 } from './platform';
+export {
+  getRtlScrollAxisType,
+  RtlScrollAxisType,
+  supportsScrollBehavior,
+} from './scrolling';

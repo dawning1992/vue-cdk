@@ -21,7 +21,8 @@
       "vue-cdk/scrolling": ["./src/scrolling/index.ts"],
       "vue-cdk/emitter": ["./src/emitter/index.ts"],
       "vue-cdk/a11y": ["./src/a11y/index.ts"],
-      "vue-cdk/dialog": ["./src/dialog/index.ts"]
+      "vue-cdk/dialog": ["./src/dialog/index.ts"],
+      "vue-cdk/collections": ["./src/collections/index.ts"]
     }
   },
   "include": [

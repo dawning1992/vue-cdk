@@ -35,7 +35,7 @@ export class RepositionScrollStrategy implements ScrollStrategy {
       return;
     }
     const throttle = this._config?.scrollThrottle ?? 0;
-    this._unsubscribe = scrollDispatcher.scrolled(throttle, () => {
+    this._unsubscribe = scrollDispatcher.scrolled(throttle).subscribe(() => {
       this._overlayRef?.updatePosition();
       if (this._config?.autoClose && isBrowser()) {
         const overlayRect = this._overlayRef!.overlayElement.getBoundingClientRect();

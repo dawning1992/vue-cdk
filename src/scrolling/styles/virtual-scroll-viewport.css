@@ -1,0 +1,88 @@
+/*
+ * 虚拟滚动结构样式，对应 Angular CDK 的 virtual-scroll-viewport.scss。
+ * 类名使用 vcdk- 前缀，结构与 Angular 一致：
+ * - 视口根节点：撑起滚动容器；
+ * - content-wrapper：绝对定位 + transform 位移承载渲染内容；
+ * - spacer：尺寸等于全部内容总尺寸，保证滚动条反映完整数据量。
+ */
+
+.vcdk-virtual-scroll-viewport {
+  display: block;
+  position: relative;
+  transform: translateZ(0);
+}
+
+/* 自滚动容器：与 Angular 的 .cdk-virtual-scrollable 等价。 */
+.vcdk-virtual-scrollable {
+  overflow: auto;
+  will-change: scroll-position;
+  contain: strict;
+
+  /* 防止浏览器滚动锚定干扰虚拟滚动计算。 */
+  overflow-anchor: none;
+  scroll-behavior: auto;
+}
+
+/* 渲染内容包裹层：通过 transform 把渲染区间推到数据中的正确位置。 */
+.vcdk-virtual-scroll-content-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  contain: content;
+
+  [dir='rtl'] & {
+    right: 0;
+    left: auto;
+  }
+}
+
+/* 横向模式下内容撑满视口高度，纵向模式撑满宽度。 */
+.vcdk-virtual-scroll-orientation-horizontal .vcdk-virtual-scroll-content-wrapper {
+  min-height: 100%;
+}
+
+.vcdk-virtual-scroll-orientation-vertical .vcdk-virtual-scroll-content-wrapper {
+  min-width: 100%;
+}
+
+/*
+ * 视口内直接放置 dl/ol/table/ul 时（如 tr/li 标签受限场景），
+ * 清除容器在滚动方向上的额外空间，避免干扰滚动计算（对应 Angular 的
+ * _clear-container-space）。
+ */
+.vcdk-virtual-scroll-orientation-horizontal .vcdk-virtual-scroll-content-wrapper > dl,
+.vcdk-virtual-scroll-orientation-horizontal .vcdk-virtual-scroll-content-wrapper > ol,
+.vcdk-virtual-scroll-orientation-horizontal .vcdk-virtual-scroll-content-wrapper > table,
+.vcdk-virtual-scroll-orientation-horizontal .vcdk-virtual-scroll-content-wrapper > ul {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: 0;
+  margin-right: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+  outline: none;
+}
+
+.vcdk-virtual-scroll-orientation-vertical .vcdk-virtual-scroll-content-wrapper > dl,
+.vcdk-virtual-scroll-orientation-vertical .vcdk-virtual-scroll-content-wrapper > ol,
+.vcdk-virtual-scroll-orientation-vertical .vcdk-virtual-scroll-content-wrapper > table,
+.vcdk-virtual-scroll-orientation-vertical .vcdk-virtual-scroll-content-wrapper > ul {
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  border-top-width: 0;
+  border-bottom-width: 0;
+  outline: none;
+}
+
+/* 撑出完整数据量的 spacer：横向改变宽度，纵向改变高度。 */
+.vcdk-virtual-scroll-spacer {
+  height: 1px;
+  transform-origin: 0 0;
+  flex: 0 0 auto; /* 防止在 flex 布局下被压缩 */
+
+  [dir='rtl'] & {
+    transform-origin: 100% 0;
+  }
+}

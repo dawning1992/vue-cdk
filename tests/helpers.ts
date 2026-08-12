@@ -44,6 +44,53 @@ export function mockRect(
   return vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(full as unknown as DOMRect);
 }
 
+/**
+ * 模拟元素的滚动与几何指标。
+ * scrollTop/scrollLeft 提供 getter/setter，便于测试中直接赋值后派发滚动事件。
+ */
+export function mockScrollMetrics(
+  element: Element,
+  metrics: Partial<{
+    clientWidth: number;
+    clientHeight: number;
+    scrollWidth: number;
+    scrollHeight: number;
+    offsetWidth: number;
+    offsetHeight: number;
+    scrollTop: number;
+    scrollLeft: number;
+  }>,
+): void {
+  for (const [key, value] of Object.entries(metrics)) {
+    if (key === 'scrollTop' || key === 'scrollLeft') {
+      let current = value ?? 0;
+      Object.defineProperty(element, key, {
+        get: () => current,
+        set: next => {
+          current = next;
+        },
+        configurable: true,
+      });
+    } else {
+      Object.defineProperty(element, key, {value: value ?? 0, configurable: true});
+    }
+  }
+}
+
+/**
+ * 等待下一动画帧：jsdom 无 requestAnimationFrame 时退化为 16ms 定时器。
+ * 用于虚拟滚动「按帧合并滚动事件」的测试。
+ */
+export function flushRaf(): Promise<void> {
+  return new Promise(resolve => {
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(() => resolve());
+    } else {
+      setTimeout(resolve, 16);
+    }
+  });
+}
+
 /** 创建真实 OverlayRef 用于策略/生命周期测试。 */
 export function createTestOverlay(config?: OverlayConfig): OverlayRef {
   return createOverlayRef(config);

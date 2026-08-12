@@ -38,6 +38,12 @@
       "import": "./dist/scrolling/index.js",
       "require": "./dist/scrolling/index.cjs"
     },
+    "./scrolling/style.css": "./dist/scrolling/style.css",
+    "./collections": {
+      "types": "./dist/collections/index.d.ts",
+      "import": "./dist/collections/index.js",
+      "require": "./dist/collections/index.cjs"
+    },
     "./emitter": {
       "types": "./dist/emitter/index.d.ts",
       "import": "./dist/emitter/index.js",
@@ -73,7 +79,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "vite --config vite.demo.config.ts",
-    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs",
+    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs",
     "build:demo": "vite build --config vite.demo.config.ts",
     "preview:demo": "vite preview --config vite.demo.config.ts",
     "typecheck": "vue-tsc --noEmit",

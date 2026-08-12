@@ -26,6 +26,7 @@ export default defineConfig({
         coercion: 'src/coercion/index.ts',
         platform: 'src/platform/index.ts',
         scrolling: 'src/scrolling/index.ts',
+        collections: 'src/collections/index.ts',
         emitter: 'src/emitter/index.ts',
         a11y: 'src/a11y/index.ts',
         dialog: 'src/dialog/index.ts',

@@ -1,7 +1,8 @@
 import type {OverlayRef} from '../overlay-ref';
 import type {ScrollStrategy} from './scroll-strategy';
 import {getScrollStrategyAlreadyAttachedError} from './scroll-strategy';
-import {scrollDispatcher, type ScrollEventSource} from '../../scrolling';
+import type {ScrollDispatcherTarget} from '../../scrolling';
+import {scrollDispatcher} from '../../scrolling';
 import {viewportRuler} from '../../scrolling';
 
 /** Close 滚动策略的配置。 */
@@ -36,7 +37,7 @@ export class CloseScrollStrategy implements ScrollStrategy {
     const threshold = this._config?.threshold;
     if (threshold && threshold > 1) {
       this._initialScrollPosition = viewportRuler.getViewportScrollPosition().top;
-      this._unsubscribe = scrollDispatcher.scrolled(0, source => {
+      this._unsubscribe = scrollDispatcher.scrolled(0).subscribe(source => {
         if (!this._canHandle(source)) {
           return;
         }
@@ -48,7 +49,7 @@ export class CloseScrollStrategy implements ScrollStrategy {
         }
       });
     } else {
-      this._unsubscribe = scrollDispatcher.scrolled(0, source => {
+      this._unsubscribe = scrollDispatcher.scrolled(0).subscribe(source => {
         if (this._canHandle(source)) {
           this._detachOverlay();
         }
@@ -66,13 +67,16 @@ export class CloseScrollStrategy implements ScrollStrategy {
     this._overlayRef = null;
   }
 
-  /** 忽略发生在 overlay 面板内部的滚动，避免内容自身滚动导致误关闭。 */
-  private _canHandle(source: ScrollEventSource): boolean {
+  /**
+   * 忽略发生在 overlay 面板内部的滚动，避免内容自身滚动导致误关闭。
+   * 窗口/文档滚动（void）始终处理；元素滚动仅处理面板外的注册滚动容器。
+   */
+  private _canHandle(source: ScrollDispatcherTarget | void): boolean {
     const overlayElement = this._overlayRef?.overlayElement;
-    if (!overlayElement || !(source.element instanceof HTMLElement)) {
+    if (!overlayElement || !source) {
       return true;
     }
-    return !overlayElement.contains(source.element);
+    return !overlayElement.contains(source.getElementRef().nativeElement);
   }
 
   private _detachOverlay(): void {

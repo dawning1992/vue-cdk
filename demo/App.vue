@@ -12,6 +12,8 @@ import PopoverDemo from './sections/PopoverDemo.vue';
 import KeyManagerDemo from './sections/KeyManagerDemo.vue';
 import FocusTrapDemo from './sections/FocusTrapDemo.vue';
 import FocusMonitorDemo from './sections/FocusMonitorDemo.vue';
+import VirtualScrolling from './sections/VirtualScrolling.vue';
+import ScrollDispatcherDemo from './sections/ScrollDispatcherDemo.vue';
 
 /** 页签配置：每个页签对应一个独立功能演示组件。 */
 interface TabItem {
@@ -33,6 +35,8 @@ const tabs: TabItem[] = [
   {key: 'key-manager', label: '键盘导航', component: KeyManagerDemo},
   {key: 'focus-trap', label: '焦点陷阱', component: FocusTrapDemo},
   {key: 'focus-monitor', label: '焦点来源', component: FocusMonitorDemo},
+  {key: 'virtual-scroll', label: '虚拟滚动', component: VirtualScrolling},
+  {key: 'scroll-dispatcher', label: '滚动分发', component: ScrollDispatcherDemo},
 ];
 
 const activeKey = ref(tabs[0].key);
@@ -43,7 +47,7 @@ const activeTab = computed(() => tabs.find(tab => tab.key === activeKey.value) ?
   <div class="page">
     <header class="page-header">
       <h1>Vue CDK 演示</h1>
-      <p>Vue 3 Composition API 组件开发工具包，设计移植自 Angular CDK（Overlay 与 a11y）</p>
+      <p>Vue 3 Composition API 组件开发工具包，设计移植自 Angular CDK（Overlay、a11y 与 scrolling）</p>
     </header>
 
     <nav class="tabs" role="tablist" aria-label="功能演示">

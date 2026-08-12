@@ -9,7 +9,8 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/overlay` | overlay | 浮层面板：命令式 `useOverlay()` + 声明式 `VConnectedOverlay` / `VOverlayOrigin` |
 | `vue-cdk/coercion` | coercion | 类型/值强制转换工具（`coerceArray`、`coerceCssPixelValue`） |
 | `vue-cdk/platform` | platform | 平台能力检测与事件工具（`isBrowser`、`supportsPopover`、`hasModifierKey`） |
-| `vue-cdk/scrolling` | scrolling | 全局滚动分发与视口测量（`ScrollDispatcher`、`ViewportRuler`） |
+| `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） |
+| `vue-cdk/collections` | collections | 集合抽象：`DataSource` / `ArrayDataSource` / `ListRange` / `CollectionViewer` |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） |
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） |
 | `vue-cdk/dialog` | dialog | 模态对话框：命令式 `useDialog()`，对齐 Angular CDK `@angular/cdk/dialog` |
@@ -32,6 +33,49 @@ npm install vue-cdk
 ```
 
 需要 Vue 3.3+（仅使用 Composition API）。
+
+## scrolling 特性
+
+- 与 Angular CDK scrolling 对应的完整 API：`ScrollDispatcher`（register/deregister、`scrolled`、`ancestorScrolled`、`getAncestorScrollContainers`）、`ViewportRuler`（尺寸/rect/滚动位置、resize + orientationchange）、`vScrollable` 指令与 `useScrollable` 组合式（对应 `cdkScrollable`，含 LTR/RTL 六向 `scrollTo` / `measureScrollOffset`）
+- 虚拟滚动：`VVirtualScrollViewport` + `VVirtualFor` 作用域插槽，固定尺寸策略（`itemSize` / `minBufferPx` / `maxBufferPx`），支持纵向/横向（含 RTL）、`appendOnly`、`scrollWindow` 窗口滚动、`vVirtualScrollableElement` 外部滚动容器、DataSource / 响应式数组数据源、`scrollToIndex` / `scrollToOffset`
+- 事件流沿用自研 `Emitter`，包零运行时依赖（不依赖 RxJS）
+- 结构样式自动注入，开箱即用；也可显式引入 `vue-cdk/scrolling/style.css`
+
+### 虚拟滚动快速开始
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {VVirtualFor, VVirtualScrollViewport} from 'vue-cdk/scrolling';
+
+const items = ref(Array.from({length: 1000}, (_, i) => `条目 ${i + 1}`));
+</script>
+
+<template>
+  <VVirtualScrollViewport :item-size="40" style="height: 320px" @scrolled-index-change="onChange">
+    <VVirtualFor :of="items" v-slot="{item, index}">
+      <div style="height: 40px">{{ index + 1 }}：{{ item }}</div>
+    </VVirtualFor>
+  </VVirtualScrollViewport>
+</template>
+```
+
+`VVirtualFor` 插槽上下文与 Angular `*cdkVirtualFor` 一致：
+`item` / `$implicit` / `of` / `index` / `count` / `first` / `last` / `even` / `odd`。
+
+### 声明滚动容器
+
+```vue
+<div v-scrollable class="scroll-area">...</div>
+```
+
+```ts
+import {ref} from 'vue';
+import {useScrollable} from 'vue-cdk/scrolling';
+
+const area = ref<HTMLElement | null>(null);
+const scrollable = useScrollable(area); // 组件卸载时自动注销
+```
 
 ## 快速开始
 
@@ -346,6 +390,12 @@ dialogRef.closed.subscribe(result => {
 | `ScrollStrategyOptions` | `scrollStrategies` |
 | `OverlayKeyboardDispatcher` / `OverlayOutsideClickDispatcher` | 同名分发器（模块级单例） |
 | `@angular/cdk/scrolling` 的 `ScrollDispatcher` / `ViewportRuler` | `vue-cdk/scrolling` |
+| `@angular/cdk/scrolling` 的 `cdkScrollable` 指令 | `vScrollable` 指令 / `useScrollable()` |
+| `@angular/cdk/scrolling` 的 `cdk-virtual-scroll-viewport` | `VVirtualScrollViewport` 组件 |
+| `@angular/cdk/scrolling` 的 `*cdkVirtualFor` | `VVirtualFor` 组件（作用域插槽） |
+| `@angular/cdk/scrolling` 的 `FixedSizeVirtualScrollStrategy` | 同名策略类（`itemSize` 属性自动创建） |
+| `@angular/cdk/scrolling` 的 `cdkVirtualScrollingElement` / `scrollWindow` | `vVirtualScrollableElement` 指令 / `scroll-window` 属性 |
+| `@angular/cdk/collections` 的 `DataSource` / `ArrayDataSource` / `ListRange` | `vue-cdk/collections` |
 | `@angular/cdk/platform` | `vue-cdk/platform` |
 | `@angular/cdk/coercion` | `vue-cdk/coercion` |
 | `@angular/cdk/a11y` | `vue-cdk/a11y` |
