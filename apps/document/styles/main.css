@@ -103,6 +103,16 @@ code {
   word-break: break-all;
 }
 
+/* 对话框面板：dialog 示例通过 panelClass 引用，为弹窗提供卡片外观。
+   overlay / dialog 本身不携带业务样式，背景、圆角、阴影由使用方提供。 */
+.doc-dialog-panel {
+  background: var(--doc-card);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  box-shadow: 0 12px 40px rgba(31, 36, 48, 0.18);
+  overflow: hidden;
+}
+
 /* 焦点监视演示：来源标记类视觉反馈（文档示例专用）。 */
 .vcdk-focused {
   outline: 2px solid var(--doc-primary);
