@@ -9,7 +9,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/overlay` | overlay | 浮层面板：命令式 `useOverlay()` + 声明式 `VConnectedOverlay` / `VOverlayOrigin` |
 | `vue-cdk/coercion` | coercion | 类型/值强制转换工具（`coerceArray`、`coerceCssPixelValue`） |
 | `vue-cdk/clipboard` | clipboard | 剪贴板：命令式 `useClipboard()` / `Clipboard`、延迟复制 `PendingCopy`、声明式 `vCopyToClipboard` 指令 |
-| `vue-cdk/platform` | platform | 平台能力检测与事件工具（`isBrowser`、`supportsPopover`、`hasModifierKey`） |
+| `vue-cdk/platform` | platform | 平台能力检测与事件工具：`Platform` 服务（浏览器/引擎识别 + `usePlatform` 注入）、`getSupportedInputTypes`、Shadow DOM / Popover / scroll-behavior 检测（`isBrowser`、`supportsPopover`、`hasModifierKey`） |
 | `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） |
 | `vue-cdk/collections` | collections | 集合抽象：`DataSource` / `ArrayDataSource` / `ListRange` / `CollectionViewer` |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） |
@@ -237,6 +237,46 @@ import {useScrollable} from 'vue-cdk/scrolling';
 
 const area = ref<HTMLElement | null>(null);
 const scrollable = useScrollable(area); // 组件卸载时自动注销
+```
+
+## platform 特性
+
+- 对齐 Angular CDK `Platform` 服务：`Platform` 类（`isBrowser` / `EDGE` / `TRIDENT` / `BLINK` / `WEBKIT` / `IOS` / `FIREFOX` / `ANDROID` / `SAFARI`，构造时快照）+ 全局单例 `platform` + `createPlatform({ userAgent })` 工厂
+- 组合式注入：`usePlatform()` 返回当前作用域实例，`providePlatform()` 组件级覆盖，App 级用 `app.provide(CDK_PLATFORM, platform)`（对应 Angular `PlatformModule`）
+- `getSupportedInputTypes()`：返回当前浏览器支持的 `<input>` type 集合，结果缓存；SSR 下返回完整候选集
+- `isTestEnvironment()`：检测 `__karma__` / `jasmine` / `jest` / `Mocha` 全局标记（对应 Angular `_isTestEnvironment`）
+- 其余能力：Shadow DOM 穿透（`getEventTargetPierceShadowDom` / `getFocusedElementPierceShadowDom` / `getShadowRoot`）、passive 监听归一化、RTL 滚动轴检测、`hasModifierKey` 修饰键判断，SSR 环境下均可安全调用
+
+### 平台快速开始
+
+```vue
+<script setup lang="ts">
+import {createPlatform, getSupportedInputTypes, isTestEnvironment, usePlatform} from 'vue-cdk/platform';
+
+// setup 内获取当前平台实例（组件链未 provide 时回退全局单例）。
+const platform = usePlatform();
+
+// 支持 UA 覆盖：SSR 或单测可固定检测结果。
+const serverPlatform = createPlatform({userAgent: ''});
+
+const supportedInputTypes = Array.from(getSupportedInputTypes());
+const inTestEnv = isTestEnvironment();
+</script>
+
+<template>
+  <p>Blink: {{ platform.BLINK }}；Safari: {{ platform.SAFARI }}</p>
+  <p>支持的 input type：{{ supportedInputTypes.join(', ') }}；测试环境：{{ inTestEnv }}</p>
+</template>
+```
+
+App 级注入（等价于 Angular 引入 `PlatformModule`）：
+
+```ts
+import {createApp} from 'vue';
+import {CDK_PLATFORM, platform} from 'vue-cdk/platform';
+
+const app = createApp(App);
+app.provide(CDK_PLATFORM, platform);
 ```
 
 ## 快速开始
@@ -608,7 +648,10 @@ outlet.attach(new DomPortal(document.querySelector('#movable')!)); // detach 恢
 | `@angular/cdk/scrolling` 的 `FixedSizeVirtualScrollStrategy` | 同名策略类（`itemSize` 属性自动创建） |
 | `@angular/cdk/scrolling` 的 `cdkVirtualScrollingElement` / `scrollWindow` | `vVirtualScrollableElement` 指令 / `scroll-window` 属性 |
 | `@angular/cdk/collections` 的 `DataSource` / `ArrayDataSource` / `ListRange` | `vue-cdk/collections` |
-| `@angular/cdk/platform` | `vue-cdk/platform` |
+| `@angular/cdk/platform` 的 `Platform` 服务 | `Platform` 类 + `platform` 单例 + `usePlatform()`（Angular 注入 → Vue provide/inject） |
+| `PlatformModule` | `app.provide(CDK_PLATFORM, platform)` 或组件内 `providePlatform()` |
+| `@angular/cdk/platform` 的 `getSupportedInputTypes` | `getSupportedInputTypes()`（`vue-cdk/platform`） |
+| `@angular/cdk/platform` 的 `_isTestEnvironment` | `isTestEnvironment()`（`vue-cdk/platform`） |
 | `@angular/cdk/coercion` | `vue-cdk/coercion` |
 | `@angular/cdk/a11y` | `vue-cdk/a11y` |
 | `@angular/cdk/dialog` 的 `Dialog` 服务 | `useDialog()` / `dialogService` |
