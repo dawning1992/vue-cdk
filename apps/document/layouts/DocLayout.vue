@@ -20,7 +20,7 @@ function isActive(module: DocModule): boolean {
         <span class="brand-tag">文档</span>
       </router-link>
       <span class="version">v{{ pkg.version }}</span>
-      <span class="header-desc">Vue 3 组件开发工具包 · 按子路径模块化导入</span>
+      <span class="header-desc">Vue 3 组件开发工具包</span>
     </header>
 
     <div class="doc-body">
@@ -63,7 +63,7 @@ function isActive(module: DocModule): boolean {
   top: 0;
   z-index: 20;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
   padding: 0 24px;
   height: 56px;
