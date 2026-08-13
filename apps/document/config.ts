@@ -91,6 +91,13 @@ export const docModules: DocModule[] = [
     summary: '拖拽排序：VDropList / VDrag / vDragHandle，对齐 Angular CDK drag-drop。',
   },
   {
+    path: '/tree',
+    name: 'tree',
+    label: '树',
+    view: 'Tree',
+    summary: '树形结构渲染：VTree / VTreeNode / VNestedTreeNode 与 TreeControl，对齐 Angular CDK tree。',
+  },
+  {
     path: '/clipboard',
     name: 'clipboard',
     label: '剪贴板',

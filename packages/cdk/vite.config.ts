@@ -37,6 +37,7 @@ export default defineConfig({
         a11y: 'src/a11y/index.ts',
         dialog: 'src/dialog/index.ts',
         'drag-drop': 'src/drag-drop/index.ts',
+        tree: 'src/tree/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) =>

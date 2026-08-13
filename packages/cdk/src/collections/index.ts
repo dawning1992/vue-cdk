@@ -6,3 +6,5 @@
 export type {ListRange, CollectionViewer} from './collection-viewer';
 export {DataSource, isDataSource} from './data-source';
 export {ArrayDataSource, type ArrayDataSourceInput} from './array-data-source';
+export {SelectionModel, getMultipleValuesInSingleSelectionError} from './selection-model';
+export type {SelectionChange} from './selection-model';

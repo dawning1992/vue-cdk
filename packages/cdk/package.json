@@ -76,7 +76,12 @@
       "import": "./dist/drag-drop/index.js",
       "require": "./dist/drag-drop/index.cjs"
     },
-    "./drag-drop/style.css": "./dist/drag-drop/style.css"
+    "./drag-drop/style.css": "./dist/drag-drop/style.css",
+    "./tree": {
+      "types": "./dist/tree/index.d.ts",
+      "import": "./dist/tree/index.js",
+      "require": "./dist/tree/index.cjs"
+    }
   },
   "sideEffects": [
     "**/*.css"
@@ -94,7 +99,9 @@
     "teleport",
     "portal",
     "drag-drop",
-    "draggable"
+    "draggable",
+    "tree",
+    "treeview"
   ],
   "license": "MIT",
   "scripts": {

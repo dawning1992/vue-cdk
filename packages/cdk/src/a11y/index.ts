@@ -18,6 +18,7 @@ export * from './key-manager/typeahead';
 export * from './key-manager/list-key-manager';
 export * from './key-manager/focus-key-manager';
 export * from './key-manager/activedescendant-key-manager';
+export * from './key-manager/tree-key-manager';
 
 export * from './focus-trap/interactivity-checker';
 export * from './focus-trap/focus-trap';

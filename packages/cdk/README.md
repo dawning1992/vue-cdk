@@ -17,8 +17,69 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） |
 | `vue-cdk/dialog` | dialog | 模态对话框：命令式 `useDialog()`，对齐 Angular CDK `@angular/cdk/dialog` |
 | `vue-cdk/drag-drop` | drag-drop | 拖拽排序：`VDropList` / `VDrag` / `VDropListGroup` / `vDragHandle`，对齐 Angular CDK `@angular/cdk/drag-drop` |
+| `vue-cdk/tree` | tree | 树形结构：`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`，对齐 Angular CDK `@angular/cdk/tree` |
 
 根入口 `vue-cdk` 与 Angular CDK 一致，仅导出版本号；业务能力一律按子路径导入。
+
+## tree 特性
+
+- 完整复刻 Angular CDK tree 设计模式：数据源（`DataSource` / `Emitter` / `Ref` / 数组）→ 扁平化/层级化渲染管线 → 节点组件（ARIA + 焦点管理）→ 指令
+- 两种树型：扁平树（`VTreeNode` + `levelAccessor`）与嵌套树（`VNestedTreeNode` + `childrenAccessor`），`childrenAccessor` 也支持 `Emitter` 异步子节点
+- 双数据入口：经典 `FlatTreeControl` / `NestedTreeControl`（含 `BaseTreeControl` / `TreeControl` 接口）与 Angular 21 推荐的 `levelAccessor` / `childrenAccessor` / `expansionKey` / `trackBy`
+- 完整 ARIA treeview 无障碍：`role` / `aria-level` / `aria-posinset` / `aria-setsize` / `aria-expanded`、roving tabindex、`TreeKeyManager` 键盘导航（方向键、左右键展开/收起与聚焦子/父节点、Home/End、Enter/Space 激活、`*` 同级展开、typeahead、RTL）
+- `vTreeNodeToggle` 指令（支持递归切换）与 `vTreeNodePadding` 指令（层级缩进，支持 CSS 单位与 RTL）
+- 事件：节点 `activation`（键盘激活）与 `expandedChange`（展开状态变化）；树实例暴露 `expandAll` / `collapseAll` / `expandDescendants` 等命令式方法
+- 零新增运行时依赖；与 Angular 的差异（作用域插槽替代结构指令、嵌套子节点自动渲染、条件模板用 v-if）见文档站
+
+### 树快速开始（扁平树）
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {VTree, VTreeNode} from 'vue-cdk/tree';
+
+interface Item {
+  name: string;
+  level: number;
+  expandable: boolean;
+}
+
+const items = ref<Item[]>([
+  {name: 'root', level: 0, expandable: true},
+  {name: 'child', level: 1, expandable: false},
+]);
+</script>
+
+<template>
+  <VTree :data-source="items" :level-accessor="(node: Item) => node.level">
+    <template #node="{node, level}">
+      <VTreeNode :node="node" :is-expandable="node.expandable" v-tree-node-padding>
+        <button v-tree-node-toggle>{{ node.name }}</button>
+      </VTreeNode>
+    </template>
+  </VTree>
+</template>
+```
+
+嵌套树使用 `childrenAccessor` 与 `VNestedTreeNode`，展开后子节点自动渲染在节点内部：
+
+```vue
+<script setup lang="ts">
+import {VTree, VNestedTreeNode} from 'vue-cdk/tree';
+
+const roots = [{name: 'root', children: [{name: 'child', children: []}]}];
+</script>
+
+<template>
+  <VTree :data-source="roots" :children-accessor="(node: any) => node.children">
+    <template #node="{node}">
+      <VNestedTreeNode :node="node" :is-expandable="node.children.length > 0">
+        {{ node.name }}
+      </VNestedTreeNode>
+    </template>
+  </VTree>
+</template>
+```
 
 ## clipboard 特性
 
@@ -554,6 +615,14 @@ outlet.attach(new DomPortal(document.querySelector('#movable')!)); // detach 恢
 | `@angular/cdk/dialog` 的 `DialogRef` | `DialogRef`（RxJS → `Emitter`） |
 | `DIALOG_DATA` / `DEFAULT_DIALOG_CONFIG` | 同名 InjectionKey + `useDialogData()` |
 | `CdkDialogContainer` | `VDialogContainer` / `useDialogContainerCore()` |
+| `@angular/cdk/tree` 的 `CdkTree` | `VTree`（`vue-cdk/tree`，数据源形态含 Ref/Emitter） |
+| `CdkTreeNode` / `CdkNestedTreeNode` | `VTreeNode` / `VNestedTreeNode` |
+| `cdkTreeNodeDef` 结构指令 | `#node` 作用域插槽（`{node, level, index, count}`） |
+| `cdkTreeNodeToggle` / `cdkTreeNodePadding` | `vTreeNodeToggle` / `vTreeNodePadding` |
+| `cdkTreeNodeOutlet` | 嵌套树自动渲染子节点，无需显式出口 |
+| `FlatTreeControl` / `NestedTreeControl` / `BaseTreeControl` / `TreeControl` | 同名类/接口 |
+| `SelectionModel`（collections） | 同名类（内部 `shallowRef`，响应式可追踪） |
+| `TreeKeyManager`（a11y） | 同名类（条目源支持 Ref，`change` 用 `Emitter`） |
 | `@angular/cdk/portal` 的 `Portal` 抽象类 | `Portal`（`vue-cdk/portal`） |
 | `ComponentPortal` / `TemplatePortal` / `DomPortal` | 同名类（injector → appContext、bindings → props） |
 | `CdkPortal` 指令 | `VPortal` 组件（插槽捕获模板源） |
