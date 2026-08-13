@@ -9,7 +9,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `packages/cdk` | `vue-cdk` | 可发布到 npm 的 CDK 库，含源码、测试与构建配置 |
 | `apps/document` | `vue-cdk-document` | private 文档站点，构建产物可直接静态托管 |
 
-`vue-cdk` 现提供 overlay、coercion、platform、scrolling、collections、emitter、portal、a11y、dialog 与 drag-drop 十个子路径模块；drag-drop 模块对齐 Angular CDK 的拖拽排序能力（`VDropList` / `VDrag` / `vDragHandle`），完整文档见 [packages/cdk/README.md](packages/cdk/README.md)。
+`vue-cdk` 现提供 overlay、coercion、clipboard、platform、scrolling、collections、emitter、portal、a11y、dialog 与 drag-drop 十一个子路径模块；clipboard 模块对齐 Angular CDK 的剪贴板能力（`useClipboard` / `vCopyToClipboard`），drag-drop 模块对齐 Angular CDK 的拖拽排序能力（`VDropList` / `VDrag` / `vDragHandle`），完整文档见 [packages/cdk/README.md](packages/cdk/README.md)。
 
 ## 环境要求
 

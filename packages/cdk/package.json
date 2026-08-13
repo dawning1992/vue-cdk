@@ -28,6 +28,11 @@
       "import": "./dist/coercion/index.js",
       "require": "./dist/coercion/index.cjs"
     },
+    "./clipboard": {
+      "types": "./dist/clipboard/index.d.ts",
+      "import": "./dist/clipboard/index.js",
+      "require": "./dist/clipboard/index.cjs"
+    },
     "./platform": {
       "types": "./dist/platform/index.d.ts",
       "import": "./dist/platform/index.js",
@@ -85,6 +90,7 @@
     "popover",
     "dropdown",
     "tooltip",
+    "clipboard",
     "teleport",
     "portal",
     "drag-drop",

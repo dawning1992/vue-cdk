@@ -90,4 +90,11 @@ export const docModules: DocModule[] = [
     view: 'DragDrop',
     summary: '拖拽排序：VDropList / VDrag / vDragHandle，对齐 Angular CDK drag-drop。',
   },
+  {
+    path: '/clipboard',
+    name: 'clipboard',
+    label: '剪贴板',
+    view: 'Clipboard',
+    summary: '剪贴板复制：useClipboard() / Clipboard 命令式复制与 vCopyToClipboard 指令复制。',
+  },
 ];

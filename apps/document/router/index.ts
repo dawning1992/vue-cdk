@@ -15,6 +15,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   A11y: () => import('../views/A11y.vue'),
   Dialog: () => import('../views/Dialog.vue'),
   DragDrop: () => import('../views/DragDrop.vue'),
+  Clipboard: () => import('../views/Clipboard.vue'),
 };
 
 /**

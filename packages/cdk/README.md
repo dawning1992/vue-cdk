@@ -8,6 +8,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | --- | --- | --- |
 | `vue-cdk/overlay` | overlay | 浮层面板：命令式 `useOverlay()` + 声明式 `VConnectedOverlay` / `VOverlayOrigin` |
 | `vue-cdk/coercion` | coercion | 类型/值强制转换工具（`coerceArray`、`coerceCssPixelValue`） |
+| `vue-cdk/clipboard` | clipboard | 剪贴板：命令式 `useClipboard()` / `Clipboard`、延迟复制 `PendingCopy`、声明式 `vCopyToClipboard` 指令 |
 | `vue-cdk/platform` | platform | 平台能力检测与事件工具（`isBrowser`、`supportsPopover`、`hasModifierKey`） |
 | `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） |
 | `vue-cdk/collections` | collections | 集合抽象：`DataSource` / `ArrayDataSource` / `ListRange` / `CollectionViewer` |
@@ -18,6 +19,59 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/drag-drop` | drag-drop | 拖拽排序：`VDropList` / `VDrag` / `VDropListGroup` / `vDragHandle`，对齐 Angular CDK `@angular/cdk/drag-drop` |
 
 根入口 `vue-cdk` 与 Angular CDK 一致，仅导出版本号；业务能力一律按子路径导入。
+
+## clipboard 特性
+
+- 与 Angular CDK clipboard 对齐的 API：`Clipboard` 类（`copy` / `beginCopy`）、单例 `clipboard`、组合式 `useClipboard()`、延迟复制 `PendingCopy`
+- 声明式 `vCopyToClipboard` 指令：字符串简写 `v-copy-to-clipboard="text"` 或对象 `{text, attempts, onCopied}`，点击即复制
+- 大文本重试：`attempts` 默认 1、上限 50（与 Angular 一致），`beginCopy` 预加载 textarea 后以 1ms 间隔重试，浏览器拒绝复制时可自动补试
+- 全局默认配置：`CDK_COPY_TO_CLIPBOARD_CONFIG` 注入键 + `provideCopyToClipboardConfig()`，App 级或组件级 provide 均可
+- 复制机制与 Angular 相同：隐藏 textarea + `execCommand('copy')`，同步返回成功与否，复制后还原焦点；不依赖 `navigator.clipboard`
+- SSR 安全：无 `document` 时 `copy()` 返回 `false`，`beginCopy()` 抛出明确错误，模块可安全导入
+- 零新增运行时依赖，TypeScript 编写，发布产物含 `.d.ts` 类型声明
+
+### 剪贴板快速开始
+
+先全局注册指令（或在使用组件的 `directives` 中局部注册）：
+
+```ts
+import {createApp} from 'vue';
+import {vCopyToClipboard} from 'vue-cdk/clipboard';
+
+const app = createApp(App);
+app.directive('copy-to-clipboard', vCopyToClipboard);
+```
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+
+const text = ref('要复制的文本');
+const copied = ref<boolean | null>(null);
+
+function onCopied(successful: boolean) {
+  copied.value = successful;
+}
+</script>
+
+<template>
+  <!-- 字符串简写：只复制，不关心结果 -->
+  <button v-copy-to-clipboard="text">复制</button>
+
+  <!-- 对象写法：携带重试次数与结果回调 -->
+  <button v-copy-to-clipboard="{text, attempts: 3, onCopied}">重试复制</button>
+  <span v-if="copied !== null">{{ copied ? '复制成功' : '复制失败' }}</span>
+</template>
+```
+
+命令式复制：
+
+```ts
+import {useClipboard} from 'vue-cdk/clipboard';
+
+const clipboard = useClipboard();
+const successful = clipboard.copy('内容'); // true | false
+```
 
 ## overlay 特性
 

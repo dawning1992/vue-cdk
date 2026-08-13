@@ -28,6 +28,7 @@ export default defineConfig({
         index: 'src/index.ts',
         overlay: 'src/overlay/index.ts',
         coercion: 'src/coercion/index.ts',
+        clipboard: 'src/clipboard/index.ts',
         platform: 'src/platform/index.ts',
         scrolling: 'src/scrolling/index.ts',
         collections: 'src/collections/index.ts',
