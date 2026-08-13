@@ -26,8 +26,9 @@
  * 没有这两条 transition，排序重排会瞬间跳变，预览也不会回弹。
  */
 
-/* 列表拖拽期间：未被拖起的条目用 transform 平滑让位。 */
-.vcdk-drop-list-dragging .vcdk-drag:not(.vcdk-drag-placeholder) {
+/* 列表拖拽/接收期间：未被拖起的条目用 transform 平滑让位（含 mixed 网格 FLIP）。 */
+.vcdk-drop-list-dragging .vcdk-drag:not(.vcdk-drag-placeholder),
+.vcdk-drop-list-receiving .vcdk-drag:not(.vcdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
