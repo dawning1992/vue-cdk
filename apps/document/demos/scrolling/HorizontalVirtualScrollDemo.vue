@@ -71,8 +71,19 @@ function jump(): void {
   font-size: 12px;
 }
 
+/*
+ * 虚拟滚动组件只负责按渲染区间位移内容与撑出 spacer，
+ * 不负责子元素的排版；横向 demo 需要自行让内容包裹层按行排布。
+ * 高度设为 100% 以匹配视口高度（120px），卡片再以 100% 高度撑满。
+ */
+.wrap :deep(.vcdk-virtual-scroll-content-wrapper) {
+  display: flex;
+  height: 100%;
+}
+
 .card {
   width: 140px;
+  flex: 0 0 140px;
   height: 100%;
   display: flex;
   align-items: center;
