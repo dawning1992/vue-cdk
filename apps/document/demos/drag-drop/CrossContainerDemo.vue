@@ -24,7 +24,7 @@ function onDrop(event: VDragDrop<string>): void {
   <div class="columns">
     <div class="column">
       <p class="column-title">待办（{{ todo.length }}）</p>
-      <VDropList id="todo" :data="todo" connected-to="['done']" class="drop-area" @dropped="onDrop">
+      <VDropList id="todo" :data="todo" :connected-to="['done']" class="drop-area" @dropped="onDrop">
         <VDrag v-for="item in todo" :key="item" :data="item" class="task">
           {{ item }}
         </VDrag>
