@@ -23,6 +23,12 @@ export const apiGroups: readonly ApiGroup[] = [
         description:
           '把元素或其响应式引用（ref）归一为元素；ref 当前为空时抛出异常，避免后续逻辑在无效元素上静默失败。',
       },
+      {
+        name: 'coerceNumberProperty',
+        signature: 'coerceNumberProperty(value: unknown, fallback = 0): number',
+        description:
+          '把输入值强制转换为数字：null/undefined/空串与无法解析的值返回兜底值（默认 0）。适用于把用户输入或外部数据归一为数字的边界场景。',
+      },
     ],
   },
   {

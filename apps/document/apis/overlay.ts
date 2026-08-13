@@ -20,7 +20,8 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'CreateOverlayRefOptions',
         signature: 'interface CreateOverlayRefOptions { appContext?: AppContext | null; container?: OverlayContainer | HTMLElement }',
-        description: 'createOverlayRef 的附加选项：自定义渲染上下文与容器；container 支持 OverlayContainer 实例或任意 HTML 元素，默认使用全局单例容器。',
+        description:
+          'createOverlayRef 的附加选项：appContext 为命令式渲染内容提供 provide/inject 通道（缺省回退全局上下文）；container 支持 OverlayContainer 实例或任意 HTML 元素（默认使用全局单例容器），可把浮层限制渲染到指定区域。',
       },
     ],
   },
@@ -32,7 +33,7 @@ export const apiGroups: readonly ApiGroup[] = [
         signature: 'class OverlayConfig',
         default: '—',
         description:
-          '创建配置：positionStrategy、scrollStrategy（默认 noop）、panelClass、hasBackdrop（默认 false）、backdropClass（默认 vcdk-overlay-dark-backdrop）、disableAnimations、width/height/min/max 尺寸（数字按像素）、direction、disposeOnNavigation、usePopover（默认 true）、eventPredicate。',
+          '创建配置（字段与默认值对齐 Angular CDK 的 OverlayConfig）：positionStrategy 定位策略，不提供时 overlay 不主动定位；scrollStrategy 滚动策略，默认 noop；panelClass 面板自定义类（字符串或数组，默认空）；hasBackdrop 是否启用遮罩，默认 false；backdropClass 遮罩自定义类，默认 vcdk-overlay-dark-backdrop；disableAnimations 禁用内置动画（遮罩淡入淡出）；width/height/minWidth/minHeight/maxWidth/maxHeight 面板尺寸（数字按像素）；direction 文本方向，不设置时回退 html 根元素 dir；disposeOnNavigation 路由导航时自动销毁，默认 false；usePopover 以原生 Popover 元素渲染（不支持时自动降级），默认 true；eventPredicate 事件谓词，决定 overlay 是否接收分发器派发的特定事件。',
       },
       {
         name: 'OverlayRef',
@@ -50,12 +51,14 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'OverlayRefDeps',
         signature: 'interface OverlayRefDeps { document; keyboardDispatcher; outsideClickDispatcher; container; animationsDisabled?; appContext? }',
-        description: 'OverlayRef 的依赖集合，由 createOverlayRef 注入。',
+        description:
+          'OverlayRef 的依赖集合，由 createOverlayRef 注入：document 为渲染文档；keyboardDispatcher/outsideClickDispatcher 为全局事件分发器；container 为浮层容器；animationsDisabled 关闭动画；appContext 为命令式渲染保留调用方 provide/inject 能力。',
       },
       {
         name: 'OverlaySizeConfig',
         signature: 'interface OverlaySizeConfig { width?; height?; minWidth?; minHeight?; maxWidth?; maxHeight? }',
-        description: 'updateSize 的尺寸参数；数字按像素处理。',
+        description:
+          'updateSize 的尺寸参数：width/height 设置面板宽高，minWidth/minHeight/maxWidth/maxHeight 设置最小/最大尺寸；所有字段均为 number | string，数字按像素处理。',
       },
       {
         name: 'BackdropRef',
@@ -162,8 +165,9 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'FlexibleOverlayPopoverLocation',
-        signature: 'type FlexibleOverlayPopoverLocation',
-        description: 'Popover API 定位信息，供 withPopoverLocation 指定浏览器原生的锚点位置。',
+        signature: "type FlexibleOverlayPopoverLocation = 'global' | 'inline' | {type: 'parent'; element: Element}",
+        description:
+          'Popover API 定位信息，供 withPopoverLocation 指定浏览器原生的锚点位置：global 插入 body 顶层、inline 插入锚点元素内部、{type: "parent"; element} 插入指定父元素。',
       },
       {
         name: 'Point',
@@ -178,7 +182,8 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'FlexibleConnectedPositionStrategyDeps',
         signature: 'interface FlexibleConnectedPositionStrategyDeps',
-        description: '连接策略的依赖集合（document、viewportRuler 等），一般由库内自动注入。',
+        description:
+          '连接策略的依赖集合：viewportRuler 视口测量工具、document 渲染文档、overlayContainer 浮层容器；均缺省时回退模块级默认实例，一般由库内自动注入。',
       },
     ],
   },
@@ -187,8 +192,10 @@ export const apiGroups: readonly ApiGroup[] = [
     rows: [
       {
         name: 'ConnectedPosition',
-        signature: 'interface ConnectedPosition { originX; originY; overlayX; overlayY; offsetX?; offsetY?; panelClass? }',
-        description: '一组连接位置：origin 与 overlay 各自在 start/center/end 与 top/center/bottom 上的对齐方式。',
+        signature:
+          'interface ConnectedPosition { originX; originY; overlayX; overlayY; weight?; offsetX?; offsetY?; panelClass? }',
+        description:
+          '一组连接位置：originX/originY 与 overlayX/overlayY 分别指定 origin 与 overlay 在水平（start/center/end）与垂直（top/center/bottom）上的对齐方式；weight 候选位置优先级权重；offsetX/offsetY 偏移像素；panelClass 命中该位置时附加到面板的类。',
       },
       {
         name: 'OriginConnectionPosition',
@@ -208,7 +215,8 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'ScrollingVisibility',
         signature: 'class ScrollingVisibility',
-        description: '描述连接位置在视口内的可见性：isOriginClipped/isOriginFullyClipped/isOverlayClipped/isOverlayFullyClipped。',
+        description:
+          '描述连接位置在视口内的可见性：isOriginClipped/isOriginOutsideView 与 isOverlayClipped/isOverlayOutsideView 分别表示 origin/overlay 被裁剪或完全移出视口。',
       },
       {
         name: 'ConnectedOverlayPositionChange',
@@ -310,6 +318,11 @@ export const apiGroups: readonly ApiGroup[] = [
         signature: 'interface RepositionScrollStrategyConfig { scrollThrottle?: number }',
         description: '重定位策略配置：scrollThrottle 为滚动重定位的节流毫秒数。',
       },
+      {
+        name: 'getScrollStrategyAlreadyAttachedError',
+        signature: 'getScrollStrategyAlreadyAttachedError(): Error',
+        description: '同一滚动策略重复绑定到多个 overlay 时抛出的错误工厂。',
+      },
     ],
   },
   {
@@ -324,6 +337,11 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'isElementClippedByScrolling',
         signature: 'isElementClippedByScrolling(element: HTMLElement, containers?: ScrollableContainer[]): boolean',
         description: '判断元素是否被滚动容器裁剪（部分或全部不可见）。',
+      },
+      {
+        name: 'Dimensions',
+        signature: "type Dimensions = Omit<DOMRect, 'x' | 'y' | 'toJSON'>",
+        description: 'DOMRect 的简化形态，仅保留定位算法所需的几何字段（top/left/right/bottom/width/height）。',
       },
     ],
   },

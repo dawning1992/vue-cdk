@@ -26,7 +26,7 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'DialogApi',
         signature: 'interface DialogApi',
         description:
-          '对话框服务能力契约：open(content, config?)、closeAll()、getDialogById(id)、openDialogs、afterOpened、afterAllClosed。',
+          '对话框服务能力契约，useDialog() 与 dialogService 共用：open<R, D, C>(content, config?) 打开对话框并返回 DialogRef（id 与已打开对话框重复时抛错）；closeAll() 按后进先出顺序关闭全部对话框；getDialogById(id) 按 id 查找已打开对话框；openDialogs 为当前打开的对话框列表（后打开的排末尾）；afterOpened 为打开事件流；afterAllClosed 为全部关闭完成事件流（订阅时无打开对话框会立即触发一次）。',
       },
       {
         name: 'DialogOpenOptions',

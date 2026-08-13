@@ -32,4 +32,18 @@ export const router = createRouter({
     name: module.view,
     component: viewLoaders[module.view],
   })),
+  /**
+   * 锚点滚动：API 文档深链接（#/tree#VTree）与跨模块提及链接跳转依赖此行为；
+   * 元素不存在时回退顶部，避免无效 hash 误滚动。
+   */
+  scrollBehavior(to, _from, savedPosition) {
+    if (to.hash) {
+      // 锚点 id 均为小写 slug，先转小写再定位，兼容 #VTree 这类大写深链接。
+      const id = to.hash.slice(1).toLowerCase();
+      return document.getElementById(id)
+        ? {el: `#${id}`, top: 76, behavior: 'smooth'}
+        : {top: 0};
+    }
+    return savedPosition ?? {top: 0};
+  },
 });

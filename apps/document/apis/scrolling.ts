@@ -84,6 +84,56 @@ export const apiGroups: readonly ApiGroup[] = [
         signature: 'type ExtendedScrollToOptions = _XAxis & _YAxis & ScrollOptions',
         description: '扩展版 ScrollToOptions：top/bottom 互斥、left/right/start/end 互斥，start/end 按方向映射（RTL 兼容）。',
       },
+      {
+        name: '_XAxis',
+        signature: 'type _XAxis = _XOR<_XOR<_Left, _Right>, _XOR<_Start, _End>>',
+        description: '水平滚动轴选项：left/right/start/end 中至多一个生效（互斥组合）。',
+      },
+      {
+        name: '_YAxis',
+        signature: 'type _YAxis = _XOR<_Top, _Bottom>',
+        description: '垂直滚动轴选项：top/bottom 互斥。',
+      },
+      {
+        name: '_XOR',
+        signature: 'type _XOR<T, U> = (_Without<T> & U) | (_Without<U> & T)',
+        description: '互斥联合类型工具：只允许 T 或 U 中的一侧提供字段，另一侧必须缺省。',
+      },
+      {
+        name: '_Without',
+        signature: 'type _Without<T> = {[P in keyof T]?: never}',
+        description: '把 T 的全部字段置为「可选且永不允许」，配合 _XOR 实现字段互斥。',
+      },
+      {
+        name: '_Top',
+        signature: 'type _Top = {top?: number}',
+        description: 'top 滚动偏移选项。',
+      },
+      {
+        name: '_Bottom',
+        signature: 'type _Bottom = {bottom?: number}',
+        description: 'bottom 滚动偏移选项（相对容器底部的偏移）。',
+      },
+      {
+        name: '_Left',
+        signature: 'type _Left = {left?: number}',
+        description: 'left 滚动偏移选项。',
+      },
+      {
+        name: '_Right',
+        signature: 'type _Right = {right?: number}',
+        description: 'right 滚动偏移选项（相对容器右侧的偏移）。',
+      },
+      {
+        name: '_Start',
+        signature: 'type _Start = {start?: number}',
+        description: 'start 滚动偏移选项：LTR 下等同 left，RTL 下等同 right。',
+      },
+      {
+        name: '_End',
+        signature: 'type _End = {end?: number}',
+        description: 'end 滚动偏移选项：LTR 下等同 right，RTL 下等同 left。',
+      },
     ],
   },
   {
@@ -106,7 +156,8 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'VirtualForContext',
         signature: 'interface VirtualForContext<T = unknown>',
-        description: 'VVirtualFor 单个渲染项的插槽上下文，字段语义与 Angular cdkVirtualFor 一致。',
+        description:
+          'VVirtualFor 单个渲染项的插槽上下文，字段语义与 Angular cdkVirtualFor 一致：item/$implicit 为当前条目、of 为传入 :of 的原始数据源、index 为完整数据中的索引、count 为数据总条数、first/last/even/odd 为位置标记。',
       },
       {
         name: 'VirtualForSource',
@@ -151,7 +202,8 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'VirtualScrollViewportAdapter',
         signature: 'interface VirtualScrollViewportAdapter',
-        description: '策略与视口交互的适配器契约。',
+        description:
+          '策略与视口交互的适配器契约（隐藏组件实现细节）：getDataLength/getViewportSize 读取数据长度与可见尺寸；getRenderedRange/setRenderedRange 读写渲染区间；measureScrollOffset 测量滚动偏移；setTotalContentSize/setRenderedContentOffset 撑出滚动条并定位内容；scrollToOffset 滚动视口。',
       },
       {
         name: 'VirtualScrollableElement',

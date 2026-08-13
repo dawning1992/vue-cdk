@@ -55,7 +55,37 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'TypeaheadConfig',
         signature: 'interface TypeaheadConfig<T>',
-        description: 'Typeahead 配置：debounceInterval（清空输入缓冲的毫秒数）等。',
+        description:
+          'Typeahead 配置：debounceInterval 为清空输入缓冲的毫秒数（默认 200）；skipPredicate 判断条目是否应被跳过（用于支持禁用项）。',
+      },
+      {
+        name: 'TreeKeyManager',
+        signature: 'class TreeKeyManager<T extends TreeKeyManagerItem> implements TreeKeyManagerStrategy<T>',
+        description:
+          '树形键盘导航管理器（对齐 Angular TreeKeyManager）：方向键导航、左右键展开/收起或聚焦子/父节点、Home/End、Enter/Space 激活、`*` 展开同级、typeahead、禁用项跳过、RTL 交换左右键；条目源支持数组或 Ref（响应式同步）。属性 change（Emitter<T | null>）；方法 onKeydown/destroy/focusItem/getActiveItem/getActiveItemIndex。',
+      },
+      {
+        name: 'TreeKeyManagerItem',
+        signature: 'interface TreeKeyManagerItem',
+        description:
+          '树形导航条目契约：activate() 执行主动作、getParent() 返回父条目（根节点返回 null）、getChildren() 返回子条目（数组或 Emitter 流）、isExpanded 与 expand()/collapse() 控制展开、focus()/unfocus() 切换焦点；isDisabled? 禁用项默认仍可被方向键导航（ARIA 焦点规则）、getLabel?() 供 typeahead 使用、makeFocusable?() 设置 roving tabindex 初始项。',
+      },
+      {
+        name: 'TreeKeyManagerItems',
+        signature: 'type TreeKeyManagerItems<T> = T[] | readonly T[] | Ref<T[]> | Ref<readonly T[]>',
+        description: '树形导航条目源：数组或响应式数组，变化自动同步。',
+      },
+      {
+        name: 'TreeKeyManagerOptions',
+        signature: 'interface TreeKeyManagerOptions<T extends TreeKeyManagerItem>',
+        description:
+          '树形导航配置：shouldActivationFollowFocus（为 true 时条目聚焦的同时执行 activate）、horizontalOrientation（rtl/ltr，左右键语义互换）、skipPredicate（导航时跳过命中谓词的条目）、trackBy（条目等价比较，默认按引用）、typeAheadDebounceInterval（true 使用默认 200ms 或传防抖毫秒数）。',
+      },
+      {
+        name: 'TreeKeyManagerStrategy',
+        signature: 'interface TreeKeyManagerStrategy<T extends TreeKeyManagerItem>',
+        description:
+          '树形导航策略接口：change（聚焦项变化时派发 Emitter<T | null>）、onKeydown(event)/destroy()、getActiveItemIndex()/getActiveItem()、focusItem(index | item, {emitChangeEvent?})。TreeKeyManager 实现该接口，树组件据此集成键盘导航。',
       },
     ],
   },
@@ -137,7 +167,7 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'IsFocusableConfig',
         signature: 'class IsFocusableConfig',
-        description: 'isFocusable 的配置：是否把被遮挡元素视为不可聚焦等。',
+        description: 'isFocusable 的配置：ignoreVisibility 为 true 时即使元素当前不可见也按可聚焦处理（默认 false）。',
       },
     ],
   },
@@ -210,7 +240,7 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'FocusOptions',
         signature: 'interface FocusOptions',
-        description: 'focusVia 的选项：是否阻止滚动、聚焦样式归因等。',
+        description: 'focusVia 的选项：preventScroll 为 true 时聚焦但不滚动到该元素。',
       },
       {
         name: 'FocusMonitorDetectionMode',
@@ -220,7 +250,7 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'FocusMonitorOptions',
         signature: 'interface FocusMonitorOptions',
-        description: 'FocusMonitor 构造配置：detectionMode、输入模态检测器等。',
+        description: 'FocusMonitor 构造配置：detectionMode 指定焦点来源归因模式（默认 IMMEDIATE）。',
       },
       {
         name: 'FOCUS_MONITOR_DEFAULT_OPTIONS',
@@ -245,7 +275,8 @@ export const apiGroups: readonly ApiGroup[] = [
       {
         name: 'InputModalityDetectorOptions',
         signature: 'interface InputModalityDetectorOptions',
-        description: '输入模态检测器配置：触摸判定缓冲毫秒数等。',
+        description:
+          '输入模态检测器配置：ignoreKeys 为检测键盘输入方式时忽略的按键码列表（默认忽略纯修饰键，避免与鼠标组合操作、VoiceOver 线性导航混淆）。',
       },
       {
         name: 'INPUT_MODALITY_DETECTOR_DEFAULT_OPTIONS',

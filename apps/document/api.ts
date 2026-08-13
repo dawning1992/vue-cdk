@@ -15,3 +15,23 @@ export interface ApiGroup {
   title: string;
   rows: readonly ApiRow[];
 }
+
+/** API 行锚点：导航展示名（原始 name）与自动生成的锚点 id。 */
+export interface ApiAnchorEntry {
+  /** 导航展示名，多名称行（如 VDragStart / VDragRelease）原样展示。 */
+  label: string;
+  /** 行锚点 id，同时作为 <tr> 的 id 与跳转目标。 */
+  anchor: string;
+  /** 对应 API 行数据。 */
+  row: ApiRow;
+}
+
+/** 分组锚点信息：分组标题锚点与组内行锚点，供右侧导航与表格渲染共用。 */
+export interface ApiAnchorGroup {
+  /** 分组标题（与 ApiGroup.title 一致）。 */
+  title: string;
+  /** 分组标题锚点 id。 */
+  anchor: string;
+  /** 组内行锚点信息（含原始行数据），顺序与 ApiGroup.rows 一致。 */
+  items: readonly ApiAnchorEntry[];
+}

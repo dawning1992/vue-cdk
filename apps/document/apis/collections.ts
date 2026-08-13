@@ -44,4 +44,26 @@ export const apiGroups: readonly ApiGroup[] = [
       },
     ],
   },
+  {
+    title: '选择模型',
+    rows: [
+      {
+        name: 'SelectionModel',
+        signature:
+          'class SelectionModel<T>（constructor(multiple?, initiallySelectedValues?, emitChanges?, compareWith?)）',
+        description:
+          '选择模型：维护选中集合并派发变化事件。select/deselect/toggle/isSelected/setSelection/clear/sort/isEmpty/hasValue/isMultipleSelection；bulk 提供面向大批量集合的 select/deselect/setSelection 入口；changed 为 Emitter<SelectionChange>；compareWith 自定义相等比较（提供时以「等价代表值」存储）；内部 shallowRef 存储，读取 selected 可被响应式追踪。单选模式下 select/deselect/setSelection 传入多个值会抛错。',
+      },
+      {
+        name: 'SelectionChange',
+        signature: 'interface SelectionChange<T> { source: SelectionModel<T>; added: T[]; removed: T[] }',
+        description: '选择变化事件载荷：source 为派发本次变化的模型实例，added/removed 为本次新增与取消选中的值。',
+      },
+      {
+        name: 'getMultipleValuesInSingleSelectionError',
+        signature: 'getMultipleValuesInSingleSelectionError(): Error',
+        description: '单选模式下向 select/deselect/setSelection 传入多个值时抛出的错误工厂。',
+      },
+    ],
+  },
 ];
