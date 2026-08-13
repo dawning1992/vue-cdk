@@ -9,10 +9,6 @@
  * - 全部事件载荷类型与配置类型。
  */
 
-import {injectDragDropStyles} from './style-inject';
-
-injectDragDropStyles();
-
 export {createDragRef, DragRef} from './drag-ref';
 export type {
   DragConstrainPosition,

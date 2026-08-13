@@ -15,6 +15,7 @@
 
 import {nextTick} from 'vue';
 import {InteractivityChecker} from './interactivity-checker';
+import {injectFocusTrapStyles} from './style-inject';
 
 /** 区域边界标记的查询选择器（kebab-case 为 Vue 模板惯例，camelCase 兼容编程式 DOM）。 */
 const REGION_START_SELECTOR = '[vcdk-focus-region-start], [vcdkFocusRegionStart]';
@@ -53,6 +54,9 @@ export class FocusTrap {
     readonly _document: Document,
     deferAnchors = false,
   ) {
+    // 结构样式随陷阱创建注入（幂等）：不放在模块入口顶层调用，
+    // 避免 barrel 入口被 tree-shaking 误判为无副作用而丢失样式。
+    injectFocusTrapStyles();
     if (!deferAnchors) {
       this.attachAnchors();
     }

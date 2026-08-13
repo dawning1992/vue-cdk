@@ -22,6 +22,7 @@ import type {DropListOrientation} from './config';
 import type {DropListSortStrategy} from './sorting/drop-list-sort-strategy';
 import {SingleAxisSortStrategy} from './sorting/single-axis-sort-strategy';
 import {MixedSortStrategy} from './sorting/mixed-sort-strategy';
+import {injectDragDropStyles} from './style-inject';
 
 /** 拖拽条目影响容器的指针距离阈值（占宽/高的比例）。 */
 const DROP_PROXIMITY_THRESHOLD = 0.05;
@@ -47,6 +48,9 @@ enum AutoScrollHorizontalDirection {
 export function createDropListRef<T = unknown>(
   element: ElementOrRef<HTMLElement>,
 ): DropListRef<T> {
+  // 结构样式随拖放容器创建注入（幂等）：不放在模块入口顶层调用，
+  // 避免 barrel 入口被 tree-shaking 误判为无副作用而丢失样式。
+  injectDragDropStyles();
   return new DropListRef(element, dragDropRegistry, document, viewportRuler);
 }
 

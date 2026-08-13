@@ -36,6 +36,7 @@ import type {CdkVirtualScrollRepeater} from './virtual-scroll-repeater';
 import {VirtualScrollable} from './virtual-scrollable';
 import {findVirtualScrollableElement} from './virtual-scrollable-element';
 import {VirtualScrollableWindow} from './virtual-scrollable-window';
+import {injectVirtualScrollStyles} from './style-inject';
 import {
   VIRTUAL_SCROLL_STRATEGY,
   type VirtualScrollStrategy,
@@ -132,6 +133,9 @@ export const VVirtualScrollViewport = defineComponent({
     scrolledIndexChange: (_index: number) => true,
   },
   setup(props, {slots, expose, emit}) {
+    // 结构样式随视口组件创建注入（幂等）：不放在模块入口顶层调用，
+    // 避免 barrel 入口被 tree-shaking 误判为无副作用而丢失样式。
+    injectVirtualScrollStyles();
     const rootEl = ref<HTMLElement | null>(null);
     const contentWrapper = ref<HTMLElement | null>(null);
     const isSelfScrollable = ref(false);

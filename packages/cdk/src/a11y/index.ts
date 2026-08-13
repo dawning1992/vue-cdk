@@ -8,12 +8,6 @@
  * - focus-monitor：FocusMonitor / InputModalityDetector / fake-event-detection。
  */
 
-import {injectFocusTrapStyles} from './focus-trap/style-inject';
-
-// 结构样式随入口自动注入（?inline）；独立的 `vue-cdk/a11y/style.css`
-// 产物由构建脚本从源 css 拷贝生成。
-injectFocusTrapStyles();
-
 export * from './key-manager/typeahead';
 export * from './key-manager/list-key-manager';
 export * from './key-manager/focus-key-manager';

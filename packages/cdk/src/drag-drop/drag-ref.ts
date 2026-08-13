@@ -28,6 +28,7 @@ import {
 import {dragDropRegistry, type DragDropRegistry} from './drag-drop-registry';
 import type {DropListRef} from './drop-list-ref';
 import {PreviewRef} from './preview-ref';
+import {injectDragDropStyles} from './style-inject';
 
 /** 拖拽起点配置。 */
 export interface DragRefConfig {
@@ -106,6 +107,9 @@ export function createDragRef<T = unknown>(
     pointerDirectionChangeThreshold: 5,
   },
 ): DragRef<T> {
+  // 结构样式随拖拽条目创建注入（幂等）：不放在模块入口顶层调用，
+  // 避免 barrel 入口被 tree-shaking 误判为无副作用而丢失样式。
+  injectDragDropStyles();
   return new DragRef(element, config, getDocument(), viewportRuler, dragDropRegistry);
 }
 

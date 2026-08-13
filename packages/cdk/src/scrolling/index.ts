@@ -6,12 +6,6 @@
  * 虚拟滚动（VVirtualScrollViewport / VVirtualFor / 固定尺寸策略）。
  */
 
-import {injectVirtualScrollStyles} from './style-inject';
-
-// 结构样式随入口自动注入（?inline）；独立的 `vue-cdk/scrolling/style.css`
-// 产物由构建脚本从源 css 拷贝生成。
-injectVirtualScrollStyles();
-
 export {
   DEFAULT_SCROLL_TIME,
   ScrollDispatcher,
