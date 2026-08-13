@@ -1,5 +1,7 @@
 # Vue Component Dev Kit ( Vue CDK )
 
+在线文档：[https://dawning1992.github.io/vue-cdk](https://dawning1992.github.io/vue-cdk)
+
 Vue 3 组件开发工具包（Vue Component Dev Kit），设计模式借鉴 [Angular CDK](https://material.angular.io/cdk/overview)
 
 本仓库为 pnpm workspaces monorepo，包含两个独立包：
