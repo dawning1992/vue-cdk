@@ -1,5 +1,6 @@
-import {getCurrentInstance, h, inject, type AppContext} from 'vue';
+import {getCurrentInstance, inject, type AppContext} from 'vue';
 import {createOverlayRef} from '../overlay/overlay';
+import {ComponentPortal} from '../portal';
 import {OverlayConfig} from '../overlay/overlay-config';
 import type {OverlayRef} from '../overlay/overlay-ref';
 import {overlayPositionBuilder} from '../overlay/position/overlay-position-builder';
@@ -197,13 +198,17 @@ export class Dialog implements DialogApi {
   ): DialogContainerInstance {
     let containerInstance: DialogContainerInstance | null = null;
     const containerComponent = config.container ?? VDialogContainer;
-    overlay.attach(() =>
-      h(containerComponent, {
+    // 容器经 ComponentPortal 挂载：验证 portal 分层，同时保持 h() 传参语义
+    // （config/dialogRef/content 走 props，onContainerReady 作为事件监听）。
+    overlay.attach(
+      new ComponentPortal(containerComponent, {
+        props: {
         config,
         dialogRef,
         content,
         onContainerReady: (instance: DialogContainerInstance) => {
           containerInstance = instance;
+        },
         },
       }),
     );

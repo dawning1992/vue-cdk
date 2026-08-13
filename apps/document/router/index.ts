@@ -11,6 +11,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   Scrolling: () => import('../views/Scrolling.vue'),
   Collections: () => import('../views/Collections.vue'),
   Emitter: () => import('../views/Emitter.vue'),
+  Portal: () => import('../views/Portal.vue'),
   A11y: () => import('../views/A11y.vue'),
   Dialog: () => import('../views/Dialog.vue'),
   DragDrop: () => import('../views/DragDrop.vue'),

@@ -12,6 +12,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 | `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） |
 | `vue-cdk/collections` | collections | 集合抽象：`DataSource` / `ArrayDataSource` / `ListRange` / `CollectionViewer` |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） |
+| `vue-cdk/portal` | portal | 可编程内容挂载：`Portal` 系列 + `VPortal` / `VPortalOutlet`，overlay/dialog 基于它构建 |
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） |
 | `vue-cdk/dialog` | dialog | 模态对话框：命令式 `useDialog()`，对齐 Angular CDK `@angular/cdk/dialog` |
 | `vue-cdk/drag-drop` | drag-drop | 拖拽排序：`VDropList` / `VDrag` / `VDropListGroup` / `vDragHandle`，对齐 Angular CDK `@angular/cdk/drag-drop` |
@@ -423,6 +424,56 @@ dialogRef.closed.subscribe(result => {
   `updatePosition()` / `updateSize()` / `addPanelClass()` / `removePanelClass()`；
 - 结构样式随打开自动注入，也可显式引入 `vue-cdk/dialog/style.css`。
 
+## portal 模块
+
+- 移植自 Angular CDK `@angular/cdk/portal`：`Portal` 抽象类与 `ComponentPortal` /
+  `TemplatePortal` / `DomPortal` 三种内容源；`PortalOutlet` 接口与
+  `BasePortalOutlet` / `DomPortalOutlet` 两类出口
+- 声明式组件：`VPortal`（无渲染模板源，捕获插槽为 `TemplatePortal`）与
+  `VPortalOutlet`（出口组件，`portal` prop、`attached` 事件、`attachedRef` 与
+  三组 `attachXxxPortal` exposed 方法）
+- 模板内容经内部包装组件渲染，父级响应式状态变化可驱动已挂载内容更新
+  （等价 Angular 嵌入视图的变更检测语义）
+- Vue 能力映射：Angular `Injector` → `appContext`（provide/inject）、
+  `bindings/directives` → props、`TemplateRef` / `$implicit` → 渲染函数参数 /
+  插槽 props；`DomPortal` 移动的元素若含 Vue 绑定将失去响应式（与 Angular 警告一致）
+- overlay/dialog 已基于 portal 重构内容挂载：`overlayRef.attach(portal)` 可直接挂载三类 portal
+
+### portal 快速开始（声明式）
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {VPortal, VPortalOutlet, type Portal} from 'vue-cdk/portal';
+
+const source = ref<{portal: Portal<unknown>} | null>(null);
+const activePortal = ref<Portal<unknown> | null>(null);
+</script>
+
+<template>
+  <VPortal ref="source">
+    <template #default="{data}">{{ data }}</template>
+  </VPortal>
+  <VPortalOutlet :portal="activePortal" tag="section" />
+  <button @click="activePortal = source?.portal ?? null">挂载</button>
+</template>
+```
+
+### portal 命令式（组件 / 模板 / DOM）
+
+```ts
+import {h} from 'vue';
+import {ComponentPortal, DomPortal, DomPortalOutlet, TemplatePortal} from 'vue-cdk/portal';
+import MyComponent from './MyComponent.vue';
+
+const outlet = new DomPortalOutlet(document.querySelector('#slot')!);
+outlet.attach(new ComponentPortal(MyComponent, {props: {title: 'Hello'}}));
+outlet.detach();
+outlet.attach(new TemplatePortal(ctx => h('p', ctx.msg), {msg: 'hi'}));
+outlet.detach();
+outlet.attach(new DomPortal(document.querySelector('#movable')!)); // detach 恢复原位置
+```
+
 ## 与 Angular CDK 的对应关系
 
 | Angular | Vue CDK（`vue-cdk/overlay`） |
@@ -449,6 +500,11 @@ dialogRef.closed.subscribe(result => {
 | `@angular/cdk/dialog` 的 `DialogRef` | `DialogRef`（RxJS → `Emitter`） |
 | `DIALOG_DATA` / `DEFAULT_DIALOG_CONFIG` | 同名 InjectionKey + `useDialogData()` |
 | `CdkDialogContainer` | `VDialogContainer` / `useDialogContainerCore()` |
+| `@angular/cdk/portal` 的 `Portal` 抽象类 | `Portal`（`vue-cdk/portal`） |
+| `ComponentPortal` / `TemplatePortal` / `DomPortal` | 同名类（injector → appContext、bindings → props） |
+| `CdkPortal` 指令 | `VPortal` 组件（插槽捕获模板源） |
+| `CdkPortalOutlet` 指令 | `VPortalOutlet` 组件（宿主元素出口） |
+| `DomPortalOutlet` | 同名类（ApplicationRef + Injector → appContext） |
 | RxJS `Subject` | 内部 `Emitter`（`vue-cdk/emitter`，零依赖） |
 
 ## 开发

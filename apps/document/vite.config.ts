@@ -19,6 +19,7 @@ export default defineConfig({
       'vue-cdk/scrolling': fileURLToPath(new URL('../../packages/cdk/src/scrolling/index.ts', import.meta.url)),
       'vue-cdk/collections': fileURLToPath(new URL('../../packages/cdk/src/collections/index.ts', import.meta.url)),
       'vue-cdk/emitter': fileURLToPath(new URL('../../packages/cdk/src/emitter/index.ts', import.meta.url)),
+      'vue-cdk/portal': fileURLToPath(new URL('../../packages/cdk/src/portal/index.ts', import.meta.url)),
       'vue-cdk/a11y': fileURLToPath(new URL('../../packages/cdk/src/a11y/index.ts', import.meta.url)),
       'vue-cdk/dialog': fileURLToPath(new URL('../../packages/cdk/src/dialog/index.ts', import.meta.url)),
       'vue-cdk/drag-drop': fileURLToPath(new URL('../../packages/cdk/src/drag-drop/index.ts', import.meta.url)),

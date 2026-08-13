@@ -1,8 +1,9 @@
 import {describe, expect, it, vi} from 'vitest';
-import {h, nextTick} from 'vue';
+import {defineComponent, h, nextTick, ref} from 'vue';
 import {createTestOverlay} from '../../tests/helpers';
 import {createGlobalPositionStrategy} from './position/global-position-strategy';
 import {createNoopScrollStrategy} from './scroll/noop-scroll-strategy';
+import {ComponentPortal, DomPortal, TemplatePortal, type PortalOutlet} from '../portal';
 
 describe('OverlayRef 生命周期', () => {
   it('attach 渲染内容到容器面板', async () => {
@@ -76,6 +77,78 @@ describe('OverlayRef 生命周期', () => {
     ref.dispose();
     ref.attach(h('div'));
     expect(onDetach).toHaveBeenCalledTimes(1);
+  });
+
+  it('支持挂载 ComponentPortal 并返回组件实例', async () => {
+    const Content = defineComponent({
+      name: 'PortalContent',
+      setup() {
+        return () => h('p', {class: 'portal-content'}, 'portal component');
+      },
+    });
+    const ref = createTestOverlay();
+
+    const instance = ref.attach(new ComponentPortal(Content));
+    await nextTick();
+
+    expect(ref.hasAttached()).toBe(true);
+    expect(ref.overlayElement.querySelector('.portal-content')?.textContent).toBe(
+      'portal component',
+    );
+    expect(instance).toBeTruthy();
+
+    ref.detach();
+    expect(ref.overlayElement.children).toHaveLength(0);
+    ref.dispose();
+  });
+
+  it('支持挂载 TemplatePortal：上下文生效且父级响应式状态驱动更新', async () => {
+    const state = ref('v1');
+    const overlayRef = createTestOverlay();
+
+    const portal = new TemplatePortal<{label: string}>(ctx => h('p', `${state.value} - ${ctx.label}`), {
+      label: 'x',
+    });
+    overlayRef.attach(portal);
+    await nextTick();
+
+    expect(overlayRef.overlayElement.textContent).toContain('v1 - x');
+
+    state.value = 'v2';
+    await nextTick();
+    expect(overlayRef.overlayElement.textContent).toContain('v2 - x');
+
+    overlayRef.detach();
+    expect(overlayRef.overlayElement.children).toHaveLength(0);
+    overlayRef.dispose();
+  });
+
+  it('支持挂载 DomPortal：元素移入面板，detach 恢复到原位置', () => {
+    const originalParent = document.createElement('div');
+    const element = document.createElement('div');
+    element.textContent = 'dom content';
+    originalParent.appendChild(element);
+    document.body.appendChild(originalParent);
+    const ref = createTestOverlay();
+
+    ref.attach(new DomPortal(element));
+
+    expect(ref.overlayElement.contains(element)).toBe(true);
+
+    ref.detach();
+    expect(element.parentNode).toBe(originalParent);
+    ref.dispose();
+  });
+
+  it('overlay 内容出口保持 PortalOutlet 语义：重复 attach 抛错', () => {
+    const ref = createTestOverlay();
+    const outlet = (ref as unknown as {_outlet: PortalOutlet})._outlet;
+
+    outlet.attach(new TemplatePortal(() => h('p', 'first')));
+    expect(() => outlet.attach(new TemplatePortal(() => h('p', 'second')))).toThrowError(
+      /出口已经挂载了一个 portal/,
+    );
+    ref.dispose();
   });
 });
 

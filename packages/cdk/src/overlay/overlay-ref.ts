@@ -1,4 +1,6 @@
-import {Fragment, createVNode, nextTick, render, type AppContext, type VNode} from 'vue';
+import {Fragment, createVNode, nextTick, type AppContext, type VNode} from 'vue';
+import {DomPortalOutlet} from '../portal/dom-portal-outlet';
+import {Portal, TemplatePortal} from '../portal/portal';
 import {Emitter} from '../emitter';
 import type {PositionStrategy} from './position/position-strategy';
 import type {ScrollStrategy} from './scroll/scroll-strategy';
@@ -10,8 +12,13 @@ import type {OverlayContainer} from './overlay-container';
 import {coerceArray, coerceCssPixelValue} from '../coercion';
 import {supportsPopover, isBrowser} from '../platform';
 
-/** 可挂载到 overlay 的内容：VNode 或渲染函数。 */
-export type OverlayContent = VNode | (() => VNode | VNode[] | null);
+/**
+ * 可挂载到 overlay 的内容：VNode、渲染函数或 Portal。
+ *
+ * Portal 路径与 Angular 一致（`overlayRef.attach(new TemplatePortal(...))`），
+ * 返回挂载引用；VNode/渲染函数路径为 Vue 便捷写法，返回归一化后的 VNode。
+ */
+export type OverlayContent = VNode | (() => VNode | VNode[] | null) | Portal<any>;
 
 /** OverlayRef 的依赖集合。 */
 export interface OverlayRefDeps {
@@ -56,19 +63,19 @@ export class OverlayRef {
   private _backdropRef: BackdropRef | null = null;
   private _disposed = false;
   private _hasAttached = false;
-  private _contentRendered = false;
   private _previousHostParent: HTMLElement | null = null;
   private _locationCleanup: (() => void) | undefined;
 
   private _host: HTMLElement;
   private _pane: HTMLElement;
+  /** 基于面板元素的 portal 出口：统一管理内容挂载/卸载/销毁。 */
+  private _outlet: DomPortalOutlet;
   private _config: OverlayConfig;
   private _document: Document;
   private _container: OverlayContainer;
   private _keyboardDispatcher: OverlayKeyboardDispatcher;
   private _outsideClickDispatcher: OverlayOutsideClickDispatcher;
   private _animationsDisabled: boolean;
-  private _appContext: AppContext | null | undefined;
 
   constructor(host: HTMLElement, pane: HTMLElement, config: OverlayConfig, deps: OverlayRefDeps) {
     this._host = host;
@@ -79,7 +86,7 @@ export class OverlayRef {
     this._keyboardDispatcher = deps.keyboardDispatcher;
     this._outsideClickDispatcher = deps.outsideClickDispatcher;
     this._animationsDisabled = deps.animationsDisabled ?? false;
-    this._appContext = deps.appContext;
+    this._outlet = new DomPortalOutlet(this._pane, {appContext: deps.appContext ?? null});
 
     if (config.scrollStrategy) {
       this._scrollStrategy = config.scrollStrategy;
@@ -108,11 +115,15 @@ export class OverlayRef {
     return this._config.eventPredicate || null;
   }
 
+  /** 挂载 VNode 或渲染函数内容，返回归一化后的 VNode。 */
+  attach(content?: VNode | (() => VNode | VNode[] | null)): VNode | null;
+  /** 挂载 Portal 内容，返回出口的挂载引用（组件实例 / VNode / DOM 元素）。 */
+  attach(portal: Portal<any>): any;
   /**
    * 挂载内容并完成 overlay 的完整初始化。
    * @param content 可选；不传时由外部（如 Teleport）负责渲染面板内容。
    */
-  attach(content?: OverlayContent): VNode | null {
+  attach(content?: OverlayContent): VNode | null | unknown {
     if (this._disposed) {
       return null;
     }
@@ -124,14 +135,20 @@ export class OverlayRef {
     // 先挂 host 再渲染内容，保证重复挂载时动画模块能正常工作。
     this._attachHost();
 
-    let vnode: VNode | null = null;
+    let attachedResult: VNode | null | unknown = null;
     if (content != null) {
-      vnode = normalizeContent(content);
-      if (this._appContext) {
-        vnode.appContext = this._appContext;
+      if (content instanceof Portal) {
+        // Portal 路径：内容生命周期由 portal 出口统一管理。
+        attachedResult = this._outlet.attach(content);
+      } else {
+        // 旧路径兼容：VNode 或渲染函数经模板 Portal 包装后挂载，
+        // 包装组件会追踪渲染函数内的响应式依赖，父级状态变化可驱动内容更新。
+        const vnode = normalizeContent(content);
+        const renderFn: () => VNode | VNode[] | null =
+          typeof content === 'function' ? content : () => content;
+        this._outlet.attachTemplatePortal(new TemplatePortal(renderFn, undefined));
+        attachedResult = vnode;
       }
-      render(vnode, this._pane);
-      this._contentRendered = true;
     }
 
     this._positionStrategy?.attach(this);
@@ -163,7 +180,7 @@ export class OverlayRef {
       this._subscribeNavigation();
     }
     this._outsideClickDispatcher.add(this);
-    return vnode;
+    return attachedResult;
   }
 
   /** 卸载内容并停止滚动策略与事件分发；引用保留可再次 attach。 */
@@ -177,9 +194,8 @@ export class OverlayRef {
     if (this._scrollStrategy) {
       this._scrollStrategy.disable();
     }
-    if (this._contentRendered) {
-      render(null, this._pane);
-      this._contentRendered = false;
+    if (this._outlet.hasAttached()) {
+      this._outlet.detach();
     }
     this._hasAttached = false;
 
@@ -208,10 +224,10 @@ export class OverlayRef {
     this._backdropRef?.dispose();
     this._unsubscribeNavigation();
     this._keyboardDispatcher.remove(this);
-    if (this._contentRendered) {
-      render(null, this._pane);
-      this._contentRendered = false;
+    if (this._outlet.hasAttached()) {
+      this._outlet.detach();
     }
+    this._outlet.dispose();
     this._attachments.complete();
     this._backdropClick.complete();
     this._keydownEvents.complete();
@@ -455,7 +471,7 @@ export class OverlayRef {
 }
 
 /** 将 overlay 内容归一化为单根 VNode。 */
-function normalizeContent(content: OverlayContent): VNode {
+function normalizeContent(content: VNode | (() => VNode | VNode[] | null)): VNode {
   const value = typeof content === 'function' ? content() : content;
   if (Array.isArray(value)) {
     return createVNode(Fragment, null, value);

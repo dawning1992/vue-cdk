@@ -32,6 +32,7 @@ export default defineConfig({
         scrolling: 'src/scrolling/index.ts',
         collections: 'src/collections/index.ts',
         emitter: 'src/emitter/index.ts',
+        portal: 'src/portal/index.ts',
         a11y: 'src/a11y/index.ts',
         dialog: 'src/dialog/index.ts',
         'drag-drop': 'src/drag-drop/index.ts',

@@ -49,6 +49,11 @@
       "import": "./dist/emitter/index.js",
       "require": "./dist/emitter/index.cjs"
     },
+    "./portal": {
+      "types": "./dist/portal/index.d.ts",
+      "import": "./dist/portal/index.js",
+      "require": "./dist/portal/index.cjs"
+    },
     "./a11y": {
       "types": "./dist/a11y/index.d.ts",
       "import": "./dist/a11y/index.js",
@@ -81,6 +86,7 @@
     "dropdown",
     "tooltip",
     "teleport",
+    "portal",
     "drag-drop",
     "draggable"
   ],

@@ -63,6 +63,13 @@ export const docModules: DocModule[] = [
     summary: '零依赖的类型化事件发射器，替代 RxJS Subject 的事件通信。',
   },
   {
+    path: '/portal',
+    name: 'portal',
+    label: '内容挂载',
+    view: 'Portal',
+    summary: '可编程内容挂载：Portal / ComponentPortal / TemplatePortal / DomPortal 与声明式 VPortal / VPortalOutlet。',
+  },
+  {
     path: '/a11y',
     name: 'a11y',
     label: '无障碍',

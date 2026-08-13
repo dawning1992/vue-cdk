@@ -33,6 +33,7 @@ const open = ref(false);
 
 const subpathCode = `import {useOverlay} from 'vue-cdk/overlay';
 import {useDialog} from 'vue-cdk/dialog';
+import {VPortalOutlet} from 'vue-cdk/portal';
 import {ListKeyManager} from 'vue-cdk/a11y';
 import {VVirtualScrollViewport} from 'vue-cdk/scrolling';
 import {ArrayDataSource} from 'vue-cdk/collections';

@@ -43,8 +43,9 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'OverlayContent',
-        signature: 'type OverlayContent = VNode | (() => VNode | VNode[] | null)',
-        description: '可挂载到 overlay 的内容：VNode 或渲染函数。',
+        signature: 'type OverlayContent = VNode | (() => VNode | VNode[] | null) | Portal<any>',
+        description:
+          '可挂载到 overlay 的内容：VNode / 渲染函数（返回归一化 VNode）或 Portal（返回挂载引用）。overlay 内容挂载基于 vue-cdk/portal 实现。',
       },
       {
         name: 'OverlayRefDeps',
