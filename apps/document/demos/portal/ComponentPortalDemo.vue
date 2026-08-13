@@ -1,37 +1,14 @@
 <script setup lang="ts">
-import {defineComponent, getCurrentInstance, h, inject, onBeforeUnmount, ref} from 'vue';
+import {getCurrentInstance, onBeforeUnmount, ref} from 'vue';
 import {ComponentPortal, DomPortalOutlet} from 'vue-cdk/portal';
-
-/**
- * 组件内容：props 传入数据，inject 读取 app 级 provide。
- * 内容经 ComponentPortal 挂载后仍能访问应用上下文提供的注入值。
- */
-const UserCard = defineComponent({
-  name: 'PortalUserCard',
-  props: {
-    name: {type: String, required: true},
-    level: {type: Number, default: 1},
-  },
-  setup(props) {
-    const appName = inject<string>('vue-cdk-doc-app', '未知应用');
-    return () =>
-      h('div', {class: 'portal-card'}, [
-        h('p', {class: 'card-title'}, `你好，${props.name}`),
-        h(
-          'p',
-          {class: 'card-meta'},
-          `Lv.${props.level} · 应用级 provide：${appName}`,
-        ),
-      ]);
-  },
-});
+import UserCard from './UserCard.vue';
 
 const outletEl = ref<HTMLElement | null>(null);
 const instanceInfo = ref('');
 const mounted = ref(false);
 let outlet: DomPortalOutlet | null = null;
 
-/** 捕获当前应用上下文，使挂载内容可访问 app 级 provide。 */
+/** 捕获当前应用上下文，使挂载的 .vue 组件可访问 app 级 provide/inject。 */
 const appContext = getCurrentInstance()!.appContext;
 
 /** 挂载组件 Portal 到面板元素，挂载引用为组件公共实例。 */
@@ -99,25 +76,6 @@ onBeforeUnmount(() => {
   margin: 0;
   color: var(--doc-muted);
   font-size: 13px;
-}
-
-.portal-card {
-  padding: 10px 14px;
-  background: #fff;
-  border: 1px solid #e3e6ee;
-  border-radius: 8px;
-}
-
-.card-title {
-  margin: 0 0 4px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.card-meta {
-  margin: 0;
-  color: var(--doc-muted);
-  font-size: 12px;
 }
 
 .result {

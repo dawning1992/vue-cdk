@@ -4,6 +4,7 @@ import ModulePage from '../components/ModulePage.vue';
 import {apiGroups} from '../apis/portal';
 import ComponentPortalDemo from '../demos/portal/ComponentPortalDemo.vue';
 import ComponentPortalDemoSource from '../demos/portal/ComponentPortalDemo.vue?raw';
+import UserCardSource from '../demos/portal/UserCard.vue?raw';
 import DeclarativeTemplateDemo from '../demos/portal/DeclarativeTemplateDemo.vue';
 import DeclarativeTemplateDemoSource from '../demos/portal/DeclarativeTemplateDemo.vue?raw';
 import ImperativeTemplateDemo from '../demos/portal/ImperativeTemplateDemo.vue';
@@ -23,9 +24,10 @@ import OverlayPortalDemoSource from '../demos/portal/OverlayPortalDemo.vue?raw';
   >
     <DemoCard
       title="组件 Portal（ComponentPortal + DomPortalOutlet）"
-      description="命令式创建出口并挂载组件：props 传入数据，appContext 提供 provide/inject 通道；attach 返回组件公共实例。"
+      description="命令式创建出口并挂载组件：挂载内容为独立 .vue 单文件组件，props 传入数据，appContext 提供 provide/inject 通道；attach 返回组件公共实例。"
       :source="ComponentPortalDemoSource"
       filename="ComponentPortalDemo.vue"
+      :extra-sources="[{filename: 'UserCard.vue', code: UserCardSource}]"
     >
       <ComponentPortalDemo />
     </DemoCard>
