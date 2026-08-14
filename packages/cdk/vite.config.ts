@@ -38,6 +38,7 @@ export default defineConfig({
         dialog: 'src/dialog/index.ts',
         'drag-drop': 'src/drag-drop/index.ts',
         tree: 'src/tree/index.ts',
+        'virtual-tree': 'src/virtual-tree/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) =>

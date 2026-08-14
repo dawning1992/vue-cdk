@@ -81,6 +81,11 @@
       "types": "./dist/tree/index.d.ts",
       "import": "./dist/tree/index.js",
       "require": "./dist/tree/index.cjs"
+    },
+    "./virtual-tree": {
+      "types": "./dist/virtual-tree/index.d.ts",
+      "import": "./dist/virtual-tree/index.js",
+      "require": "./dist/virtual-tree/index.cjs"
     }
   },
   "sideEffects": [
@@ -101,7 +106,9 @@
     "drag-drop",
     "draggable",
     "tree",
-    "treeview"
+    "treeview",
+    "virtual-tree",
+    "virtual-scroll"
   ],
   "license": "MIT",
   "scripts": {

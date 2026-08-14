@@ -11,7 +11,7 @@ Vue 3 组件开发工具包（Vue Component Dev Kit），设计模式借鉴 [Ang
 | `packages/cdk` | `vue-cdk` | 可发布到 npm 的 CDK 库，含源码、测试与构建配置 |
 | `apps/document` | `vue-cdk-document` | private 文档站点，构建产物可直接静态托管 |
 
-`vue-cdk` 现提供 overlay、coercion、clipboard、platform、scrolling、collections、emitter、portal、a11y、dialog、drag-drop 与 tree 十二个子路径模块；clipboard 模块对齐 Angular CDK 的剪贴板能力（`useClipboard` / `vCopyToClipboard`），drag-drop 模块对齐 Angular CDK 的拖拽排序能力（`VDropList` / `VDrag` / `vDragHandle`），tree 模块对齐 Angular CDK 的树形结构能力（`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`），完整文档见 [packages/cdk/README.md](packages/cdk/README.md)。
+`vue-cdk` 现提供 overlay、coercion、clipboard、platform、scrolling、collections、emitter、portal、a11y、dialog、drag-drop、tree 与 virtual-tree 十三个子路径模块；clipboard 模块对齐 Angular CDK 的剪贴板能力（`useClipboard` / `vCopyToClipboard`），drag-drop 模块对齐 Angular CDK 的拖拽排序能力（`VDropList` / `VDrag` / `vDragHandle`），tree 模块对齐 Angular CDK 的树形结构能力（`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`），virtual-tree 模块提供虚拟滚动树（`VVirtualScrollTree`，全量/懒加载两种数据模式、每层独立分页与滚动边界加载），完整文档见 [packages/cdk/README.md](packages/cdk/README.md)。
 
 ## 环境要求
 

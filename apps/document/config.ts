@@ -98,6 +98,13 @@ export const docModules: DocModule[] = [
     summary: '树形结构渲染：VTree / VTreeNode / VNestedTreeNode 与 TreeControl，对齐 Angular CDK tree。',
   },
   {
+    path: '/virtual-tree',
+    name: 'virtual-tree',
+    label: '虚拟滚动树',
+    view: 'VirtualTree',
+    summary: '虚拟滚动树：VVirtualScrollTree，全量/懒加载两种模式，每层独立分页与滚动边界加载。',
+  },
+  {
     path: '/clipboard',
     name: 'clipboard',
     label: '剪贴板',

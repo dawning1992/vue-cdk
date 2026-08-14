@@ -16,6 +16,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   Dialog: () => import('../views/Dialog.vue'),
   DragDrop: () => import('../views/DragDrop.vue'),
   Tree: () => import('../views/Tree.vue'),
+  VirtualTree: () => import('../views/VirtualTree.vue'),
   Clipboard: () => import('../views/Clipboard.vue'),
 };
 

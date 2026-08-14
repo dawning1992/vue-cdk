@@ -9,7 +9,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 ## 特性总览
 
 - **零运行时依赖**：事件流使用自研 `Emitter`（`vue-cdk/emitter`）替代 RxJS，不引入任何第三方运行时依赖
-- **子路径按需导入**：12 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
+- **子路径按需导入**：13 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
 - **TypeScript 编写**：发布产物含完整 `.d.ts` 类型声明
 - **结构样式开箱即用**：运行时自动注入，也可显式引入 `style.css`（与自动注入去重）
 - **SSR 安全**：无 `document` 环境可安全导入，平台检测、剪贴板等能力提供明确降级
@@ -21,7 +21,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 - [安装与要求](#安装与要求)
 - [快速开始](#快速开始)
 - [模块一览](#模块一览)
-- 模块： [a11y](#a11y-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块)
+- 模块： [a11y](#a11y-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
 - [与 Angular CDK 的对应关系](#与-angular-cdk-的对应关系)
 - [开发](#开发)
 - [注意事项](#注意事项)
@@ -132,6 +132,7 @@ function openConfirm() {
 | `vue-cdk/portal` | portal | 可编程内容挂载：`Portal` 系列 + `VPortal` / `VPortalOutlet`，overlay/dialog 基于它构建 | — |
 | `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） | `vue-cdk/scrolling/style.css` |
 | `vue-cdk/tree` | tree | 树形结构：`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`，对齐 Angular CDK `@angular/cdk/tree` | — |
+| `vue-cdk/virtual-tree` | virtual-tree | 虚拟滚动树：`VVirtualScrollTree`，全量/懒加载两种数据模式、每层独立分页与滚动边界加载，复用 scrolling 虚拟滚动与 tree 节点能力 | — |
 
 ## a11y 模块
 
@@ -833,6 +834,87 @@ const roots = [{name: 'root', children: [{name: 'child', children: []}]}];
   </VTree>
 </template>
 ```
+
+## virtual-tree 模块
+
+虚拟滚动树：在固定行高虚拟滚动之上提供树形结构渲染，Vue CDK 独有能力（Angular CDK 无对应模块）。
+组件复用 scrolling 模块的 `VVirtualScrollViewport` / `VVirtualFor` 与 tree 模块的
+`VTreeNode` / `vTreeNodePadding` / `vTreeNodeToggle`，因此节点模板写法与 tree 模块保持一致。
+
+### 特性
+
+- 两种数据模式：`data` 全量模式（一次性提供全部节点）与 `loadChildren` 懒加载模式（按父节点分页）
+- 每层独立滚动加载：根层级、第二层及更深层级各自维护分页状态，滚动接近某父节点最后一个已加载子节点时只请求该父节点下一页；展开节点时请求首页
+- 内存缓存：折叠再展开命中缓存不重复请求；`hasMore=false` 后该层永久不再请求；`clearCache()` / `retry(parent)` 管理缓存与失败恢复
+- 一键展开/折叠：懒加载模式下 `expandAll` 按 BFS 逐页递归加载全部层级（缓存去重）；全量模式直接展开
+- 键盘无障碍：基于扁平索引导航（方向键 / Home / End / 左右键 / Enter / `*`），跨虚拟窗口自动滚动入视并聚焦，RTL 左右键互换，禁用节点跳过
+- 固定行高（`itemSize` 必填），40 万行数据仍只渲染视口附近行；`#node` 插槽上下文扩展 `isLoading` / `hasMore` / `isError` 等状态
+
+### 快速开始
+
+全量模式：
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {VVirtualScrollTree} from 'vue-cdk/virtual-tree';
+import {VTreeNode, vTreeNodePadding, vTreeNodeToggle} from 'vue-cdk/tree';
+
+interface Item {
+  id: string;
+  name: string;
+  children?: Item[];
+}
+
+const data = ref<Item[]>([
+  {id: '1', name: 'Fruit', children: [
+    {id: '1-1', name: 'Apple'},
+    {id: '1-2', name: 'Banana'},
+  ]},
+  {id: '2', name: 'Vegetables', children: [
+    {id: '2-1', name: 'Carrot'},
+  ]},
+]);
+</script>
+
+<template>
+  <VVirtualScrollTree :data="data" :item-size="40" height="280px">
+    <template #node="{node, isExpandable, isExpanded}">
+      <VTreeNode :node="node" :is-expandable="isExpandable">
+        <button type="button" v-tree-node-toggle>
+          <span :class="{open: isExpanded}">▸</span>
+        </button>
+        <span v-tree-node-padding>{{ node.name }}</span>
+      </VTreeNode>
+    </template>
+  </VVirtualScrollTree>
+</template>
+```
+
+懒加载模式（根层级用 `parent === null` 表达）：
+
+```ts
+import type {LoadChildren, PageInfo} from 'vue-cdk/virtual-tree';
+
+const loadChildren: LoadChildren<Item> = async (parent, page: PageInfo) => {
+  // 示例：parent === null 表示根层级；offset 为已加载条数，可直接作为查询偏移。
+  const {items, total} = await fetchChildren(parent?.id ?? null, page.offset, page.pageSize);
+  return {children: items, hasMore: page.offset + items.length < total};
+};
+```
+
+```vue
+<VVirtualScrollTree :load-children="loadChildren" :item-size="40" height="280px">
+  <template #node="{node, isExpandable, isLoading}">
+    <VTreeNode :node="node" :is-expandable="isExpandable">
+      {{ node.name }}
+      <span v-if="isLoading">加载中…</span>
+    </VTreeNode>
+  </template>
+</VVirtualScrollTree>
+```
+
+更多示例（全量、懒加载多层级、40 万行、自定义节点/错误重试）与完整 API 见文档站 virtual-tree 页面。
 
 ## 与 Angular CDK 的对应关系
 

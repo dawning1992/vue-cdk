@@ -25,6 +25,7 @@ export default defineConfig({
       'vue-cdk/dialog': fileURLToPath(new URL('../../packages/cdk/src/dialog/index.ts', import.meta.url)),
       'vue-cdk/drag-drop': fileURLToPath(new URL('../../packages/cdk/src/drag-drop/index.ts', import.meta.url)),
       'vue-cdk/tree': fileURLToPath(new URL('../../packages/cdk/src/tree/index.ts', import.meta.url)),
+      'vue-cdk/virtual-tree': fileURLToPath(new URL('../../packages/cdk/src/virtual-tree/index.ts', import.meta.url)),
     },
   },
 });

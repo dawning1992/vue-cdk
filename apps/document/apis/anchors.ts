@@ -13,6 +13,7 @@ import {apiGroups as platformGroups} from './platform';
 import {apiGroups as portalGroups} from './portal';
 import {apiGroups as scrollingGroups} from './scrolling';
 import {apiGroups as treeGroups} from './tree';
+import {apiGroups as virtualTreeGroups} from './virtual-tree';
 
 /** 视图组件名 → 该模块 API 分组数据，对应 config.ts 中 DocModule.view 字段。 */
 const viewApiGroups: Record<string, readonly ApiGroup[]> = {
@@ -27,6 +28,7 @@ const viewApiGroups: Record<string, readonly ApiGroup[]> = {
   Dialog: dialogGroups,
   DragDrop: dragDropGroups,
   Tree: treeGroups,
+  VirtualTree: virtualTreeGroups,
   Clipboard: clipboardGroups,
 };
 
