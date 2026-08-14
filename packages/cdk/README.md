@@ -45,7 +45,7 @@ yarn add vue-cdk
 ```ts
 import {version} from 'vue-cdk';
 
-console.log(version); // '0.1.0'
+console.log(version); // 输出 package.json 中的 version
 ```
 
 业务能力一律按子路径导入，例如：

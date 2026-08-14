@@ -1,6 +1,11 @@
+import {readFileSync} from 'node:fs';
 import {defineConfig} from 'vite';
 import vue from '@vitejs/plugin-vue';
 import dts from 'vite-plugin-dts';
+
+// 版本号的唯一事实来源是 package.json；构建时通过 define 注入根入口的
+// __VUE_CDK_VERSION__，产物与类型声明中都不会残留对 package.json 的引用。
+const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 
 /**
  * 库构建配置：以 vite 库模式多入口产出 ESM/CJS 双格式、类型声明与样式文件。
@@ -8,6 +13,9 @@ import dts from 'vite-plugin-dts';
  * 结构样式会在运行时自动注入，因此即便使用者不引入 css 也能正常工作。
  */
 export default defineConfig({
+  define: {
+    __VUE_CDK_VERSION__: JSON.stringify(pkg.version),
+  },
   plugins: [
     vue(),
     dts({
