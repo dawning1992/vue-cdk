@@ -21,6 +21,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   VirtualTree: () => import('../views/VirtualTree.vue'),
   Clipboard: () => import('../views/Clipboard.vue'),
   Accordion: () => import('../views/Accordion.vue'),
+  TextField: () => import('../views/TextField.vue'),
 };
 
 /**

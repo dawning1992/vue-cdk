@@ -101,10 +101,19 @@
       "types": "./dist/virtual-tree/index.d.ts",
       "import": "./dist/virtual-tree/index.js",
       "require": "./dist/virtual-tree/index.cjs"
-    }
+    },
+    "./text-field": {
+      "types": "./dist/text-field/index.d.ts",
+      "import": "./dist/text-field/index.js",
+      "require": "./dist/text-field/index.cjs"
+    },
+    "./text-field/style.css": "./dist/text-field/style.css",
+    "./text-field/index": "./dist/text-field/_index.scss",
+    "./text-field/text-field-prebuilt.scss": "./dist/text-field/text-field-prebuilt.scss"
   },
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "**/*.scss"
   ],
   "keywords": [
     "vue",
@@ -128,15 +137,19 @@
     "tree",
     "treeview",
     "virtual-tree",
-    "virtual-scroll"
+    "virtual-scroll",
+    "text-field",
+    "textarea-autosize",
+    "autofill"
   ],
   "license": "MIT",
   "scripts": {
-    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs && node scripts/copy-drag-drop-css.mjs",
+    "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs && node scripts/copy-drag-drop-css.mjs && node scripts/copy-text-field-assets.mjs",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "pnpm run typecheck && pnpm run test && pnpm run build && node scripts/check-version.mjs"
+    "test:browser": "vitest run --config vitest.browser.config.ts",
+    "prepublishOnly": "pnpm run typecheck && pnpm run test && pnpm run test:browser && pnpm run build && node scripts/check-version.mjs"
   },
   "peerDependencies": {
     "vue": "^3.3.0"
@@ -144,8 +157,11 @@
   "devDependencies": {
     "@types/node": "^26.2.0",
     "@vitejs/plugin-vue": "^6.0.8",
+    "@vitest/browser-playwright": "4.1.10",
     "@vue/test-utils": "^2.4.11",
     "jsdom": "^30.0.1",
+    "playwright": "^1.62.1",
+    "sass": "^1.102.0",
     "typescript": "~5.9.0",
     "vite": "^8.2.1",
     "vite-plugin-dts": "^5.0.3",

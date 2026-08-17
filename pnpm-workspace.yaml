@@ -2,3 +2,6 @@
 packages:
   - packages/*
   - apps/*
+allowBuilds:
+  # Sass 的可选文件监听器不参与本项目构建；禁止其安装脚本可保持安装过程无交互且可复现。
+  '@parcel/watcher': false

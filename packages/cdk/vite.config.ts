@@ -50,6 +50,7 @@ export default defineConfig({
         'drag-drop': 'src/drag-drop/index.ts',
         tree: 'src/tree/index.ts',
         'virtual-tree': 'src/virtual-tree/index.ts',
+        'text-field': 'src/text-field/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) =>

@@ -132,4 +132,11 @@ export const docModules: DocModule[] = [
     view: 'Accordion',
     summary: '无样式展开状态协调：CdkAccordion / CdkAccordionItem 与 Composition API 双入口。',
   },
+  {
+    path: '/text-field',
+    name: 'text-field',
+    label: '文本字段',
+    view: 'TextField',
+    summary: 'textarea 自动伸缩与 input 自动填充状态监控、样式探针。',
+  },
 ];

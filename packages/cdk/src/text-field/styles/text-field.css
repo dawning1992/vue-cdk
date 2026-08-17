@@ -1,0 +1,36 @@
+textarea.cdk-textarea-autosize {
+  resize: none;
+}
+
+textarea.cdk-textarea-autosize-measuring,
+textarea.cdk-textarea-autosize-measuring-firefox {
+  padding: 2px 0 !important;
+  box-sizing: content-box !important;
+}
+
+textarea.cdk-textarea-autosize-measuring {
+  height: auto !important;
+  overflow: hidden !important;
+}
+
+textarea.cdk-textarea-autosize-measuring-firefox {
+  height: 0 !important;
+}
+
+@keyframes cdk-text-field-autofill-start {
+  from {}
+  to {}
+}
+
+@keyframes cdk-text-field-autofill-end {
+  from {}
+  to {}
+}
+
+.cdk-text-field-autofill-monitored:-webkit-autofill {
+  animation: cdk-text-field-autofill-start 0s 1ms;
+}
+
+.cdk-text-field-autofill-monitored:not(:-webkit-autofill) {
+  animation: cdk-text-field-autofill-end 0s 1ms;
+}
