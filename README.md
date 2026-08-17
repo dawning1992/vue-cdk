@@ -11,7 +11,7 @@ Vue 3 组件开发工具包（Vue Component Dev Kit），设计模式借鉴 [Ang
 | `packages/cdk` | `vue-cdk` | 可发布到 npm 的 CDK 库，含源码、测试与构建配置 |
 | `apps/document` | `vue-cdk-document` | private 文档站点，构建产物可直接静态托管 |
 
-`vue-cdk` 现提供 overlay、coercion、clipboard、platform、scrolling、collections、emitter、portal、a11y、dialog、drag-drop、tree 与 virtual-tree 十三个子路径模块；clipboard 模块对齐 Angular CDK 的剪贴板能力（`useClipboard` / `vCopyToClipboard`），drag-drop 模块对齐 Angular CDK 的拖拽排序能力（`VDropList` / `VDrag` / `vDragHandle`），tree 模块对齐 Angular CDK 的树形结构能力（`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`），virtual-tree 模块提供虚拟滚动树（`VVirtualScrollTree`，全量/懒加载两种数据模式、每层独立分页与滚动边界加载），完整文档见 [packages/cdk/README.md](packages/cdk/README.md)。
+`vue-cdk` 现提供 accordion、a11y、bidi、clipboard、coercion、collections、dialog、drag-drop、emitter、layout、observers、overlay、platform、portal、scrolling、stepper、text-field、tree、virtual-tree 十九个子路径模块。各模块均可独立导入并参与 tree-shaking；完整模块说明、API 与示例见 [packages/cdk/README.md](packages/cdk/README.md)。
 
 ## 环境要求
 
@@ -40,3 +40,38 @@ pnpm install
 ## 库使用文档
 
 模块列表、安装方式与各模块 API 说明见 [packages/cdk/README.md](packages/cdk/README.md)。
+
+
+## FAQ
+
+**Vue CDK 与 UI 组件库（Element Plus、Ant Design Vue 等）是什么关系？**
+
+CDK 是不含业务样式的基础能力层，UI 组件库可以基于它构建下拉、对话框、拖拽列表等交互；
+直接使用 Vue CDK 时需自行定义主题与视觉样式。
+
+**为什么根入口只导出版本号？**
+
+与 Angular CDK 一致，业务能力全部按子路径导入，避免把整个库打进产物，配合 tree-shaking 按需加载。
+
+**事件流为什么不使用 RxJS？**
+
+`Emitter` 提供订阅、派发、完成的最小语义（对齐 RxJS `Subject`），让包保持零运行时依赖；
+如需 RxJS 操作符，可自行用 `from` / `fromEvent` 等工具桥接。
+
+**SSR 下怎么使用？**
+
+各模块可安全导入；命令式 API（`useOverlay` / `useDialog` 等）应在客户端环境（如 `onMounted`）调用，
+剪贴板与平台检测在无 `document` 时提供明确降级。
+
+**结构样式需要手动引入吗？**
+
+不需要，运行时自动注入；想完全掌控时可显式引入对应 `style.css`，两者会去重。
+
+**多个 `createApp` 实例共享全局单例有什么影响？**
+
+`OverlayContainer`、事件分发器等是模块级单例，多个应用实例会共享；
+需要隔离时可用 `createOverlayRef` 的 `container` 选项指定容器，或自行管理生命周期。
+
+**对 Vue 版本有什么要求？**
+
+`vue-cdk` 的 `peerDependencies` 为 `vue ^3.3.0`，仅使用 Composition API。

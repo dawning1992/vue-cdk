@@ -2,14 +2,14 @@
 
 Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular CDK](https://material.angular.io/cdk/overview)。
 
-Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能力层」：浮层、对话框、拖拽、树、虚拟滚动等可组合能力开箱即用。它不是 UI 组件库——不提供按钮、表单等业务组件，也不包含主题样式；使用方需要自带业务/主题样式（结构样式已内置）。
+Vue CDK 是面向组件库与复杂业务组件开发者的「基础能力层」：浮层、对话框、拖拽、步进器、树、虚拟滚动等可组合能力开箱即用。它不是 UI 组件库——不提供按钮、表单等业务组件，也不包含主题样式；使用方需要自带业务/主题样式（结构样式已内置）。
 
 完整 API 说明与可运行示例见本仓库文档站 `apps/document`（`pnpm dev` 启动）。
 
 ## 特性总览
 
 - **零运行时依赖**：事件流使用自研 `Emitter`（`vue-cdk/emitter`）替代 RxJS，不引入任何第三方运行时依赖
-- **子路径按需导入**：16 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
+- **子路径按需导入**：19 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
 - **TypeScript 编写**：发布产物含完整 `.d.ts` 类型声明
 - **结构样式开箱即用**：运行时自动注入，也可显式引入 `style.css`（与自动注入去重）
 - **SSR 安全**：无 `document` 环境可安全导入，平台检测、剪贴板等能力提供明确降级
@@ -21,7 +21,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 - [安装与要求](#安装与要求)
 - [快速开始](#快速开始)
 - [模块一览](#模块一览)
-- 模块： [accordion](#accordion-模块) / [a11y](#a11y-模块) / [bidi](#bidi-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [layout](#layout-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
+- 模块： [accordion](#accordion-模块) / [a11y](#a11y-模块) / [bidi](#bidi-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [layout](#layout-模块) / [observers](#observers-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [stepper](#stepper-模块) / [text-field](#text-field-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
 - [与 Angular CDK 的对应关系](#与-angular-cdk-的对应关系)
 - [开发](#开发)
 - [注意事项](#注意事项)
@@ -130,10 +130,13 @@ function openConfirm() {
 | `vue-cdk/drag-drop` | drag-drop | 拖拽排序：`VDropList` / `VDrag` / `VDropListGroup` / `vDragHandle`，对齐 Angular CDK `@angular/cdk/drag-drop` | `vue-cdk/drag-drop/style.css` |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） | — |
 | `vue-cdk/layout` | layout | 响应式布局：`Breakpoints`、`MediaMatcher`、`BreakpointObserver` 与 `useBreakpoints()` | — |
+| `vue-cdk/observers` | observers | DOM 内容观察：共享 `MutationObserver` 的 `ContentObserver`、`useObserveContent()` 与 `vCdkObserveContent` | — |
 | `vue-cdk/overlay` | overlay | 浮层面板：命令式 `useOverlay()` + 声明式 `VConnectedOverlay` / `VOverlayOrigin` | `vue-cdk/overlay/style.css` |
 | `vue-cdk/platform` | platform | 平台能力检测与事件工具：`Platform` 服务（浏览器/引擎识别 + `usePlatform` 注入）、`getSupportedInputTypes`、Shadow DOM / Popover / scroll-behavior 检测 | — |
 | `vue-cdk/portal` | portal | 可编程内容挂载：`Portal` 系列 + `VPortal` / `VPortalOutlet`，overlay/dialog 基于它构建 | — |
-| `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） | `vue-cdk/scrolling/style.css` |
+| `vue-cdk/scrolling` | scrolling | 滚动能力：滚动分发、容器与视口测量，以及固定尺寸/不定高度虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） | `vue-cdk/scrolling/style.css` |
+| `vue-cdk/stepper` | stepper | 无样式多步骤流程：线性校验、键盘导航、步骤状态与通用表单适配契约 | — |
+| `vue-cdk/text-field` | text-field | 文本字段：textarea 自动伸缩、浏览器自动填充监控，以及 Composition API / 指令 / Sass 入口 | `vue-cdk/text-field/style.css` |
 | `vue-cdk/tree` | tree | 树形结构：`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`，对齐 Angular CDK `@angular/cdk/tree` | — |
 | `vue-cdk/virtual-tree` | virtual-tree | 虚拟滚动树：`VVirtualScrollTree`，全量/懒加载两种数据模式、每层独立分页与滚动边界加载，复用 scrolling 虚拟滚动与 tree 节点能力 | — |
 
@@ -616,6 +619,47 @@ done.subscribe(() => console.log('never')); // 完成后拒绝订阅
 | --- | --- |
 | `Emitter<T = void>` | 类型化事件发射器；`subscribe` 返回幂等退订函数，`next` 同步派发，`complete` 后拒绝新订阅，`hasListeners` 可判断监听者是否存在 |
 
+## observers 模块
+
+DOM 内容变化观察能力，对应 Angular CDK `@angular/cdk/observers`。同一元素的多个订阅共享底层
+`MutationObserver`，最后一个订阅取消后自动断开；仅由 Vue 注释锚点引起的变化会被过滤。
+
+### 快速开始
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {useObserveContent} from 'vue-cdk/observers';
+
+const content = ref<Element | null>(null);
+const changeCount = ref(0);
+
+useObserveContent(content, records => {
+  changeCount.value += records.length;
+}, {debounce: 100});
+</script>
+
+<template>
+  <div ref="content">待观察内容</div>
+  <p>已观察到 {{ changeCount }} 项变化</p>
+</template>
+```
+
+模板中也可使用指令（在 `<script setup>` 中导入后，Vue 会自动将其暴露给模板）：
+
+```vue
+<script setup lang="ts">
+import {vCdkObserveContent} from 'vue-cdk/observers';
+</script>
+
+<!-- vCdkObserveContent 在模板中的名称为 v-cdk-observe-content。 -->
+<div v-cdk-observe-content="records => console.log(records)">...</div>
+```
+
+核心导出包括 `ContentObserver` / `contentObserver`、`useObserveContent()`、
+`vCdkObserveContent` / `cdkObserveContent`、`provideContentObserver()` 与
+`MutationObserverFactory`。SSR 或运行环境缺少 `MutationObserver` 时可安全创建服务，但不会产生变更通知。
+
 ## layout 模块
 
 对齐 Angular CDK `@angular/cdk/layout`，并提供 Vue 3 Composition API 响应式桥接：
@@ -812,8 +856,9 @@ outlet.attach(new DomPortal(document.querySelector('#movable')!)); // detach 恢
 ### 特性
 
 - 与 Angular CDK scrolling 对应的完整 API：`ScrollDispatcher`（register/deregister、`scrolled`、`ancestorScrolled`、`getAncestorScrollContainers`）、`ViewportRuler`（尺寸/rect/滚动位置、resize + orientationchange）、`vScrollable` 指令与 `useScrollable` 组合式（对应 `cdkScrollable`，含 LTR/RTL 六向 `scrollTo` / `measureScrollOffset`）
-- 虚拟滚动：`VVirtualScrollViewport` + `VVirtualFor` 作用域插槽，固定尺寸策略（`itemSize` / `minBufferPx` / `maxBufferPx`），支持纵向/横向（含 RTL）、`appendOnly`、`scrollWindow` 窗口滚动、`vVirtualScrollableElement` 外部滚动容器、DataSource / 响应式数组数据源、`scrollToIndex` / `scrollToOffset`
-- 事件流沿用自研 `Emitter`，包零运行时依赖（不依赖 RxJS）
+- 虚拟滚动：`VVirtualScrollViewport` + `VVirtualFor` 作用域插槽，支持固定尺寸策略（`itemSize`）与纵向不定高度策略（`autosize` / `estimatedItemSize`），以及 `appendOnly`、`scrollWindow` 窗口滚动、`vVirtualScrollableElement` 外部滚动容器、DataSource / 响应式数组数据源、`scrollToIndex` / `scrollToOffset`
+- 数据双向追加：不定高度策略以稳定 `trackBy` 缓存条目尺寸并恢复滚动锚点；顶部追加数据时必须提供唯一 `trackBy`，`ResizeObserver` 用于响应条目运行时高度变化
+- 事件流沿用 `Emitter`，包零运行时依赖（不依赖 RxJS）
 - 结构样式自动注入，开箱即用；也可显式引入 `vue-cdk/scrolling/style.css`
 
 ### 快速开始
@@ -838,6 +883,22 @@ const items = ref(Array.from({length: 1000}, (_, i) => `条目 ${i + 1}`));
 `VVirtualFor` 插槽上下文与 Angular `*cdkVirtualFor` 一致：
 `item` / `$implicit` / `of` / `index` / `count` / `first` / `last` / `even` / `odd`。
 
+不定高度列表启用 `autosize`，且不要同时传入 `itemSize`：
+
+```vue
+<VVirtualScrollViewport
+  autosize
+  :estimated-item-size="56"
+  style="height: 320px"
+>
+  <VVirtualFor :of="items" :track-by="(_index, item) => item.id" v-slot="{item}">
+    <article>{{ item.content }}</article>
+  </VVirtualFor>
+</VVirtualScrollViewport>
+```
+
+`autosize` 当前仅支持纵向滚动。需要从列表顶部追加数据时，`trackBy` 必须为每个条目返回稳定且唯一的键。
+
 声明滚动容器：
 
 ```vue
@@ -851,6 +912,84 @@ import {useScrollable} from 'vue-cdk/scrolling';
 const area = ref<HTMLElement | null>(null);
 const scrollable = useScrollable(area); // 组件卸载时自动注销
 ```
+
+## stepper 模块
+
+无样式多步骤流程协调器，对应 Angular CDK `@angular/cdk/stepper`。提供线性步骤校验、
+可编辑/可选/错误状态、LTR/RTL 键盘导航与重置能力，但不规定步骤头部、内容区和切换动画的视觉样式。
+
+### 快速开始
+
+```vue
+<script setup lang="ts">
+import {computed, ref} from 'vue';
+import {
+  CdkStep,
+  CdkStepHeader,
+  CdkStepper,
+  CdkStepperNext,
+  type CdkStepPublicApi,
+} from 'vue-cdk/stepper';
+
+// 组件公开实例会自动解包 expose 的 Ref，因此 steps 在模板引用上表现为数组。
+const stepper = ref<{steps: CdkStepPublicApi[]} | null>(null);
+const steps = computed(() => stepper.value?.steps ?? []);
+</script>
+
+<template>
+  <CdkStepper ref="stepper" linear>
+    <nav role="tablist">
+      <CdkStepHeader v-for="step in steps" :key="step.id" :step="step">
+        {{ step.label.value }}
+      </CdkStepHeader>
+    </nav>
+    <CdkStep v-slot="step" label="填写资料">
+      <section v-show="step.isSelected">
+        第一步内容
+        <CdkStepperNext type="button">下一步</CdkStepperNext>
+      </section>
+    </CdkStep>
+    <CdkStep v-slot="step" label="完成">
+      <section v-show="step.isSelected">已完成，共 {{ steps.length }} 步</section>
+    </CdkStep>
+  </CdkStepper>
+</template>
+```
+
+线性流程可通过 `stepControl` 接入任意表单库。它只要求 `valid`（可选 `invalid` / `pending`）
+和 `reset()`，这些状态均可使用普通值、Ref、computed 或 getter。组件入口包括 `CdkStepper`、
+`CdkStep`、`CdkStepHeader`、`CdkStepperNext` 与 `CdkStepperPrevious`；Composition API 入口为
+`useStepper()` / `useStep()`。
+
+## text-field 模块
+
+文本字段工具，对应 Angular CDK `@angular/cdk/text-field`：自动调整 textarea 高度，并通过 CSS animation
+探针监控 Chromium/WebKit 的浏览器自动填充状态。模块可在 SSR 中安全导入。
+
+### 快速开始
+
+```vue
+<script setup lang="ts">
+import {ref} from 'vue';
+import {useAutofill, useTextareaAutosize} from 'vue-cdk/text-field';
+
+const textarea = ref<HTMLTextAreaElement | null>(null);
+const input = ref<HTMLInputElement | null>(null);
+const {isAutofilled} = useAutofill(input);
+
+useTextareaAutosize(textarea, {minRows: 2, maxRows: 8});
+</script>
+
+<template>
+  <textarea ref="textarea" />
+  <input ref="input" autocomplete="email" />
+  <span v-if="isAutofilled">浏览器已自动填充</span>
+</template>
+```
+
+模板指令入口为 `vTextareaAutosize` 与 `vAutofill`；命令式入口为 `TextareaAutosize` 与
+`AutofillMonitor`。结构样式会自动注入，也可显式导入 `vue-cdk/text-field/style.css`。
+使用 Sass 时可通过 `@use 'vue-cdk/text-field/index'` 引入 autosize、autofill 与颜色 mixin。
 
 ## tree 模块
 
@@ -1047,7 +1186,25 @@ const loadChildren: LoadChildren<Item> = async (parent, page: PageInfo) => {
 
 - `ScrollDispatcher` / `ViewportRuler` → 同名；`cdkScrollable` → `vScrollable` / `useScrollable()`
 - `cdk-virtual-scroll-viewport` / `*cdkVirtualFor` → `VVirtualScrollViewport` / `VVirtualFor`
-- `FixedSizeVirtualScrollStrategy` 同名；`cdkVirtualScrollingElement` / `scrollWindow` → `vVirtualScrollableElement` / `scroll-window`
+- `FixedSizeVirtualScrollStrategy` 同名；experimental autosize → `AutoSizeVirtualScrollStrategy` / `autosize`
+- `cdkVirtualScrollingElement` / `scrollWindow` → `vVirtualScrollableElement` / `scroll-window`
+
+### stepper
+
+- `CdkStepper` / `CdkStep` / `CdkStepHeader` → Vue 同名无样式组件
+- `cdkStepperNext` / `cdkStepperPrevious` → `CdkStepperNext` / `CdkStepperPrevious`
+- Angular Forms 的 `stepControl` → 通用 `StepControl` 契约，可适配原生表单、VeeValidate 等方案
+
+### text-field
+
+- `CdkTextareaAutosize` → `TextareaAutosize` / `useTextareaAutosize()` / `vTextareaAutosize`
+- `AutofillMonitor` → 同名类 + `useAutofill()` / `vAutofill`
+- Sass mixin → `vue-cdk/text-field/index`；预构建结构样式 → `vue-cdk/text-field/style.css`
+
+### observers
+
+- `ContentObserver` / `MutationObserverFactory` → 同名类（RxJS 流替换为零依赖可订阅流）
+- `cdkObserveContent` → `vCdkObserveContent` 指令；Vue 响应式入口为 `useObserveContent()`
 
 ### drag-drop
 
@@ -1079,7 +1236,7 @@ pnpm --filter vue-cdk publish # 发布到 npm（prepublishOnly 自动执行 type
 ## 注意事项
 
 - 库本身不包含业务样式，只提供结构样式；主题样式请在使用方应用内定义。
-- 结构样式默认在运行时自动注入；若希望显式控制，可引入 `vue-cdk/<module>/style.css`（会与自动注入去重）。仅 overlay、scrolling、a11y、dialog、drag-drop 五个模块提供独立 CSS 导出。
+- 结构样式默认在运行时自动注入；若希望显式控制，可引入 `vue-cdk/<module>/style.css`（会与自动注入去重）。目前 overlay、scrolling、a11y、dialog、drag-drop、text-field 六个模块提供独立 CSS 导出。
 - 命令式 `attach` 渲染的内容可访问 app 级 `provide`；组件级 `provide` 建议使用声明式组件。
 - 事件分发器与容器均为全局单例，多个应用实例共享时需自行管理生命周期。
 - SSR 下各模块可安全导入；无 `document` 时剪贴板 `copy()` 返回 `false`、`beginCopy()` 抛错，平台检测走安全降级。
@@ -1097,7 +1254,7 @@ CDK 是不含业务样式的基础能力层，UI 组件库可以基于它构建�
 
 **事件流为什么不使用 RxJS？**
 
-自研 `Emitter` 提供订阅、派发、完成的最小语义（对齐 RxJS `Subject`），让包保持零运行时依赖；
+`Emitter` 提供订阅、派发、完成的最小语义（对齐 RxJS `Subject`），让包保持零运行时依赖；
 如需 RxJS 操作符，可自行用 `from` / `fromEvent` 等工具桥接。
 
 **SSR 下怎么使用？**
