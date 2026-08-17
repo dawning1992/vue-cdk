@@ -1,6 +1,6 @@
 {
   "name": "vue-cdk",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Vue 3 组件开发工具包（CDK），借鉴 Angular CDK 的设计模式，以模块化子路径提供可组合的基础能力",
   "type": "module",
   "files": [
