@@ -20,6 +20,15 @@ export interface VirtualScrollViewportAdapter {
   /** 当前渲染区间。 */
   getRenderedRange(): ListRange;
 
+  /** 当前数据按顺序计算出的稳定身份；autosize 用它在结构变化后恢复滚动锚点。 */
+  getDataKeys(): readonly unknown[];
+
+  /** VVirtualFor 是否显式提供了 trackBy。 */
+  hasExplicitTrackBy(): boolean;
+
+  /** 测量当前已渲染条目的逐项尺寸。 */
+  measureRenderedItems(): readonly VirtualScrollItemMeasurement[];
+
   /** 从视口起点测量的滚动偏移（像素）。 */
   measureScrollOffset(from?: 'top' | 'left' | 'right' | 'bottom' | 'start' | 'end'): number;
 
@@ -34,6 +43,16 @@ export interface VirtualScrollViewportAdapter {
 
   /** 滚动到视口起点偏移（像素）。 */
   scrollToOffset(offset: number, behavior?: ScrollBehavior): void;
+}
+
+/** 已渲染虚拟条目的实测尺寸。 */
+export interface VirtualScrollItemMeasurement {
+  /** 条目在完整数据中的索引。 */
+  index: number;
+  /** 与 VVirtualFor trackBy 一致的稳定身份。 */
+  key: unknown;
+  /** 当前滚动方向上的实际尺寸，单位为像素。 */
+  size: number;
 }
 
 /**

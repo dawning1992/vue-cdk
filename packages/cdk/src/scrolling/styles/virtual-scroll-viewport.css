@@ -10,6 +10,8 @@
   display: block;
   position: relative;
   transform: translateZ(0);
+  /* 外部滚动容器和 window 模式也由策略负责锚定，禁止浏览器再次补偿。 */
+  overflow-anchor: none;
 }
 
 /* 自滚动容器：与 Angular 的 .cdk-virtual-scrollable 等价。 */

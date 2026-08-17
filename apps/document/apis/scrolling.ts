@@ -144,7 +144,7 @@ export const apiGroups: readonly ApiGroup[] = [
         signature: 'component VVirtualScrollViewport',
         default: '—',
         description:
-          '虚拟滚动视口。props：orientation（vertical/horizontal）、appendOnly、scrollWindow、itemSize（提供后自动创建固定尺寸策略）、minBufferPx（默认 100）、maxBufferPx（默认 200）。emits：scrolledIndexChange。模板 ref 暴露 scrollToIndex(index, behavior?)/scrollToOffset(offset, behavior?)。',
+          '虚拟滚动视口。props：orientation、appendOnly、scrollWindow、itemSize、autosize、estimatedItemSize（默认 50）、minBufferPx（默认 100）、maxBufferPx（默认 200）。autosize 与 itemSize 互斥且首版仅支持纵向；emits：scrolledIndexChange。模板 ref 暴露 scrollToIndex/scrollToOffset。',
       },
       {
         name: 'VVirtualFor',
@@ -188,6 +188,26 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'FixedSizeVirtualScrollStrategy',
         signature: 'class FixedSizeVirtualScrollStrategy implements VirtualScrollStrategy',
         description: '固定尺寸虚拟滚动策略：constructor(itemSize, minBufferPx, maxBufferPx)，按固定条目尺寸计算渲染区间。',
+      },
+      {
+        name: 'AutoSizeVirtualScrollStrategy',
+        signature: 'class AutoSizeVirtualScrollStrategy implements VirtualScrollStrategy',
+        description: '不定高度策略：缓存已见条目尺寸，未知条目使用平均估值；普通位置追加保持当前可见锚点，位于最底部时向顶部追加继续吸底。向底部追加不会自动吸底，可由业务层显式调用 scrollToIndex。通过 ResizeObserver 响应运行时高度变化。constructor(minBufferPx?, maxBufferPx?, averager?)。',
+      },
+      {
+        name: 'ItemSizeAverager',
+        signature: 'class ItemSizeAverager',
+        description: '未知条目尺寸估算器；constructor(defaultItemSize = 50)，根据当前有效逐项样本计算平均尺寸。',
+      },
+      {
+        name: 'provideAutoSizeVirtualScrollStrategy',
+        signature: 'provideAutoSizeVirtualScrollStrategy(options?: AutoSizeVirtualScrollOptions)',
+        description: 'Vue Composition API：在父组件 setup 中提供 autosize 策略。options 包含 minBufferPx、maxBufferPx、estimatedItemSize；后代视口不再声明 itemSize/autosize。',
+      },
+      {
+        name: 'AutoSizeVirtualScrollOptions',
+        signature: 'interface AutoSizeVirtualScrollOptions { minBufferPx?; maxBufferPx?; estimatedItemSize? }',
+        description: 'autosize 策略配置。ResizeObserver 不可用时仍执行首次 DOM 测量；需要持续响应异步高度变化的旧环境应由应用提供标准 ResizeObserver polyfill。',
       },
       {
         name: 'VirtualScrollStrategy',

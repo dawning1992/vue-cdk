@@ -29,8 +29,15 @@ export {
   VIRTUAL_SCROLL_STRATEGY,
   type VirtualScrollStrategy,
   type VirtualScrollViewportAdapter,
+  type VirtualScrollItemMeasurement,
 } from './virtual-scroll-strategy';
 export {FixedSizeVirtualScrollStrategy} from './fixed-size-virtual-scroll';
+export {
+  AutoSizeVirtualScrollStrategy,
+  ItemSizeAverager,
+  provideAutoSizeVirtualScrollStrategy,
+  type AutoSizeVirtualScrollOptions,
+} from './auto-size-virtual-scroll';
 export {
   CDK_VIRTUAL_SCROLL_VIEWPORT,
   VVirtualScrollViewport,

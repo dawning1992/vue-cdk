@@ -67,13 +67,20 @@ function mountViewport(options: {
   maxBufferPx?: number;
   scrollWindow?: boolean;
   trackBy?: (index: number, item: unknown) => unknown;
+  autosize?: boolean;
+  estimatedItemSize?: number;
 } = {}) {
   const items = ref(options.items ?? DATA);
 
   const Wrapper = defineComponent({
     components: {VVirtualScrollViewport, VVirtualFor},
     props: {
-      itemSize: {type: Number, default: options.itemSize ?? ITEM_SIZE},
+      itemSize: {
+        type: Number,
+        default: options.itemSize !== undefined ? options.itemSize : options.autosize ? undefined : ITEM_SIZE,
+      },
+      autosize: {type: Boolean, default: options.autosize ?? false},
+      estimatedItemSize: {type: Number, default: options.estimatedItemSize ?? 50},
       orientation: {type: String, default: options.orientation ?? 'vertical'},
       appendOnly: {type: Boolean, default: options.appendOnly ?? false},
       minBufferPx: {type: Number, default: options.minBufferPx ?? 100},
@@ -89,6 +96,8 @@ function mountViewport(options: {
       <VVirtualScrollViewport
         ref="viewport"
         :item-size="props.itemSize"
+        :autosize="props.autosize"
+        :estimated-item-size="props.estimatedItemSize"
         :orientation="props.orientation"
         :append-only="props.appendOnly"
         :min-buffer-px="props.minBufferPx"
@@ -259,6 +268,66 @@ describe('VVirtualScrollViewport（固定尺寸纵向）', () => {
       template: `<VVirtualScrollViewport><VVirtualFor :of="[]" v-slot="{item}"><div>{{ item }}</div></VVirtualFor></VVirtualScrollViewport>`,
     });
     expect(() => mount(Wrapper)).toThrow(/itemSize/);
+  });
+});
+
+describe('VVirtualScrollViewport（不定高度纵向）', () => {
+  it('autosize 使用估算高度完成首屏渲染', async () => {
+    const {wrapper} = mountViewport({autosize: true, estimatedItemSize: 50, trackBy: (_i, item) => item});
+    await flushViewport();
+    expect(renderedItems(wrapper).length).toBeGreaterThanOrEqual(6);
+    expect(wrapper.find('.vcdk-virtual-scroll-spacer').attributes('style')).toContain('height: 5000px');
+    wrapper.unmount();
+  });
+
+  it('顶部追加按 trackBy key 补偿滚动偏移', async () => {
+    const {wrapper, root, items} = mountViewport({
+      autosize: true,
+      trackBy: (_index, item) => item,
+    });
+    await flushViewport();
+    root.scrollTop = 120;
+    root.dispatchEvent(new Event('scroll'));
+    await flushRafAndTick();
+    items.value = ['before-2', 'before-1', ...items.value];
+    await flushViewport();
+    expect(root.scrollTop).toBe(220);
+    wrapper.unmount();
+  });
+
+  it('位于最底部时向顶部追加后保持吸底', async () => {
+    const {wrapper, root, items} = mountViewport({
+      autosize: true,
+      trackBy: (_index, item) => item,
+    });
+    await flushViewport();
+    root.scrollTop = 4700;
+    root.dispatchEvent(new Event('scroll'));
+    await flushRafAndTick();
+    items.value = ['before-2', 'before-1', ...items.value];
+    await flushViewport();
+    expect(root.scrollTop).toBe(4800);
+    wrapper.unmount();
+  });
+
+  it('位于底部附近时向底部追加后保持当前可视区不偏移', async () => {
+    const {wrapper, root, items} = mountViewport({
+      autosize: true,
+      trackBy: (_index, item) => item,
+    });
+    await flushViewport();
+    root.scrollTop = 4700;
+    root.dispatchEvent(new Event('scroll'));
+    await flushRafAndTick();
+    items.value = [...items.value, 'after-1', 'after-2'];
+    await flushViewport();
+    expect(root.scrollTop).toBe(4700);
+    wrapper.unmount();
+  });
+
+  it('autosize 与 itemSize 或横向模式组合时抛出明确错误', () => {
+    expect(() => mountViewport({autosize: true, itemSize: 50})).toThrow(/mutually exclusive/);
+    expect(() => mountViewport({autosize: true, orientation: 'horizontal'})).toThrow(/vertical/);
   });
 });
 

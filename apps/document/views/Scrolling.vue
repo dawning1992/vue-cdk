@@ -14,15 +14,26 @@ import WindowScrollVirtualDemo from '../demos/scrolling/WindowScrollVirtualDemo.
 import WindowScrollVirtualDemoSource from '../demos/scrolling/WindowScrollVirtualDemo.vue?raw';
 import DataSourceVirtualScrollDemo from '../demos/scrolling/DataSourceVirtualScrollDemo.vue';
 import DataSourceVirtualScrollDemoSource from '../demos/scrolling/DataSourceVirtualScrollDemo.vue?raw';
+import AutoSizeVirtualScrollDemo from '../demos/scrolling/AutoSizeVirtualScrollDemo.vue';
+import AutoSizeVirtualScrollDemoSource from '../demos/scrolling/AutoSizeVirtualScrollDemo.vue?raw';
 </script>
 
 <template>
   <ModulePage
     module-name="scrolling"
     zh-name="滚动"
-    intro="滚动能力集合：全局滚动分发（ScrollDispatcher）、滚动容器（vScrollable / useScrollable）、视口测量（ViewportRuler）与固定尺寸虚拟滚动（VVirtualScrollViewport + VVirtualFor）。"
+    intro="滚动能力集合：全局滚动分发、滚动容器、视口测量，以及固定尺寸与不定高度虚拟滚动。"
     :api-groups="apiGroups"
   >
+    <DemoCard
+      title="不定高度与双向追加"
+      description="条目高度无需预先知道；运行时变高以及向顶部或底部追加时，当前可视内容均保持原位。"
+      :source="AutoSizeVirtualScrollDemoSource"
+      filename="AutoSizeVirtualScrollDemo.vue"
+    >
+      <AutoSizeVirtualScrollDemo />
+    </DemoCard>
+
     <DemoCard
       title="固定尺寸虚拟滚动"
       description="1000 条数据仅渲染视口附近的条目；演示 scrollToIndex / scrollToOffset、trackBy 与 appendOnly 模式。"

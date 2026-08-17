@@ -14,6 +14,15 @@ class FakeViewport implements VirtualScrollViewportAdapter {
   renderedOffsetTo: 'to-start' | 'to-end' = 'to-start';
   scrollToOffsets: {offset: number; behavior: ScrollBehavior}[] = [];
   renderedRanges: ListRange[] = [];
+  getDataKeys(): readonly unknown[] {
+    return Array.from({length: this.dataLength}, (_, index) => index);
+  }
+  hasExplicitTrackBy(): boolean {
+    return true;
+  }
+  measureRenderedItems() {
+    return [];
+  }
 
   getDataLength(): number {
     return this.dataLength;

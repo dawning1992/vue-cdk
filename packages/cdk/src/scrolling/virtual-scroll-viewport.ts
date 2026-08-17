@@ -31,6 +31,7 @@ import {Emitter} from '../emitter';
 import {viewportRuler} from './viewport-ruler';
 import {getDirection} from '../bidi';
 import {FixedSizeVirtualScrollStrategy} from './fixed-size-virtual-scroll';
+import {AutoSizeVirtualScrollStrategy, ItemSizeAverager} from './auto-size-virtual-scroll';
 import type {ExtendedScrollToOptions} from './scrollable';
 import type {CdkVirtualScrollRepeater} from './virtual-scroll-repeater';
 import {VirtualScrollable} from './virtual-scrollable';
@@ -123,6 +124,10 @@ export const VVirtualScrollViewport = defineComponent({
     scrollWindow: {type: Boolean, default: false},
     /** 条目固定尺寸（像素）；提供后自动创建固定尺寸策略。 */
     itemSize: {type: Number, default: undefined},
+    /** 启用不定高度策略；首版仅支持纵向。 */
+    autosize: {type: Boolean, default: false},
+    /** autosize 尚无实测样本时使用的估算条目高度。 */
+    estimatedItemSize: {type: Number, default: 50},
     /** 视口外至少保留的缓冲（像素），低于该值触发补渲染。 */
     minBufferPx: {type: Number, default: 100},
     /** 补渲染时恢复到该缓冲量（像素）。 */
@@ -174,10 +179,19 @@ export const VVirtualScrollViewport = defineComponent({
     let strategyCleanup: (() => void) | undefined;
     let afterRenderQueue: (() => void)[] = [];
     let afterRenderScheduled = false;
+    let resizeObserver: ResizeObserver | null = null;
+    let resizeMeasurementScheduled = false;
 
     // 策略优先级与 Angular 一致：提供 itemSize 时使用固定尺寸策略，
     // 否则使用父级注入的自定义策略；两者皆无时抛错。
+    const injectedStrategy = inject(VIRTUAL_SCROLL_STRATEGY, null);
     const strategy: VirtualScrollStrategy = (() => {
+      if (props.autosize && props.itemSize != null) {
+        throw new Error('Vue CDK virtual scroll: autosize and itemSize are mutually exclusive.');
+      }
+      if (props.autosize && props.orientation !== 'vertical') {
+        throw new Error('Vue CDK autosize virtual scroll currently supports vertical orientation only.');
+      }
       if (props.itemSize != null) {
         return new FixedSizeVirtualScrollStrategy(
           props.itemSize,
@@ -185,13 +199,19 @@ export const VVirtualScrollViewport = defineComponent({
           props.maxBufferPx,
         );
       }
-      const injected = inject(VIRTUAL_SCROLL_STRATEGY, null);
-      if (!injected) {
+      if (props.autosize) {
+        return new AutoSizeVirtualScrollStrategy(
+          props.minBufferPx,
+          props.maxBufferPx,
+          new ItemSizeAverager(props.estimatedItemSize),
+        );
+      }
+      if (!injectedStrategy) {
         throw new Error(
           'Error: VVirtualScrollViewport requires the "itemSize" property or an injected VirtualScrollStrategy.',
         );
       }
-      return injected;
+      return injectedStrategy;
     })();
 
     /** itemSize/minBufferPx/maxBufferPx 变化时同步固定尺寸策略。 */
@@ -204,23 +224,25 @@ export const VVirtualScrollViewport = defineComponent({
             props.minBufferPx,
             props.maxBufferPx,
           );
+        } else if (strategy instanceof AutoSizeVirtualScrollStrategy) {
+          strategy.updateBufferSize(props.minBufferPx, props.maxBufferPx);
         }
       },
     );
 
-    /** 注册重复器并订阅其数据流，数据长度变化时通知策略。 */
+    /** 注册重复器并订阅其数据流；长度、顺序或身份变化都通知策略同步缓存。 */
     function attachRepeater(forOf: CdkVirtualScrollRepeater<unknown>): void {
       if (repeater) {
         throw new Error('VVirtualScrollViewport is already attached.');
       }
       repeater = forOf;
       repeaterDataCleanup = forOf.dataStream.subscribe(data => {
-        const newLength = data.length;
-        if (newLength !== dataLength) {
-          dataLength = newLength;
-          strategy.onDataLengthChanged();
-        }
-        scheduleAfterRender();
+        dataLength = data.length;
+        strategy.onDataLengthChanged();
+        scheduleAfterRender(() => {
+          refreshResizeObserver();
+          strategy.onContentRendered();
+        });
       });
     }
 
@@ -242,6 +264,18 @@ export const VVirtualScrollViewport = defineComponent({
 
     function getRenderedRange(): ListRange {
       return renderedRange.value;
+    }
+
+    function getDataKeys(): readonly unknown[] {
+      return repeater?.getDataKeys() ?? [];
+    }
+
+    function hasExplicitTrackBy(): boolean {
+      return repeater?.hasExplicitTrackBy() ?? false;
+    }
+
+    function measureRenderedItems() {
+      return repeater?.measureRenderedItems(props.orientation) ?? [];
     }
 
     /** 设置总内容尺寸并更新 spacer。 */
@@ -412,10 +446,34 @@ export const VVirtualScrollViewport = defineComponent({
       });
     }
 
+    /** 观察 wrapper 与逐项根元素，覆盖聚合尺寸和单项异步尺寸变化。 */
+    function refreshResizeObserver(): void {
+      if (!resizeObserver || !contentWrapper.value) return;
+      resizeObserver.disconnect();
+      for (const child of contentWrapper.value.children) {
+        resizeObserver.observe(child);
+      }
+    }
+
+    function scheduleResizeMeasurement(): void {
+      if (resizeMeasurementScheduled || destroyed) return;
+      resizeMeasurementScheduled = true;
+      const schedule = typeof requestAnimationFrame === 'function'
+        ? requestAnimationFrame
+        : (callback: FrameRequestCallback) => setTimeout(callback, 16) as unknown as number;
+      schedule(() => {
+        resizeMeasurementScheduled = false;
+        if (!destroyed) strategy.onContentRendered();
+      });
+    }
+
     const api: VirtualScrollViewportAdapter = {
       getDataLength,
       getViewportSize,
       getRenderedRange,
+      getDataKeys,
+      hasExplicitTrackBy,
+      measureRenderedItems,
       measureScrollOffset,
       setTotalContentSize,
       setRenderedRange,
@@ -464,6 +522,12 @@ export const VVirtualScrollViewport = defineComponent({
         _measureViewportSize();
         strategy.attach(api);
 
+        if (strategy instanceof AutoSizeVirtualScrollStrategy && typeof ResizeObserver !== 'undefined') {
+          resizeObserver = new ResizeObserver(() => scheduleResizeMeasurement());
+          refreshResizeObserver();
+          scheduleAfterRender(() => strategy.onContentRendered());
+        }
+
         // 滚动事件：转发给公共流，并按帧合并后驱动策略重算。
         const elementScrolledUnsubscribe = scrollable
           .elementScrolled()
@@ -485,6 +549,8 @@ export const VVirtualScrollViewport = defineComponent({
       destroyed = true;
       detachRepeater();
       strategy.detach();
+      resizeObserver?.disconnect();
+      resizeObserver = null;
       scrollCleanup?.();
       resizeCleanup?.();
       scrollable?.destroy();

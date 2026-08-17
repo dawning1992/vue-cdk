@@ -35,6 +35,7 @@ import {
 } from '../collections';
 import {CDK_VIRTUAL_SCROLL_VIEWPORT} from './virtual-scroll-viewport';
 import type {CdkVirtualScrollRepeater} from './virtual-scroll-repeater';
+import type {VirtualScrollItemMeasurement} from './virtual-scroll-strategy';
 
 /** VVirtualFor 支持的数据源形态。 */
 export type VirtualForSource<T> =
@@ -211,6 +212,33 @@ export const VVirtualFor = defineComponent({
         : 0;
     }
 
+    /** 以与 vnode key 完全相同的规则计算完整数据身份序列。 */
+    function getDataKeys(): readonly unknown[] {
+      return data.value.map((item, index) =>
+        props.trackBy ? props.trackBy(index, item) : item,
+      );
+    }
+
+    /** 逐项测量当前渲染元素；缺失根元素的 Fragment 条目会被跳过。 */
+    function measureRenderedItems(
+      orientation: 'horizontal' | 'vertical',
+    ): readonly VirtualScrollItemMeasurement[] {
+      const start = renderedRange.value.start;
+      const keys = getDataKeys();
+      const measurements: VirtualScrollItemMeasurement[] = [];
+      renderedElements.forEach((element, offset) => {
+        if (!element) return;
+        measurements.push({
+          index: start + offset,
+          key: keys[start + offset],
+          size: orientation === 'horizontal'
+            ? element.getBoundingClientRect().width || element.offsetWidth
+            : element.getBoundingClientRect().height || element.offsetHeight,
+        });
+      });
+      return measurements;
+    }
+
     /** 注册到视口并订阅渲染区间变化。 */
     function attach(): void {
       rangeCleanup = viewportApi.renderedRangeStream.subscribe(range => {
@@ -241,6 +269,9 @@ export const VVirtualFor = defineComponent({
 
     const repeater: CdkVirtualScrollRepeater<unknown> = {
       dataStream: dataEmitter,
+      getDataKeys,
+      hasExplicitTrackBy: () => props.trackBy != null,
+      measureRenderedItems,
       measureRangeSize,
     };
 

@@ -5,11 +5,21 @@
 
 import type {Emitter} from '../emitter';
 import type {ListRange} from '../collections';
+import type {VirtualScrollItemMeasurement} from './virtual-scroll-strategy';
 
 /** 可被虚拟滚动视口重复渲染的数据源。 */
 export interface CdkVirtualScrollRepeater<T> {
   /** 数据流：每次派发都代表数据集合整体已更新。 */
   dataStream: Emitter<readonly T[]>;
+
+  /** 返回当前完整数据的稳定身份序列。 */
+  getDataKeys(): readonly unknown[];
+
+  /** 是否由调用方显式提供 trackBy。 */
+  hasExplicitTrackBy(): boolean;
+
+  /** 返回当前渲染区间中每个可测量根元素的尺寸。 */
+  measureRenderedItems(orientation: 'horizontal' | 'vertical'): readonly VirtualScrollItemMeasurement[];
 
   /**
    * 测量指定区间内所有渲染项的组合尺寸。
