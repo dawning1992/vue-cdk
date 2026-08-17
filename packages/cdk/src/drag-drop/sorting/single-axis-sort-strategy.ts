@@ -5,7 +5,7 @@
  * 仅支持单轴排序；通过 CSS transform 平移条目实现可动画的重排。
  */
 
-import type {Direction} from '../../scrolling/directionality';
+import type {Direction} from '../../bidi';
 import {moveItemInArray} from '../drag-utils';
 import {dragDropRegistry, type DragDropRegistry} from '../drag-drop-registry';
 import {adjustDomRect, getMutableClientRect, isInsideClientRect} from '../dom/dom-rect';

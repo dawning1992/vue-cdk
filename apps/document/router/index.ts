@@ -5,6 +5,7 @@ import {docModules} from '../config';
 /** 视图组件懒加载映射：与 config.ts 中的 view 字段一一对应。 */
 const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   Overview: () => import('../views/Overview.vue'),
+  Bidi: () => import('../views/Bidi.vue'),
   Overlay: () => import('../views/Overlay.vue'),
   Coercion: () => import('../views/Coercion.vue'),
   Platform: () => import('../views/Platform.vue'),

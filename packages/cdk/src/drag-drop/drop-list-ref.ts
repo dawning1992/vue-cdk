@@ -10,7 +10,7 @@
 
 import {coerceElement, type ElementOrRef} from '../coercion';
 import {Emitter} from '../emitter';
-import type {Direction} from '../scrolling/directionality';
+import type {Direction} from '../bidi';
 import {viewportRuler, type ViewportRuler} from '../scrolling/viewport-ruler';
 import {getShadowRoot} from '../platform';
 import {dragDropRegistry, type DragDropRegistry} from './drag-drop-registry';

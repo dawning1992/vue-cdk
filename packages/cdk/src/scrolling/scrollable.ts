@@ -26,7 +26,7 @@ import {
   RtlScrollAxisType,
   supportsScrollBehavior,
 } from '../platform';
-import {getDirection} from './directionality';
+import {getDirection} from '../bidi';
 import {addListener} from './listen';
 import {
   scrollDispatcher,

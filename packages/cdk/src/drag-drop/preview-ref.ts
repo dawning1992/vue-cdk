@@ -6,7 +6,7 @@
  * （Vue 插槽经渲染函数实现），替代 TemplateRef/EmbeddedViewRef 机制。
  */
 
-import type {Direction} from '../scrolling/directionality';
+import type {Direction} from '../bidi';
 import type {DragPreviewTemplate} from './drag-ref';
 import {deepCloneNode} from './dom/clone-node';
 import {

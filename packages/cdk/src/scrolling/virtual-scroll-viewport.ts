@@ -29,7 +29,7 @@ import {
 import type {ListRange} from '../collections';
 import {Emitter} from '../emitter';
 import {viewportRuler} from './viewport-ruler';
-import {getDirection} from './directionality';
+import {getDirection} from '../bidi';
 import {FixedSizeVirtualScrollStrategy} from './fixed-size-virtual-scroll';
 import type {ExtendedScrollToOptions} from './scrollable';
 import type {CdkVirtualScrollRepeater} from './virtual-scroll-repeater';

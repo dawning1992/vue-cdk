@@ -9,13 +9,13 @@
  * - `v-tree-node-padding="'1.5rem'"`：字符串简写，覆盖缩进值（无单位时按 px）；
  * - `v-tree-node-padding="{level: 2, indent: '1.5rem'}"`：对象写法。
  *
- * 方向差异：RTL 布局时缩进改为右侧 padding（用 getDirection 就近读取，
- * 与仓库 directionality 一致，无运行时方向变更通知）。
+ * 方向差异：RTL 布局时缩进改为右侧 padding；每次更新均通过 bidi 的
+ * getDirection 就近读取 DOM，因此无需持有长期方向订阅。
  */
 
 import {nextTick, type Directive} from 'vue';
 import {coerceNumberProperty} from '../coercion';
-import {getDirection} from '../scrolling/directionality';
+import {getDirection} from '../bidi';
 import {findParentTreeNode} from './node';
 
 /** 指令绑定值：数字（层级覆盖）、带单位字符串（缩进覆盖）或对象。 */

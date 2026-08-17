@@ -34,6 +34,7 @@ export default defineConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
+        bidi: 'src/bidi/index.ts',
         overlay: 'src/overlay/index.ts',
         coercion: 'src/coercion/index.ts',
         clipboard: 'src/clipboard/index.ts',

@@ -17,6 +17,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
+    "./bidi": {
+      "types": "./dist/bidi/index.d.ts",
+      "import": "./dist/bidi/index.js",
+      "require": "./dist/bidi/index.cjs"
+    },
     "./overlay": {
       "types": "./dist/overlay/index.d.ts",
       "import": "./dist/overlay/index.js",
@@ -105,6 +110,8 @@
     "vue",
     "vue3",
     "cdk",
+    "bidi",
+    "rtl",
     "component",
     "layout",
     "responsive",

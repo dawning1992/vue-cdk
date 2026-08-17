@@ -21,7 +21,7 @@ import {
   type Slot,
 } from 'vue';
 import {coerceElement, coerceNumberProperty} from '../coercion';
-import {getDirection} from '../scrolling/directionality';
+import {getDirection} from '../bidi';
 import {createDragRef, type DragConstrainPosition, type DragRef, type Point, type PreviewContainer} from './drag-ref';
 import type {DragPreviewTemplate} from './drag-ref';
 import type {DragStartDelay, DragAxis} from './config';

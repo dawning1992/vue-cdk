@@ -19,7 +19,7 @@ import {
   type Ref,
 } from 'vue';
 import {coerceArray, coerceNumberProperty} from '../coercion';
-import {getDirection} from '../scrolling/directionality';
+import {getDirection} from '../bidi';
 import {scrollDispatcher} from '../scrolling/scroll-dispatcher';
 import {createDropListRef, type DropListRef} from './drop-list-ref';
 import type {DragRef} from './drag-ref';

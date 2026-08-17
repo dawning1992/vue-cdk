@@ -12,7 +12,7 @@ import {coerceElement, type ElementOrRef} from '../coercion';
 import {Emitter} from '../emitter';
 import {isFakeMousedownFromScreenReader, isFakeTouchstartFromScreenReader} from '../a11y';
 import {getEventTarget, getShadowRoot} from '../platform';
-import type {Direction} from '../scrolling/directionality';
+import type {Direction} from '../bidi';
 import {addListener} from '../scrolling/listen';
 import {viewportRuler, type ViewportRuler} from '../scrolling/viewport-ruler';
 import {deepCloneNode} from './dom/clone-node';

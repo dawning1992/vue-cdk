@@ -42,7 +42,7 @@ import {
   type ListRange,
 } from '../collections';
 import {Emitter} from '../emitter';
-import {getDirection} from '../scrolling/directionality';
+import {getDirection} from '../bidi';
 import {TreeKeyManager, type TreeKeyManagerStrategy} from '../a11y/key-manager/tree-key-manager';
 import type {TreeControl} from './control/tree-control';
 import {

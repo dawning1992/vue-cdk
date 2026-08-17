@@ -28,6 +28,13 @@ export const docModules: DocModule[] = [
     summary: '命令式 useOverlay() 与声明式 VConnectedOverlay 浮层面板体系。',
   },
   {
+    path: '/bidi',
+    name: 'bidi',
+    label: '文字方向',
+    view: 'Bidi',
+    summary: 'LTR/RTL 方向上下文、局部覆盖与 Composition API 响应式状态。',
+  },
+  {
     path: '/coercion',
     name: 'coercion',
     label: '强制转换',

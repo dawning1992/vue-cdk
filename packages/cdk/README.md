@@ -9,7 +9,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 ## 特性总览
 
 - **零运行时依赖**：事件流使用自研 `Emitter`（`vue-cdk/emitter`）替代 RxJS，不引入任何第三方运行时依赖
-- **子路径按需导入**：15 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
+- **子路径按需导入**：16 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
 - **TypeScript 编写**：发布产物含完整 `.d.ts` 类型声明
 - **结构样式开箱即用**：运行时自动注入，也可显式引入 `style.css`（与自动注入去重）
 - **SSR 安全**：无 `document` 环境可安全导入，平台检测、剪贴板等能力提供明确降级
@@ -21,7 +21,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 - [安装与要求](#安装与要求)
 - [快速开始](#快速开始)
 - [模块一览](#模块一览)
-- 模块： [accordion](#accordion-模块) / [a11y](#a11y-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [layout](#layout-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
+- 模块： [accordion](#accordion-模块) / [a11y](#a11y-模块) / [bidi](#bidi-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [layout](#layout-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
 - [与 Angular CDK 的对应关系](#与-angular-cdk-的对应关系)
 - [开发](#开发)
 - [注意事项](#注意事项)
@@ -122,6 +122,7 @@ function openConfirm() {
 | --- | --- | --- | --- |
 | `vue-cdk/accordion` | accordion | 无样式展开协调：`CdkAccordion` / `CdkAccordionItem` 与 `useAccordion()` / `useAccordionItem()` | — |
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） | `vue-cdk/a11y/style.css` |
+| `vue-cdk/bidi` | bidi | 文字方向：`Directionality`、`VDir` / `Dir`、`useDirectionality()` 与 `provideDirectionality()` | — |
 | `vue-cdk/clipboard` | clipboard | 剪贴板：命令式 `useClipboard()` / `Clipboard`、延迟复制 `PendingCopy`、声明式 `vCopyToClipboard` 指令 | — |
 | `vue-cdk/coercion` | coercion | 类型/值强制转换工具（`coerceArray`、`coerceCssPixelValue`、`coerceElement`、`coerceNumberProperty`） | — |
 | `vue-cdk/collections` | collections | 集合抽象：`DataSource` / `ArrayDataSource` / `ListRange` / `CollectionViewer` / `SelectionModel` | — |
@@ -278,6 +279,31 @@ const unsubscribe = monitor.monitor(inputRef).subscribe(origin => {
 结构样式（`.vcdk-visually-hidden`）随 `vue-cdk/a11y` 入口自动注入；
 也可显式引入 `vue-cdk/a11y/style.css`（会与自动注入去重）。
 焦点来源类只负责标记，具体视觉样式由使用方自行定义（文档站点「无障碍」页展示了色标示例）。
+
+## bidi 模块
+
+对齐 Angular CDK bidi 的方向上下文、局部覆盖和变更通知。Vue 自定义指令无法成为
+后代注入提供者，因此使用无样式 `VDir` 组件承载局部方向：
+
+```vue
+<script setup lang="ts">
+import {VDir, useDirectionality} from 'vue-cdk/bidi';
+
+const directionality = useDirectionality();
+</script>
+
+<template>
+  <p>应用方向：{{ directionality.valueSignal.value }}</p>
+  <VDir dir="rtl" v-slot="{direction}">
+    局部方向：{{ direction }}
+    <VDir dir="ltr">嵌套区域覆盖为 LTR</VDir>
+  </VDir>
+</template>
+```
+
+`Dir` 是 `VDir` 的 Angular 同名别名。`provideDirectionality(refOrGetter)` 可用于构建
+自定义 Composition API 容器；`DIR_DOCUMENT` 支持 iframe、测试与 SSR。`auto` 按浏览器
+语言解析，不扫描文本内容；无效输入和无 DOM 环境回退 `ltr`。
 
 ## clipboard 模块
 
@@ -1005,6 +1031,11 @@ const loadChildren: LoadChildren<Item> = async (parent, page: PageInfo) => {
 ### a11y
 
 - `@angular/cdk/a11y` → `vue-cdk/a11y`（完整映射见 [a11y 模块](#a11y-模块) 章节）
+
+### bidi
+
+- `Directionality` → 同名类 + `useDirectionality()` / `provideDirectionality()`
+- `[dir]` / `Dir` → `VDir` 组件（`Dir` 别名）；Vue 指令不能为后代建立 provide 上下文
 
 ### dialog
 
