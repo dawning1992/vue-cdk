@@ -1,6 +1,7 @@
 import {createApp} from 'vue';
 import {vFocusMonitor, vFocusTrap} from 'vue-cdk/a11y';
 import {vCopyToClipboard} from 'vue-cdk/clipboard';
+import {vCdkObserveContent} from 'vue-cdk/observers';
 import App from './App.vue';
 import {router} from './router';
 import './styles/main.css';
@@ -15,6 +16,8 @@ app.directive('focus-trap', vFocusTrap);
 app.directive('focus-monitor', vFocusMonitor);
 // 全局注册 clipboard 指令，文档示例模板中可直接使用 v-copy-to-clipboard。
 app.directive('copy-to-clipboard', vCopyToClipboard);
+// 全局注册 observers 指令，文档示例中可直接使用 v-cdk-observe-content。
+app.directive('cdk-observe-content', vCdkObserveContent);
 
 app.use(router);
 app.mount('#app');

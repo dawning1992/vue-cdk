@@ -16,6 +16,7 @@ export default defineConfig({
       'vue-cdk/overlay': fileURLToPath(new URL('../../packages/cdk/src/overlay/index.ts', import.meta.url)),
       'vue-cdk/coercion': fileURLToPath(new URL('../../packages/cdk/src/coercion/index.ts', import.meta.url)),
       'vue-cdk/clipboard': fileURLToPath(new URL('../../packages/cdk/src/clipboard/index.ts', import.meta.url)),
+      'vue-cdk/observers': fileURLToPath(new URL('../../packages/cdk/src/observers/index.ts', import.meta.url)),
       'vue-cdk/platform': fileURLToPath(new URL('../../packages/cdk/src/platform/index.ts', import.meta.url)),
       'vue-cdk/scrolling': fileURLToPath(new URL('../../packages/cdk/src/scrolling/index.ts', import.meta.url)),
       'vue-cdk/collections': fileURLToPath(new URL('../../packages/cdk/src/collections/index.ts', import.meta.url)),

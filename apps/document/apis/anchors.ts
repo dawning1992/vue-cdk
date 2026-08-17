@@ -10,6 +10,7 @@ import {apiGroups as dialogGroups} from './dialog';
 import {apiGroups as dragDropGroups} from './drag-drop';
 import {apiGroups as emitterGroups} from './emitter';
 import {apiGroups as overlayGroups} from './overlay';
+import {apiGroups as observersGroups} from './observers';
 import {apiGroups as platformGroups} from './platform';
 import {apiGroups as layoutGroups} from './layout';
 import {apiGroups as portalGroups} from './portal';
@@ -34,6 +35,7 @@ const viewApiGroups: Record<string, readonly ApiGroup[]> = {
   VirtualTree: virtualTreeGroups,
   Clipboard: clipboardGroups,
   Accordion: accordionGroups,
+  Observers: observersGroups,
 };
 
 /** 按 docModules 顺序排列各模块 API 数据，Overview 无 API 分组被过滤。 */

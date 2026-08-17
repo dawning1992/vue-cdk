@@ -139,4 +139,11 @@ export const docModules: DocModule[] = [
     view: 'TextField',
     summary: 'textarea 自动伸缩与 input 自动填充状态监控、样式探针。',
   },
+  {
+    path: '/observers',
+    name: 'observers',
+    label: '内容观察',
+    view: 'Observers',
+    summary: '共享 MutationObserver 的 DOM 内容变化流、声明式指令与 Composition API。',
+  },
 ];

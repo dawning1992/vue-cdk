@@ -51,6 +51,7 @@ export default defineConfig({
         tree: 'src/tree/index.ts',
         'virtual-tree': 'src/virtual-tree/index.ts',
         'text-field': 'src/text-field/index.ts',
+        observers: 'src/observers/index.ts',
       },
       formats: ['es', 'cjs'],
       fileName: (format, entryName) =>
