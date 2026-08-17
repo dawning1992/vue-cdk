@@ -133,6 +133,13 @@ export const docModules: DocModule[] = [
     summary: '无样式展开状态协调：CdkAccordion / CdkAccordionItem 与 Composition API 双入口。',
   },
   {
+    path: '/stepper',
+    name: 'stepper',
+    label: '步进器',
+    view: 'Stepper',
+    summary: '无样式多步骤流程：线性校验、表单适配、步骤状态与键盘导航。',
+  },
+  {
     path: '/text-field',
     name: 'text-field',
     label: '文本字段',

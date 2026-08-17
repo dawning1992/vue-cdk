@@ -39,6 +39,7 @@ export default defineConfig({
         coercion: 'src/coercion/index.ts',
         clipboard: 'src/clipboard/index.ts',
         accordion: 'src/accordion/index.ts',
+        stepper: 'src/stepper/index.ts',
         platform: 'src/platform/index.ts',
         layout: 'src/layout/index.ts',
         scrolling: 'src/scrolling/index.ts',

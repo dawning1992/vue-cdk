@@ -1,0 +1,9 @@
+.stepper-demo { width: 100%; }
+.stepper-headers { display: flex; gap: 8px; margin-bottom: 16px; }
+.stepper-header { border: 1px solid var(--doc-border); border-radius: 6px; background: white; padding: 8px 12px; cursor: pointer; }
+.stepper-header[aria-selected="true"] { color: white; background: var(--doc-primary); border-color: var(--doc-primary); }
+.stepper-panel { min-height: 84px; padding: 14px; border: 1px solid var(--doc-border); border-radius: 8px; }
+.stepper-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.stepper-actions button { padding: 7px 12px; }
+.stepper-demo input { padding: 7px 9px; border: 1px solid var(--doc-border); border-radius: 5px; }
+.stepper-error { color: #b42318; font-size: 13px; }

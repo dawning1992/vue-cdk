@@ -43,6 +43,11 @@
       "import": "./dist/accordion/index.js",
       "require": "./dist/accordion/index.cjs"
     },
+    "./stepper": {
+      "types": "./dist/stepper/index.d.ts",
+      "import": "./dist/stepper/index.js",
+      "require": "./dist/stepper/index.cjs"
+    },
     "./platform": {
       "types": "./dist/platform/index.d.ts",
       "import": "./dist/platform/index.js",
@@ -135,6 +140,7 @@
     "tooltip",
     "clipboard",
     "accordion",
+    "stepper",
     "teleport",
     "portal",
     "drag-drop",
