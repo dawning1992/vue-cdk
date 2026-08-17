@@ -2,6 +2,7 @@ import type {Router} from 'vue-router';
 import type {ApiAnchorGroup, ApiGroup} from '../api';
 import {docModules} from '../config';
 import {apiGroups as a11yGroups} from './a11y';
+import {apiGroups as accordionGroups} from './accordion';
 import {apiGroups as clipboardGroups} from './clipboard';
 import {apiGroups as coercionGroups} from './coercion';
 import {apiGroups as collectionsGroups} from './collections';
@@ -10,6 +11,7 @@ import {apiGroups as dragDropGroups} from './drag-drop';
 import {apiGroups as emitterGroups} from './emitter';
 import {apiGroups as overlayGroups} from './overlay';
 import {apiGroups as platformGroups} from './platform';
+import {apiGroups as layoutGroups} from './layout';
 import {apiGroups as portalGroups} from './portal';
 import {apiGroups as scrollingGroups} from './scrolling';
 import {apiGroups as treeGroups} from './tree';
@@ -20,6 +22,7 @@ const viewApiGroups: Record<string, readonly ApiGroup[]> = {
   Overlay: overlayGroups,
   Coercion: coercionGroups,
   Platform: platformGroups,
+  Layout: layoutGroups,
   Scrolling: scrollingGroups,
   Collections: collectionsGroups,
   Emitter: emitterGroups,
@@ -30,6 +33,7 @@ const viewApiGroups: Record<string, readonly ApiGroup[]> = {
   Tree: treeGroups,
   VirtualTree: virtualTreeGroups,
   Clipboard: clipboardGroups,
+  Accordion: accordionGroups,
 };
 
 /** 按 docModules 顺序排列各模块 API 数据，Overview 无 API 分组被过滤。 */

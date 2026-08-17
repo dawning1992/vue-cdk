@@ -33,10 +33,20 @@
       "import": "./dist/clipboard/index.js",
       "require": "./dist/clipboard/index.cjs"
     },
+    "./accordion": {
+      "types": "./dist/accordion/index.d.ts",
+      "import": "./dist/accordion/index.js",
+      "require": "./dist/accordion/index.cjs"
+    },
     "./platform": {
       "types": "./dist/platform/index.d.ts",
       "import": "./dist/platform/index.js",
       "require": "./dist/platform/index.cjs"
+    },
+    "./layout": {
+      "types": "./dist/layout/index.d.ts",
+      "import": "./dist/layout/index.js",
+      "require": "./dist/layout/index.cjs"
     },
     "./scrolling": {
       "types": "./dist/scrolling/index.d.ts",
@@ -96,11 +106,14 @@
     "vue3",
     "cdk",
     "component",
+    "layout",
+    "responsive",
     "overlay",
     "popover",
     "dropdown",
     "tooltip",
     "clipboard",
+    "accordion",
     "teleport",
     "portal",
     "drag-drop",

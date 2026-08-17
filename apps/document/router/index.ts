@@ -8,6 +8,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   Overlay: () => import('../views/Overlay.vue'),
   Coercion: () => import('../views/Coercion.vue'),
   Platform: () => import('../views/Platform.vue'),
+  Layout: () => import('../views/Layout.vue'),
   Scrolling: () => import('../views/Scrolling.vue'),
   Collections: () => import('../views/Collections.vue'),
   Emitter: () => import('../views/Emitter.vue'),
@@ -18,6 +19,7 @@ const viewLoaders: Record<string, () => Promise<{default: Component}>> = {
   Tree: () => import('../views/Tree.vue'),
   VirtualTree: () => import('../views/VirtualTree.vue'),
   Clipboard: () => import('../views/Clipboard.vue'),
+  Accordion: () => import('../views/Accordion.vue'),
 };
 
 /**

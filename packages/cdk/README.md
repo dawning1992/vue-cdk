@@ -9,7 +9,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 ## 特性总览
 
 - **零运行时依赖**：事件流使用自研 `Emitter`（`vue-cdk/emitter`）替代 RxJS，不引入任何第三方运行时依赖
-- **子路径按需导入**：13 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
+- **子路径按需导入**：15 个能力模块各自独立入口，支持 tree-shaking；根入口与 Angular CDK 一致仅导出版本号
 - **TypeScript 编写**：发布产物含完整 `.d.ts` 类型声明
 - **结构样式开箱即用**：运行时自动注入，也可显式引入 `style.css`（与自动注入去重）
 - **SSR 安全**：无 `document` 环境可安全导入，平台检测、剪贴板等能力提供明确降级
@@ -21,7 +21,7 @@ Vue CDK 是面向组件库与复杂业务组件的开发者提供的「基础能
 - [安装与要求](#安装与要求)
 - [快速开始](#快速开始)
 - [模块一览](#模块一览)
-- 模块： [a11y](#a11y-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
+- 模块： [accordion](#accordion-模块) / [a11y](#a11y-模块) / [clipboard](#clipboard-模块) / [coercion](#coercion-模块) / [collections](#collections-模块) / [dialog](#dialog-模块) / [drag-drop](#drag-drop-模块) / [emitter](#emitter-模块) / [layout](#layout-模块) / [overlay](#overlay-模块) / [platform](#platform-模块) / [portal](#portal-模块) / [scrolling](#scrolling-模块) / [tree](#tree-模块) / [virtual-tree](#virtual-tree-模块)
 - [与 Angular CDK 的对应关系](#与-angular-cdk-的对应关系)
 - [开发](#开发)
 - [注意事项](#注意事项)
@@ -120,6 +120,7 @@ function openConfirm() {
 
 | 子路径 | 模块 | 说明 | 结构样式导出 |
 | --- | --- | --- | --- |
+| `vue-cdk/accordion` | accordion | 无样式展开协调：`CdkAccordion` / `CdkAccordionItem` 与 `useAccordion()` / `useAccordionItem()` | — |
 | `vue-cdk/a11y` | a11y | 无障碍：键盘导航（`ListKeyManager` 系列）、焦点陷阱（`FocusTrap`）、焦点来源监视（`FocusMonitor`） | `vue-cdk/a11y/style.css` |
 | `vue-cdk/clipboard` | clipboard | 剪贴板：命令式 `useClipboard()` / `Clipboard`、延迟复制 `PendingCopy`、声明式 `vCopyToClipboard` 指令 | — |
 | `vue-cdk/coercion` | coercion | 类型/值强制转换工具（`coerceArray`、`coerceCssPixelValue`、`coerceElement`、`coerceNumberProperty`） | — |
@@ -127,12 +128,36 @@ function openConfirm() {
 | `vue-cdk/dialog` | dialog | 模态对话框：命令式 `useDialog()`，对齐 Angular CDK `@angular/cdk/dialog` | `vue-cdk/dialog/style.css` |
 | `vue-cdk/drag-drop` | drag-drop | 拖拽排序：`VDropList` / `VDrag` / `VDropListGroup` / `vDragHandle`，对齐 Angular CDK `@angular/cdk/drag-drop` | `vue-cdk/drag-drop/style.css` |
 | `vue-cdk/emitter` | emitter | 零依赖的类型化事件发射器（`Emitter`） | — |
+| `vue-cdk/layout` | layout | 响应式布局：`Breakpoints`、`MediaMatcher`、`BreakpointObserver` 与 `useBreakpoints()` | — |
 | `vue-cdk/overlay` | overlay | 浮层面板：命令式 `useOverlay()` + 声明式 `VConnectedOverlay` / `VOverlayOrigin` | `vue-cdk/overlay/style.css` |
 | `vue-cdk/platform` | platform | 平台能力检测与事件工具：`Platform` 服务（浏览器/引擎识别 + `usePlatform` 注入）、`getSupportedInputTypes`、Shadow DOM / Popover / scroll-behavior 检测 | — |
 | `vue-cdk/portal` | portal | 可编程内容挂载：`Portal` 系列 + `VPortal` / `VPortalOutlet`，overlay/dialog 基于它构建 | — |
 | `vue-cdk/scrolling` | scrolling | 滚动能力：全局滚动分发（`ScrollDispatcher`）、滚动容器（`vScrollable` / `useScrollable`）、视口测量（`ViewportRuler`）、虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） | `vue-cdk/scrolling/style.css` |
 | `vue-cdk/tree` | tree | 树形结构：`VTree` / `VTreeNode` / `VNestedTreeNode` / `vTreeNodeToggle` / `vTreeNodePadding`，对齐 Angular CDK `@angular/cdk/tree` | — |
 | `vue-cdk/virtual-tree` | virtual-tree | 虚拟滚动树：`VVirtualScrollTree`，全量/懒加载两种数据模式、每层独立分页与滚动边界加载，复用 scrolling 虚拟滚动与 tree 节点能力 | — |
+
+## accordion 模块
+
+对齐 Angular CDK accordion 的状态协调语义，不提供视觉样式、动画或固定的无障碍 DOM。
+Vue 版本同时提供无样式组件与 Composition API：
+
+```vue
+<script setup lang="ts">
+import {CdkAccordion, CdkAccordionItem} from 'vue-cdk/accordion';
+</script>
+
+<template>
+  <CdkAccordion>
+    <CdkAccordionItem v-slot="item">
+      <button :aria-expanded="item.expanded" @click="item.toggle">标题</button>
+      <div v-show="item.expanded" role="region">内容</div>
+    </CdkAccordionItem>
+  </CdkAccordion>
+</template>
+```
+
+`multi` 开启多选；容器实例提供 `openAll()` / `closeAll()`，子项支持
+`v-model:expanded`、`disabled` 以及 `open()` / `close()` / `toggle()`。
 
 ## a11y 模块
 
@@ -564,6 +589,38 @@ done.subscribe(() => console.log('never')); // 完成后拒绝订阅
 | 成员 | 说明 |
 | --- | --- |
 | `Emitter<T = void>` | 类型化事件发射器；`subscribe` 返回幂等退订函数，`next` 同步派发，`complete` 后拒绝新订阅，`hasListeners` 可判断监听者是否存在 |
+
+## layout 模块
+
+对齐 Angular CDK `@angular/cdk/layout`，并提供 Vue 3 Composition API 响应式桥接：
+
+```vue
+<script setup lang="ts">
+import {Breakpoints, useBreakpoints} from 'vue-cdk/layout';
+
+const {matches: isHandset, breakpoints} = useBreakpoints(Breakpoints.Handset);
+</script>
+
+<template>
+  <nav :class="{compact: isHandset}">当前 Handset：{{ breakpoints }}</nav>
+</template>
+```
+
+命令式代码可保留 Angular 风格的订阅形态：
+
+```ts
+import {BreakpointObserver} from 'vue-cdk/layout';
+
+const observer = new BreakpointObserver();
+const subscription = observer.observe(['(orientation: portrait)', '(prefers-reduced-motion: reduce)'])
+  .subscribe(state => console.log(state.matches, state.breakpoints));
+
+subscription.unsubscribe();
+observer.destroy();
+```
+
+`BreakpointObserver` 会复用相同查询的原生监听器，并将同一任务中的多项变化合并派发。
+SSR 下 `MediaMatcher` 使用安全空实现；SSR 应为每个应用实例单独 provide 服务，避免跨请求共享。
 
 ## overlay 模块
 

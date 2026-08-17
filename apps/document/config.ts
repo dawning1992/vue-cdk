@@ -42,6 +42,13 @@ export const docModules: DocModule[] = [
     summary: '浏览器能力检测与通用事件工具，SSR 环境下可安全判断。',
   },
   {
+    path: '/layout',
+    name: 'layout',
+    label: '响应式布局',
+    view: 'Layout',
+    summary: '媒体查询观察、标准响应式断点与 Vue Composition API 响应式状态。',
+  },
+  {
     path: '/scrolling',
     name: 'scrolling',
     label: '滚动',
@@ -110,5 +117,12 @@ export const docModules: DocModule[] = [
     label: '剪贴板',
     view: 'Clipboard',
     summary: '剪贴板复制：useClipboard() / Clipboard 命令式复制与 vCopyToClipboard 指令复制。',
+  },
+  {
+    path: '/accordion',
+    name: 'accordion',
+    label: '手风琴',
+    view: 'Accordion',
+    summary: '无样式展开状态协调：CdkAccordion / CdkAccordionItem 与 Composition API 双入口。',
   },
 ];
