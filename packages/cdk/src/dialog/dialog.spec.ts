@@ -281,6 +281,42 @@ describe('DialogRef 生命周期', () => {
     expect(dialogService.openDialogs).toHaveLength(0);
   });
 
+  it('closedPromise 返回首次成功关闭的结果，且 open 仍返回 DialogRef', async () => {
+    const ref = dialogService.open<number>(SimpleContent);
+    expect(ref).not.toBeInstanceOf(Promise);
+    expect(ref.close).toBeTypeOf('function');
+
+    ref.close(7);
+    ref.close(8);
+
+    await expect(ref.closedPromise).resolves.toBe(7);
+  });
+
+  it('closedPromise 在无关闭结果时解析为 undefined', async () => {
+    const ref = dialogService.open(SimpleContent);
+    ref.close();
+    await expect(ref.closedPromise).resolves.toBeUndefined();
+  });
+
+  it('closePredicate 拒绝关闭时不结算 closedPromise，成功关闭后才解析', async () => {
+    let allowClose = false;
+    let settled = false;
+    const ref = dialogService.open<string>(SimpleContent, {
+      closePredicate: () => allowClose,
+    });
+    void ref.closedPromise.then(() => {
+      settled = true;
+    });
+
+    ref.close('blocked');
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    allowClose = true;
+    ref.close('accepted');
+    await expect(ref.closedPromise).resolves.toBe('accepted');
+  });
+
   it('componentInstance 暴露内容组件的公开实例，渲染函数内容为 null', async () => {
     const ref = dialogService.open(ExposedContent);
     await nextTick();

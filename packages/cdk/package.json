@@ -156,6 +156,15 @@
     "content-observer"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/dawning1992/vue-cdk#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dawning1992/vue-cdk.git",
+    "directory": "packages/cdk"
+  },
+  "bugs": {
+    "url": "https://github.com/dawning1992/vue-cdk/issues"
+  },
   "scripts": {
     "build": "vite build && node scripts/copy-a11y-css.mjs && node scripts/copy-dialog-css.mjs && node scripts/copy-scrolling-css.mjs && node scripts/copy-drag-drop-css.mjs && node scripts/copy-text-field-assets.mjs",
     "typecheck": "vue-tsc --noEmit",

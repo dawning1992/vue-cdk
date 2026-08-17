@@ -16,6 +16,7 @@ export interface DialogCloseOptions {
  *
  * 生命周期约定：
  * - `close()` 幂等：容器实例已置空后再次调用无效果；
+ * - `closedPromise` 与 `closed` 携带同一个关闭结果，且只在成功关闭时结算；
  * - 事件流（closed / backdropClick / keydownEvents / outsidePointerEvents）
  *   在关闭时 complete，关闭后不应再订阅；
  * - 关闭后 `componentInstance` 与 `containerInstance` 被置空，避免长引用。
@@ -33,6 +34,9 @@ export class DialogRef<R = unknown, C = unknown> {
   /** 对话框关闭事件流，携带关闭结果。 */
   readonly closed: Emitter<R | undefined> = new Emitter<R | undefined>();
 
+  /** 对话框成功关闭后解析的 Promise，解析值与 closed 事件流携带的结果一致。 */
+  readonly closedPromise: Promise<R | undefined>;
+
   /** 遮罩点击事件流。 */
   readonly backdropClick: Emitter<MouseEvent>;
 
@@ -48,10 +52,16 @@ export class DialogRef<R = unknown, C = unknown> {
   /** overlay 外部 detach 的订阅；close() 会先行退订，避免 dispose 重入触发二次关闭。 */
   private _detachSubscription: (() => void) | undefined;
 
+  /** 仅由首次成功的 close() 调用，用于结算 closedPromise。 */
+  private _resolveClosedPromise!: (result: R | undefined) => void;
+
   constructor(
     readonly overlayRef: OverlayRef,
     readonly config: DialogConfig<any, DialogRef<R, C>>,
   ) {
+    this.closedPromise = new Promise(resolve => {
+      this._resolveClosedPromise = resolve;
+    });
     this.disableClose = config.disableClose;
     this.backdropClick = overlayRef.backdropClick();
     this.keydownEvents = overlayRef.keydownEvents();
@@ -102,6 +112,7 @@ export class DialogRef<R = unknown, C = unknown> {
     this.overlayRef.dispose();
     this.closed.next(result);
     this.closed.complete();
+    this._resolveClosedPromise(result);
     this.componentInstance = null;
     this.containerInstance = null;
   }

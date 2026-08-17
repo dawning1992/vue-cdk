@@ -4,7 +4,7 @@ Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 [Angular
 
 Vue CDK 是面向组件库与复杂业务组件开发者的「基础能力层」：浮层、对话框、拖拽、步进器、树、虚拟滚动等可组合能力开箱即用。它不是 UI 组件库——不提供按钮、表单等业务组件，也不包含主题样式；使用方需要自带业务/主题样式（结构样式已内置）。
 
-完整 API 说明与可运行示例见本仓库文档站 `apps/document`（`pnpm dev` 启动）。
+完整 API 说明与可运行示例见[在线文档](https://dawning1992.github.io/vue-cdk)；
 
 ## 特性总览
 
@@ -103,14 +103,13 @@ import MyDialog from './MyDialog.vue'; // 任意 .vue 单文件组件
 
 const dialog = useDialog();
 
-function openConfirm() {
+async function openConfirm() {
   const dialogRef = dialog.open(MyDialog, {
     data: {title: '确认删除？'},
     panelClass: 'my-dialog-panel',
   });
-  dialogRef.closed.subscribe(result => {
-    console.log(result); // 内容组件通过 dialogRef.close(result) 返回
-  });
+  const result = await dialogRef.closedPromise;
+  console.log(result); // 内容组件通过 dialogRef.close(result) 返回
 }
 ```
 
@@ -491,15 +490,21 @@ import {useDialog} from 'vue-cdk/dialog';
 import MyDialog from './MyDialog.vue';
 
 const dialog = useDialog();
-const dialogRef = dialog.open(MyDialog, {
-  data: {title: '确认删除？'},
-  panelClass: 'my-dialog-panel',
-});
+async function openConfirm() {
+  const dialogRef = dialog.open<string>(MyDialog, {
+    data: {title: '确认删除？'},
+    panelClass: 'my-dialog-panel',
+  });
 
-dialogRef.closed.subscribe(result => {
-  console.log(result); // '确定' | '取消'
-});
+  // open() 仍立即返回 DialogRef，可先读取 id 或调用实例方法。
+  console.log(dialogRef.id);
+  const result = await dialogRef.closedPromise;
+  console.log(result); // '确定' | '取消' | undefined
+}
 ```
+
+需要响应式订阅关闭事件时，原有 `dialogRef.closed.subscribe(listener)` 仍可继续使用；
+只需等待一次关闭结果时，推荐使用 `closedPromise`。
 
 打开内容支持组件、渲染函数与 VNode 三种形式；渲染函数等价 Angular 的
 `TemplateRef`，参数为上下文对象（含 `$implicit`（data）与 `dialogRef`，
@@ -529,7 +534,7 @@ dialogRef.closed.subscribe(result => {
 - `useDialog()` / `dialogService`：`open(content, config?)`、`closeAll()`、
   `getDialogById(id)`、`openDialogs`、`afterOpened`、`afterAllClosed`
   （订阅时无打开对话框会立即触发，对齐 Angular 语义）；
-- `DialogRef`：`close(result?, {focusOrigin?})`、`closed` / `backdropClick` /
+- `DialogRef`：`close(result?, {focusOrigin?})`、`closedPromise`、`closed` / `backdropClick` /
   `keydownEvents` / `outsidePointerEvents` 事件流（`Emitter`）、
   `updatePosition()` / `updateSize()` / `addPanelClass()` / `removePanelClass()`；
 - 结构样式随打开自动注入，也可显式引入 `vue-cdk/dialog/style.css`。

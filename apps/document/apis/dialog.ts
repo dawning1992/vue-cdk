@@ -80,7 +80,13 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'DialogRef',
         signature: 'class DialogRef<R = unknown, C = unknown>',
         description:
-          '已打开对话框的引用：close(result?, { focusOrigin? }) 关闭（幂等）；事件流 closed/backdropClick/keydownEvents/outsidePointerEvents（关闭时 complete）；updatePosition()/updateSize()/addPanelClass()/removePanelClass()；属性 id、disableClose、componentInstance、containerInstance、overlayRef、config。',
+          '已打开对话框的引用：close(result?, { focusOrigin? }) 关闭（幂等）；closedPromise 在成功关闭后解析为关闭结果；事件流 closed/backdropClick/keydownEvents/outsidePointerEvents（关闭时 complete）；updatePosition()/updateSize()/addPanelClass()/removePanelClass()；属性 id、disableClose、componentInstance、containerInstance、overlayRef、config。',
+      },
+      {
+        name: 'DialogRef.closedPromise',
+        signature: 'readonly closedPromise: Promise<R | undefined>',
+        description:
+          '等待当前对话框成功关闭并取得 close(result) 的结果。closePredicate 阻止关闭时保持待定，无结果关闭时解析为 undefined；Promise 不会 reject。',
       },
       {
         name: 'DialogCloseOptions',

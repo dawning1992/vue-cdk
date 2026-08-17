@@ -4,6 +4,8 @@ import ModulePage from '../components/ModulePage.vue';
 import {apiGroups} from '../apis/dialog';
 import ComponentDialog from '../demos/dialog/ComponentDialog.vue';
 import ComponentDialogSource from '../demos/dialog/ComponentDialog.vue?raw';
+import ClosedPromiseDialog from '../demos/dialog/ClosedPromiseDialog.vue';
+import ClosedPromiseDialogSource from '../demos/dialog/ClosedPromiseDialog.vue?raw';
 import ConfirmContentSource from '../demos/dialog/ConfirmContent.vue?raw';
 import RenderFnDialog from '../demos/dialog/RenderFnDialog.vue';
 import RenderFnDialogSource from '../demos/dialog/RenderFnDialog.vue?raw';
@@ -34,6 +36,16 @@ import CustomContainerSource from '../demos/dialog/CustomContainer.vue?raw';
       :extra-sources="[{filename: 'ConfirmContent.vue', code: ConfirmContentSource}]"
     >
       <ComponentDialog />
+    </DemoCard>
+
+    <DemoCard
+      title="使用 closedPromise 等待关闭结果"
+      description="open() 仍立即返回 DialogRef，可先读取 id 或调用实例方法；await dialogRef.closedPromise 会在成功关闭后取得 close(result) 传回的结果。"
+      :source="ClosedPromiseDialogSource"
+      filename="ClosedPromiseDialog.vue"
+      :extra-sources="[{filename: 'ConfirmContent.vue', code: ConfirmContentSource}]"
+    >
+      <ClosedPromiseDialog />
     </DemoCard>
 
     <DemoCard
