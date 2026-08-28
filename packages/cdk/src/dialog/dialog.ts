@@ -8,6 +8,7 @@ import {scrollStrategies} from '../overlay/scroll/scroll-strategy-options';
 import {Emitter} from '../emitter';
 import {DialogConfig, type DialogContainerInstance, type DialogContent} from './dialog-config';
 import {DialogRef} from './dialog-ref';
+import {DialogBackdropManager} from './dialog-backdrop-manager';
 import {VDialogContainer} from './dialog-container';
 import {DEFAULT_DIALOG_CONFIG} from './dialog-injectors';
 import {injectDialogStyles} from './style-inject';
@@ -67,6 +68,8 @@ class AfterAllClosedEmitter extends Emitter<void> {
  * 职责：
  * - 打开 / 关闭 / 查询对话框，维护打开栈与 afterOpened / afterAllClosed 事件；
  * - 将 DialogConfig 转换为 OverlayConfig 并基于 overlay 渲染对话框容器；
+ * - 通过 DialogBackdropManager 统一管理共享遮罩与对话框 z-index 栈，
+ *   后开的对话框遮罩插在两层窗口之间并遮住下层，关闭顶层后下一层浮出；
  * - 首个对话框打开时隐藏非 overlay 内容（aria-hidden），全部关闭后恢复。
  *
  * 模块导出单例 `dialogService` 供命令式使用；组件内建议使用 `useDialog()`
@@ -74,6 +77,7 @@ class AfterAllClosedEmitter extends Emitter<void> {
  */
 export class Dialog implements DialogApi {
   private readonly _openDialogsAtThisLevel: DialogRef<any, any>[] = [];
+  private readonly _backdropManager = new DialogBackdropManager();
   private readonly _afterAllClosed: AfterAllClosedEmitter;
   private readonly _afterOpened = new Emitter<DialogRef<any, any>>();
   /** 被首开对话框隐藏的背景元素及其原 aria-hidden 值，最后关闭时恢复。 */
@@ -149,6 +153,7 @@ export class Dialog implements DialogApi {
     (this.openDialogs as DialogRef<R, C>[]).push(dialogRef);
     dialogRef.closed.subscribe(() => this._removeOpenDialog(dialogRef, true));
     this._afterOpened.next(dialogRef);
+    this._backdropManager.sync(this.openDialogs);
 
     return dialogRef;
   }
@@ -171,8 +176,10 @@ export class Dialog implements DialogApi {
         overlayPositionBuilder.global().centerHorizontally().centerVertically(),
       scrollStrategy: config.scrollStrategy || scrollStrategies.block(),
       panelClass: config.panelClass,
-      hasBackdrop: config.hasBackdrop,
-      // 空字符串时不覆盖 overlay 默认深色遮罩类（与 Angular 行为一致）。
+      // 遮罩由 Dialog 层共享管理，overlay 不再为每个对话框创建独立遮罩。
+      hasBackdrop: false,
+      // backdropClass / disableAnimations 只影响 overlay 自建遮罩，现由
+      // DialogBackdropManager 从 DialogConfig 读取，此处仍透传供兼容观察。
       backdropClass: config.backdropClass || undefined,
       direction: config.direction,
       minWidth: config.minWidth,
@@ -263,6 +270,7 @@ export class Dialog implements DialogApi {
           this._afterAllClosed.next();
         }
       }
+      this._backdropManager.sync(this.openDialogs);
     }
   }
 }

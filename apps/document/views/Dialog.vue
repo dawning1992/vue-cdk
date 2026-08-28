@@ -25,7 +25,7 @@ import CustomContainerSource from '../demos/dialog/CustomContainer.vue?raw';
   <ModulePage
     module-name="dialog"
     zh-name="对话框"
-    intro="模态对话框：命令式 useDialog() 打开组件、渲染函数或 VNode 内容；DialogRef 携带关闭结果与事件流，焦点陷阱、autoFocus / restoreFocus、ARIA 与滚动锁定由内置容器完成。"
+    intro="模态对话框：命令式 useDialog() 打开组件、渲染函数或 VNode 内容；DialogRef 携带关闭结果与事件流，焦点陷阱、autoFocus / restoreFocus、ARIA 与滚动锁定由内置容器完成；多个对话框共享唯一遮罩，由服务统一管理 z-index 栈（后开对话框的遮罩遮住下层窗口，关闭顶层后下一层浮出）。"
     :api-groups="apiGroups"
   >
     <DemoCard
@@ -77,8 +77,8 @@ import CustomContainerSource from '../demos/dialog/CustomContainer.vue?raw';
     </DemoCard>
 
     <DemoCard
-      title="多对话框与服务级 API"
-      description="连续打开两个对话框观察 LIFO 关闭顺序；演示 openDialogs、getDialogById、closeAll 与 afterOpened / afterAllClosed 事件流。"
+      title="多对话框：共享遮罩与 z-index 窗口管理"
+      description="从对话框 A 内继续打开 B、从 B 内打开无遮罩的 C，三层对话框按阶梯错开排布、互不遮挡，逐层观察 LIFO 关闭顺序与唯一共享遮罩：后开对话框的遮罩插在两层窗口之间并遮住下层，关闭顶层后遮罩 z-index 回落、下一层浮出；每层对话框内都有实时层级读条，并演示 openDialogs、getDialogById、closeAll 与 afterOpened / afterAllClosed 事件流。"
       :source="DialogStackDemoSource"
       filename="DialogStackDemo.vue"
     >

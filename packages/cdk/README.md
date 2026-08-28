@@ -510,6 +510,32 @@ async function openConfirm() {
 `TemplateRef`，参数为上下文对象（含 `$implicit`（data）与 `dialogRef`，
 并合并 `templateContext`）。
 
+### 共享遮罩与 z-index 窗口管理
+
+同一 Dialog 服务打开的多个对话框共用唯一遮罩元素，不再为每层各建一个
+`.vcdk-overlay-backdrop`。服务按打开顺序维护对话框 z-index 栈：
+
+- 每个对话框 host 的 z-index = `base + 2 × rank`（rank 从 1 起，base 读取
+  容器 CSS 变量 `--vcdk-overlay-container-z-index`，缺省 1000）；
+- 共享遮罩的 z-index = `base + 2 × (topRank − 1) + 1`，始终位于当前顶层
+  “参与遮罩”的对话框之下、其余对话框之上。后开的对话框遮罩会遮住下层
+  窗口；关闭顶层后遮罩 z-index 回落，下一层窗口浮出；
+- 点击遮罩只派发给最上层参与对话框（`DialogRef.backdropClick`），下层
+  对话框不会被误关；遮罩外观 `backdropClass` 跟随顶层对话框，任一参与者
+  `disableAnimations` 时遮罩全程使用 noop 动画。
+
+渲染模式与层级实现：
+
+- 浏览器支持原生 Popover（默认开启）时，对话框以 top-layer 渲染，共享
+  遮罩迁入顶层对话框 host 内部，层级由 top-layer 顺序决定（z-index 不参与）；
+- 浏览器不支持 Popover（或显式 `usePopover: false`）时回退为容器渲染，
+  遮罩作为 overlay 容器子元素、以 z-index 插在窗口之间。
+
+限制：仅对话框参与本 z-index 管理；容器渲染模式下非对话框浮层
+（tooltip / dropdown）保持原有 z-index，可能落在对话框之下；Popover 模式
+不受影响（top-layer 始终在对话框之上）。另 `DialogRef.overlayRef.backdropElement`
+对对话框恒为 `null`，遮罩由 Dialog 服务统一持有。
+
 ### 关键 API
 
 #### 常用配置（`DialogConfig`）
@@ -535,8 +561,9 @@ async function openConfirm() {
   `getDialogById(id)`、`openDialogs`、`afterOpened`、`afterAllClosed`
   （订阅时无打开对话框会立即触发，对齐 Angular 语义）；
 - `DialogRef`：`close(result?, {focusOrigin?})`、`closedPromise`、`closed` / `backdropClick` /
-  `keydownEvents` / `outsidePointerEvents` 事件流（`Emitter`）、
-  `updatePosition()` / `updateSize()` / `addPanelClass()` / `removePanelClass()`；
+  `keydownEvents` / `outsidePointerEvents` 事件流（`Emitter`，`backdropClick` 仅当该对话框
+  为顶层参与遮罩的对话框时触发）、`updatePosition()` / `updateSize()` / `addPanelClass()` /
+  `removePanelClass()`；
 - 结构样式随打开自动注入，也可显式引入 `vue-cdk/dialog/style.css`。
 
 ## drag-drop 模块

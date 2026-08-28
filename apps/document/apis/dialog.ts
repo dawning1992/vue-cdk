@@ -20,7 +20,7 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'Dialog',
         signature: 'class Dialog implements DialogApi',
         description:
-          '对话框服务：实现 DialogApi 全部能力；首个对话框打开时隐藏非 overlay 内容（aria-hidden），全部关闭后恢复。',
+          '对话框服务：实现 DialogApi 全部能力；多个对话框共享唯一遮罩并统一管理 z-index 栈（后开对话框的遮罩插在两层窗口之间并遮住下层，关闭顶层后 z-index 回落、下一层浮出）；首个对话框打开时隐藏非 overlay 内容（aria-hidden），全部关闭后恢复。遮罩外观（backdropClass）跟随顶层参与对话框；限制：容器模式（浏览器不支持 popover）下非对话框浮层不参与 z-index 管理，可能落在对话框之下，popover 模式不受影响。',
       },
       {
         name: 'DialogApi',
@@ -80,7 +80,7 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'DialogRef',
         signature: 'class DialogRef<R = unknown, C = unknown>',
         description:
-          '已打开对话框的引用：close(result?, { focusOrigin? }) 关闭（幂等）；closedPromise 在成功关闭后解析为关闭结果；事件流 closed/backdropClick/keydownEvents/outsidePointerEvents（关闭时 complete）；updatePosition()/updateSize()/addPanelClass()/removePanelClass()；属性 id、disableClose、componentInstance、containerInstance、overlayRef、config。',
+          '已打开对话框的引用：close(result?, { focusOrigin? }) 关闭（幂等）；closedPromise 在成功关闭后解析为关闭结果；事件流 closed/backdropClick/keydownEvents/outsidePointerEvents（关闭时 complete），backdropClick 在共享遮罩被点击且该对话框为顶层参与对话框时触发；updatePosition()/updateSize()/addPanelClass()/removePanelClass()；属性 id、disableClose、componentInstance、containerInstance、overlayRef、config（overlayRef.backdropElement 对对话框恒为 null，遮罩由 Dialog 服务统一持有）。',
       },
       {
         name: 'DialogRef.closedPromise',
