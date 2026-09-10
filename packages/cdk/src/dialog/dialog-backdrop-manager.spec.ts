@@ -75,6 +75,56 @@ describe('对话框共享遮罩', () => {
     expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
   });
 
+  it('存在实际过渡时，最后一个对话框关闭不会立即移除遮罩', () => {
+    const dialog = dialogService.open(SimpleContent);
+    const backdrop = getSharedBackdrop();
+    backdrop.style.transitionDuration = '100ms';
+
+    dialog.close();
+
+    expect(document.querySelector('.vcdk-overlay-backdrop')).toBe(backdrop);
+    expect(backdrop.classList.contains('vcdk-overlay-backdrop-showing')).toBe(false);
+
+    backdrop.dispatchEvent(new Event('transitionend'));
+
+    expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
+  });
+
+  it('遮罩离场期间重新打开对话框时复用遮罩并取消旧离场', async () => {
+    const first = dialogService.open(SimpleContent);
+    const backdrop = getSharedBackdrop();
+    backdrop.style.transitionDuration = '100ms';
+
+    first.close();
+    const second = dialogService.open(SimpleContent);
+
+    expect(getSharedBackdrop()).toBe(backdrop);
+    expect(backdrop.classList.contains('vcdk-overlay-backdrop-showing')).toBe(false);
+
+    // 旧离场事件不能移除新打开的共享遮罩。
+    backdrop.dispatchEvent(new Event('transitionend'));
+    expect(getSharedBackdrop()).toBe(backdrop);
+
+    await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+
+    // 新一轮淡入完成后，遮罩应保持可见。
+    backdrop.dispatchEvent(new Event('transitionend'));
+    expect(backdrop.classList.contains('vcdk-overlay-backdrop-showing')).toBe(true);
+
+    second.close();
+  });
+
+  it('transitioncancel 后按当前状态收敛，不残留遮罩', () => {
+    const dialog = dialogService.open(SimpleContent);
+    const backdrop = getSharedBackdrop();
+    backdrop.style.transitionDuration = '100ms';
+
+    dialog.close();
+    backdrop.dispatchEvent(new Event('transitioncancel'));
+
+    expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
+  });
+
   it('遮罩点击只派发给最上层参与对话框，下层 backdropClick 不触发', () => {
     const first = dialogService.open(SimpleContent);
     const second = dialogService.open(SimpleContent);

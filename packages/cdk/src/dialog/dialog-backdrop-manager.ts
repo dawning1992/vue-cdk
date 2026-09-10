@@ -12,6 +12,9 @@ const DEFAULT_BACKDROP_CLASS = 'vcdk-overlay-dark-backdrop';
 /** 容器 CSS 变量 --vcdk-overlay-container-z-index 解析失败时的兜底值。 */
 const DEFAULT_CONTAINER_Z_INDEX = 1000;
 
+type BackdropState = 'hidden' | 'entering' | 'visible' | 'leaving';
+type BackdropAnimation = 'enter' | 'leave';
+
 /**
  * 对话框共享遮罩管理器：同一 Dialog 服务打开的多个对话框共用唯一遮罩元素，
  * 并统一维护对话框 host 的 z-index 栈。
@@ -29,7 +32,7 @@ const DEFAULT_CONTAINER_Z_INDEX = 1000;
  * backdropClass 跟随顶层参与对话框，动画禁用规则为“任一参与者禁用即 noop”。
  *
  * 生命周期约定：sync() 在 open/close 后调用；首个参与对话框打开时
- * 淡入遮罩，最后一个关闭时立即移除（与 overlay dispose 行为一致）。
+ * 淡入遮罩，最后一个关闭时等待真实 transition 生命周期后移除。
  */
 export class DialogBackdropManager {
   private _element: HTMLElement | null = null;
@@ -37,12 +40,18 @@ export class DialogBackdropManager {
   private _topParticipant: DialogRef | null = null;
   /** 上一次应用到共享遮罩上的 backdropClass，切换顶层时据此清理。 */
   private _appliedBackdropClasses: string[] = [];
+  private _state: BackdropState = 'hidden';
+  private _animationVersion = 0;
+  private _animation: BackdropAnimation | null = null;
+  private _animationCleanup: (() => void) | null = null;
+  private _participants: readonly DialogRef[] = [];
 
   /**
    * 按当前打开栈重排所有对话框的 z-index，并同步共享遮罩的位置、层级与类。
    * @param dialogs 当前已打开的对话框列表（后打开的排末尾）。
    */
   sync(dialogs: readonly DialogRef[]): void {
+    this._participants = dialogs.filter(dialog => dialog.config.hasBackdrop !== false);
     const containerElement = dialogs[0]?.overlayRef.hostElement.parentElement ?? null;
     const base = this._resolveBaseZIndex(containerElement);
 
@@ -54,12 +63,12 @@ export class DialogBackdropManager {
       }
     });
 
-    const participants = dialogs.filter(dialog => dialog.config.hasBackdrop !== false);
+    const participants = this._participants;
     const topParticipant = participants[participants.length - 1] ?? null;
     this._topParticipant = topParticipant;
 
     if (!topParticipant) {
-      this._removeElement();
+      this._startLeave();
       return;
     }
 
@@ -84,16 +93,132 @@ export class DialogBackdropManager {
     this._applyBackdropClass(element, topParticipant.config.backdropClass);
     this._syncAnimationMode(element, participants);
     if (created) {
-      // 首个参与对话框打开时淡入；禁用动画或无 rAF 环境时立即显示。
-      const noAnimation = participants.some(dialog => dialog.config.disableAnimations === true);
-      if (noAnimation || typeof requestAnimationFrame === 'undefined') {
-        element.classList.add(BACKDROP_SHOWING_CLASS);
-      } else {
-        requestAnimationFrame(() => {
-          element.classList.add(BACKDROP_SHOWING_CLASS);
-        });
-      }
+      this._startEnter(element, participants);
+    } else if (this._state === 'leaving') {
+      this._startEnter(element, participants);
     }
+  }
+
+  /** 开始遮罩淡入；离场中的元素会被复用并通过版本号取消旧回调。 */
+  private _startEnter(element: HTMLElement, participants: readonly DialogRef[]): void {
+    this._cancelAnimation();
+    const version = ++this._animationVersion;
+    const noAnimation = participants.some(dialog => dialog.config.disableAnimations === true);
+    this._state = 'entering';
+    this._animation = 'enter';
+
+    const show = () => {
+      if (this._element !== element || this._animationVersion !== version) {
+        return;
+      }
+      element.classList.add(BACKDROP_SHOWING_CLASS);
+      if (noAnimation || !this._hasTransition(element)) {
+        this._finishAnimation(version, 'enter');
+      } else {
+        this._listenForTransition(element, version, 'enter');
+      }
+    };
+
+    if (noAnimation || typeof requestAnimationFrame === 'undefined') {
+      show();
+    } else {
+      requestAnimationFrame(show);
+    }
+  }
+
+  /** 开始遮罩淡出；没有参与者时才允许进入离场状态。 */
+  private _startLeave(): void {
+    const element = this._element;
+    if (!element || this._state === 'leaving' || this._state === 'hidden') {
+      return;
+    }
+
+    this._cancelAnimation();
+    const version = ++this._animationVersion;
+    this._state = 'leaving';
+    this._animation = 'leave';
+    element.classList.remove(BACKDROP_SHOWING_CLASS);
+
+    if (!this._hasTransition(element) || element.classList.contains(BACKDROP_NOOP_CLASS)) {
+      this._finishAnimation(version, 'leave');
+    } else {
+      this._listenForTransition(element, version, 'leave');
+    }
+  }
+
+  /** 监听当前版本的真实过渡结束，不使用固定时长兜底。 */
+  private _listenForTransition(
+    element: HTMLElement,
+    version: number,
+    animation: BackdropAnimation,
+  ): void {
+    const onEnd = (event: TransitionEvent) => {
+      if (event.target !== element || (event.propertyName && event.propertyName !== 'opacity')) {
+        return;
+      }
+      this._finishAnimation(version, animation);
+    };
+    const onCancel = (event: TransitionEvent) => {
+      if (event.target === element) {
+        this._finishAnimation(version, animation);
+      }
+    };
+    element.addEventListener('transitionend', onEnd);
+    element.addEventListener('transitioncancel', onCancel);
+    this._animationCleanup = () => {
+      element.removeEventListener('transitionend', onEnd);
+      element.removeEventListener('transitioncancel', onCancel);
+    };
+  }
+
+  /** 根据当前状态完成动画，并再次核对参与者，避免旧回调污染新状态。 */
+  private _finishAnimation(version: number, animation: BackdropAnimation): void {
+    if (
+      this._animationVersion !== version ||
+      this._animation !== animation ||
+      (animation === 'enter' && this._participants.length === 0) ||
+      (animation === 'leave' && this._participants.length > 0)
+    ) {
+      return;
+    }
+    this._cancelAnimation();
+    if (animation === 'enter') {
+      this._state = 'visible';
+      return;
+    }
+    this._removeElement();
+  }
+
+  /** 取消当前事件监听并使已排队的旧回调失效。 */
+  private _cancelAnimation(): void {
+    this._animationCleanup?.();
+    this._animationCleanup = null;
+    this._animation = null;
+  }
+
+  /** 判断元素是否存在实际 CSS 过渡；零时长时允许同步收敛。 */
+  private _hasTransition(element: HTMLElement): boolean {
+    if (typeof getComputedStyle === 'undefined') {
+      return false;
+    }
+    const style = getComputedStyle(element);
+    const durations = this._parseTimeList(style.transitionDuration);
+    const delays = this._parseTimeList(style.transitionDelay);
+    return durations.some((duration, index) => duration > 0 || (delays[index] ?? delays[0] ?? 0) > 0);
+  }
+
+  /** 解析 CSS transition 的秒或毫秒时间列表。 */
+  private _parseTimeList(value: string): number[] {
+    return value.split(',').map(item => {
+      const trimmed = item.trim();
+      if (trimmed.endsWith('ms')) {
+        return Number.parseFloat(trimmed) || 0;
+      }
+      if (trimmed.endsWith('s')) {
+        return (Number.parseFloat(trimmed) || 0) * 1000;
+      }
+      return 0;
+    });
   }
 
   /**
@@ -158,6 +283,8 @@ export class DialogBackdropManager {
     }
     this._element.remove();
     this._element = null;
+    this._state = 'hidden';
+    this._cancelAnimation();
     this._topParticipant = null;
     this._appliedBackdropClasses = [];
   }
