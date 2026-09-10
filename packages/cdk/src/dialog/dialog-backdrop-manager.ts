@@ -152,8 +152,15 @@ export class DialogBackdropManager {
     version: number,
     animation: BackdropAnimation,
   ): void {
+    const transitionEndProperties = this._getTransitionEndProperties(element);
     const onEnd = (event: TransitionEvent) => {
-      if (event.target !== element || (event.propertyName && event.propertyName !== 'opacity')) {
+      if (
+        event.target !== element ||
+        (event.propertyName &&
+          transitionEndProperties.length > 0 &&
+          !transitionEndProperties.includes('all') &&
+          !transitionEndProperties.includes(event.propertyName))
+      ) {
         return;
       }
       this._finishAnimation(version, animation);
@@ -205,6 +212,35 @@ export class DialogBackdropManager {
     const durations = this._parseTimeList(style.transitionDuration);
     const delays = this._parseTimeList(style.transitionDelay);
     return durations.some((duration, index) => duration > 0 || (delays[index] ?? delays[0] ?? 0) > 0);
+  }
+
+  /**
+   * 找出最晚结束的过渡属性。
+   *
+   * 多属性过渡不能在任一属性结束时清理遮罩，否则较短的过渡会截断较长的
+   * 过渡。这里按 transition-duration + transition-delay 计算最晚结束时间；
+   * `all` 无法静态展开，因此交给任一 transitionend 事件收敛。
+   */
+  private _getTransitionEndProperties(element: HTMLElement): string[] {
+    if (typeof getComputedStyle === 'undefined') {
+      return [];
+    }
+    const style = getComputedStyle(element);
+    const properties = style.transitionProperty
+      .split(',')
+      .map(property => property.trim())
+      .filter(Boolean);
+    if (properties.length === 0 || properties.includes('all')) {
+      return properties;
+    }
+
+    const durations = this._parseTimeList(style.transitionDuration);
+    const delays = this._parseTimeList(style.transitionDelay);
+    const endTimes = properties.map(
+      (_, index) => (durations[index] ?? durations[0] ?? 0) + (delays[index] ?? delays[0] ?? 0),
+    );
+    const latestEndTime = Math.max(...endTimes);
+    return properties.filter((_, index) => endTimes[index] === latestEndTime);
   }
 
   /** 解析 CSS transition 的秒或毫秒时间列表。 */

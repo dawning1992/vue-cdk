@@ -90,6 +90,40 @@ describe('对话框共享遮罩', () => {
     expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
   });
 
+  it('自定义过渡不包含 opacity 时，按自定义属性结束并移除遮罩', () => {
+    const dialog = dialogService.open(SimpleContent);
+    const backdrop = getSharedBackdrop();
+    backdrop.style.transitionProperty = 'transform';
+    backdrop.style.transitionDuration = '100ms';
+
+    dialog.close();
+
+    const transitionEnd = new Event('transitionend') as TransitionEvent;
+    Object.defineProperty(transitionEnd, 'propertyName', {value: 'transform'});
+    backdrop.dispatchEvent(transitionEnd);
+
+    expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
+  });
+
+  it('多属性过渡时等待最晚结束的属性，避免遮罩提前移除', () => {
+    const dialog = dialogService.open(SimpleContent);
+    const backdrop = getSharedBackdrop();
+    backdrop.style.transitionProperty = 'transform, opacity';
+    backdrop.style.transitionDuration = '100ms, 300ms';
+
+    dialog.close();
+
+    const shortTransitionEnd = new Event('transitionend') as TransitionEvent;
+    Object.defineProperty(shortTransitionEnd, 'propertyName', {value: 'transform'});
+    backdrop.dispatchEvent(shortTransitionEnd);
+    expect(document.querySelector('.vcdk-overlay-backdrop')).toBe(backdrop);
+
+    const longTransitionEnd = new Event('transitionend') as TransitionEvent;
+    Object.defineProperty(longTransitionEnd, 'propertyName', {value: 'opacity'});
+    backdrop.dispatchEvent(longTransitionEnd);
+    expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
+  });
+
   it('遮罩离场期间重新打开对话框时复用遮罩并取消旧离场', async () => {
     const first = dialogService.open(SimpleContent);
     const backdrop = getSharedBackdrop();
