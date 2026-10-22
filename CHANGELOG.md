@@ -1,10 +1,18 @@
 # 未发布
 
+# 0.1.0-beta.7 (2026-10-22)
+
 ### dialog
 
 | Commit | Type | Description |
 | -- | -- | -- |
-| — | fix | 修复 Popover 模式下关闭最后一个对话框时共享遮罩的淡出动画不可见 |
+| [af5d4ae](https://github.com/dawning1992/vue-cdk/commit/af5d4ae) | fix | 修复 Popover 模式下关闭最后一个对话框时共享遮罩的淡出动画不可见 |
+
+### docs
+
+| Commit | Type | Description |
+| -- | -- | -- |
+| [af5d4ae](https://github.com/dawning1992/vue-cdk/commit/af5d4ae) | docs | README 默认使用英文并提供中文切换链接 |
 
 # 0.1.0-beta.6 (2026-09-10)
 
