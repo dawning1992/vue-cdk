@@ -45,6 +45,8 @@ export class DialogBackdropManager {
   private _animation: BackdropAnimation | null = null;
   private _animationCleanup: (() => void) | null = null;
   private _participants: readonly DialogRef[] = [];
+  /** 最近一次参与对话框所在的容器，用于 Popover host 销毁后的遮罩离场。 */
+  private _containerElement: HTMLElement | null = null;
 
   /**
    * 按当前打开栈重排所有对话框的 z-index，并同步共享遮罩的位置、层级与类。
@@ -53,6 +55,9 @@ export class DialogBackdropManager {
   sync(dialogs: readonly DialogRef[]): void {
     this._participants = dialogs.filter(dialog => dialog.config.hasBackdrop !== false);
     const containerElement = dialogs[0]?.overlayRef.hostElement.parentElement ?? null;
+    if (containerElement) {
+      this._containerElement = containerElement;
+    }
     const base = this._resolveBaseZIndex(containerElement);
 
     // 所有对话框按打开顺序获得递增 z-index：关闭中间层后栈会塌缩重排，
@@ -137,6 +142,14 @@ export class DialogBackdropManager {
     const version = ++this._animationVersion;
     this._state = 'leaving';
     this._animation = 'leave';
+    // Popover host 已随最后一个 overlay 销毁；移回页面中的 overlay 容器，
+    // 否则 transitionend 即使触发，离场过程也完全不可见。
+    if (!element.isConnected && this._containerElement?.isConnected) {
+      this._containerElement.appendChild(element);
+      element.style.zIndex = String(this._resolveBaseZIndex(this._containerElement) + 1);
+      // 先确认迁移后的可见起点，再切换透明度；同一帧合并样式会跳过过渡。
+      void element.offsetWidth;
+    }
     element.classList.remove(BACKDROP_SHOWING_CLASS);
 
     if (!this._hasTransition(element) || element.classList.contains(BACKDROP_NOOP_CLASS)) {
@@ -323,5 +336,6 @@ export class DialogBackdropManager {
     this._cancelAnimation();
     this._topParticipant = null;
     this._appliedBackdropClasses = [];
+    this._containerElement = null;
   }
 }

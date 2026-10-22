@@ -235,4 +235,25 @@ describe('对话框共享遮罩', () => {
       delete (document.body as unknown as {showPopover?: unknown}).showPopover;
     }
   });
+
+  it('popover 模式下最后一个对话框关闭时遮罩留在页面完成离场过渡', () => {
+    Object.defineProperty(document.body, 'showPopover', {value: () => {}, configurable: true});
+    try {
+      const dialog = dialogService.open(SimpleContent);
+      const backdrop = getSharedBackdrop();
+      const container = dialog.overlayRef.hostElement.parentElement;
+      backdrop.style.transitionDuration = '100ms';
+
+      dialog.close();
+
+      expect(backdrop.isConnected).toBe(true);
+      expect(backdrop.parentElement).toBe(container);
+      expect(backdrop.classList.contains('vcdk-overlay-backdrop-showing')).toBe(false);
+
+      backdrop.dispatchEvent(new Event('transitionend'));
+      expect(document.querySelector('.vcdk-overlay-backdrop')).toBeNull();
+    } finally {
+      delete (document.body as unknown as {showPopover?: unknown}).showPopover;
+    }
+  });
 });
