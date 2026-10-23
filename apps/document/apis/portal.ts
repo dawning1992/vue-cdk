@@ -5,6 +5,7 @@ export const apiGroups: readonly ApiGroup[] = [
   {
     title: '内容源（Portal）',
     rows: [
+      {name: 'TemplateRef / TemplateRefHandle<C>', signature: '组件 / 模板句柄接口', description: 'TemplateRef 通过组件 ref 暴露句柄，挂载后可 new TemplatePortal(tpl.value)。自身不渲染默认插槽；支持作用域上下文、父级响应式状态与事件。来源卸载自动卸载出口，句柄永久失效；只保证应用级上下文。'},
       {
         name: 'Portal<T>',
         signature: 'abstract class Portal<T>',
@@ -21,7 +22,7 @@ export const apiGroups: readonly ApiGroup[] = [
         name: 'TemplatePortal',
         signature: 'class TemplatePortal<C = unknown> extends Portal<VNode | null>',
         description:
-          '模板内容源：new TemplatePortal(render, context?, appContext?)。render 接收上下文返回 VNode（可多根）；attach(outlet, context?) 传入的上下文优先于构造上下文，detach() 清空上下文。',
+          '模板内容源：new TemplatePortal(render 或 TemplateRefHandle, context?, appContext?)。render 接收上下文返回 VNode（可多根）；attach(outlet, context?) 传入的上下文优先于构造上下文，detach() 清空上下文。',
       },
       {
         name: 'DomPortal',

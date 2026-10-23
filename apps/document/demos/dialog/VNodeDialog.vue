@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// 本例专门展示 VNode 输入和动态组件构造，因此保留 h()。
 import {defineComponent, h, ref} from 'vue';
 import {useDialog, useDialogData, useDialogRef} from 'vue-cdk/dialog';
 

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import {h, onBeforeUnmount, ref, type VNode} from 'vue';
+import {onBeforeUnmount, ref, shallowRef, type CSSProperties} from 'vue';
 import {useDialog, type DialogRef} from 'vue-cdk/dialog';
+import {TemplateRef, type TemplateRefHandle} from 'vue-cdk/portal';
 import {overlayPositionBuilder} from 'vue-cdk/overlay';
 
-// 对话框内容经渲染函数 h() 在 overlay 中渲染，不参与本组件 scoped 样式，
-// 因此统一使用内联样式，避免样式作用域丢失导致布局错乱。
+// 浮层内容使用内联样式，保持不同容器模式下的演示外观一致。
 const contentStyle = {padding: '20px 24px', minWidth: '320px'};
 const headingStyle = {margin: '0 0 8px', fontSize: '16px'};
 const descStyle = {margin: '0 0 14px', color: '#6b7280', fontSize: '13px'};
@@ -19,7 +19,7 @@ const readoutBoxStyle = {
   lineHeight: '1.7',
 };
 const readoutLineStyle = {margin: '2px 0'};
-const buttonRowStyle = {
+const buttonRowStyle: CSSProperties = {
   display: 'flex',
   flexWrap: 'wrap',
   gap: '8px',
@@ -122,77 +122,14 @@ function refreshStack(): void {
   collectStackInfo();
 }
 
-/**
- * 渲染共享遮罩与层级的实时读条。
- * 读取 stackInfo ref 后，任何一层打开/关闭都会驱动所有已打开对话框的内容重新渲染。
- */
-function renderStackReadout(): VNode {
-  const info = stackInfo.value;
-  const lines: VNode[] = info.dialogs.map(layer => {
-    const tag = layer.hasBackdrop ? layer.id : `${layer.id}（无遮罩）`;
-    return h(
-      'div',
-      {style: readoutLineStyle},
-      [
-        h('span', {style: {color: '#f59e0b'}}, tag),
-        ` z = ${layer.zIndex} `,
-        layer.isTop ? '（顶层）' : '（下层）',
-      ],
-    );
-  });
-  if (info.backdropCount) {
-    lines.push(
-      h(
-        'div',
-        {style: {...readoutLineStyle, color: '#f8fafc'}},
-        `共享遮罩 z = ${info.backdropZIndex}（全站仅 ${info.backdropCount} 个遮罩元素）`,
-      ),
-    );
-  }
-  lines.push(h('div', {style: {...readoutLineStyle, opacity: 0.65}}, `渲染：${info.renderMode}`));
-  return h('div', {style: readoutBoxStyle}, lines);
-}
+const content = shallowRef<TemplateRefHandle | null>(null);
 
-/** 打开指定 id 的对话框；内容为渲染函数，关闭时返回自身 id。 */
+/** 打开指定 id 的对话框；内容由 TemplateRef 生成，关闭时返回自身 id。 */
 function openDialog(id: DialogId): void {
-  const meta = dialogMeta[id];
+  if (!content.value) return;
+  const handle = content.value;
   const dialogRef = dialog.open(
-    (ctx: Record<string, unknown>) =>
-      h('div', {style: contentStyle}, [
-        h('h3', {style: headingStyle}, meta.title),
-        h('p', {style: descStyle}, meta.desc),
-        renderStackReadout(),
-        h('div', {style: buttonRowStyle}, [
-          ...(meta.next
-            ? [
-                h(
-                  'button',
-                  {
-                    class: 'doc-btn primary',
-                    onClick: () => openDialog(meta.next as DialogId),
-                  },
-                  `打开${dialogMeta[meta.next].title}`,
-                ),
-              ]
-            : []),
-          h(
-            'button',
-            {
-              class: 'doc-btn',
-              onClick: () => (ctx.dialogRef as DialogRef).close(id),
-            },
-            '关闭本层',
-          ),
-          h(
-            'button',
-            {
-              class: 'doc-btn',
-              onClick: () => dialog.closeAll(),
-            },
-            'closeAll',
-          ),
-        ]),
-      ]),
+    (ctx: Record<string, unknown>) => handle.render({...ctx, id}),
     {
       id,
       panelClass: 'doc-dialog-panel',
@@ -200,7 +137,9 @@ function openDialog(id: DialogId): void {
       ...(id === 'dialog-c' ? {hasBackdrop: false} : {}),
     },
   );
+  const unsubscribe = handle.subscribe(() => dialogRef.close());
   dialogRef.closed.subscribe(value => {
+    unsubscribe();
     push(`closed：${String(value)}`);
     refreshStack();
   });
@@ -233,6 +172,26 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <TemplateRef ref="content" v-slot="{id, dialogRef}">
+    <div :style="contentStyle">
+      <h3 :style="headingStyle">{{ dialogMeta[id as DialogId].title }}</h3>
+      <p :style="descStyle">{{ dialogMeta[id as DialogId].desc }}</p>
+      <div :style="readoutBoxStyle">
+        <div v-for="layer in stackInfo.dialogs" :key="layer.id" :style="readoutLineStyle">
+          <span style="color: #f59e0b">{{ layer.id }}{{ layer.hasBackdrop ? '' : '（无遮罩）' }}</span>
+          z = {{ layer.zIndex }} {{ layer.isTop ? '（顶层）' : '（下层）' }}
+        </div>
+        <div v-if="stackInfo.backdropCount" :style="readoutLineStyle">共享遮罩 z = {{ stackInfo.backdropZIndex }}（全站仅 {{ stackInfo.backdropCount }} 个遮罩元素）</div>
+        <div :style="readoutLineStyle">渲染：{{ stackInfo.renderMode }}</div>
+      </div>
+      <div :style="buttonRowStyle">
+        <button v-if="dialogMeta[id as DialogId].next" class="doc-btn primary" @click="openDialog(dialogMeta[id as DialogId].next!)">打开 {{ dialogMeta[dialogMeta[id as DialogId].next!].title }}</button>
+        <button class="doc-btn" @click="(dialogRef as DialogRef).close(id)">关闭本层</button>
+        <button class="doc-btn" @click="dialog.closeAll()">closeAll</button>
+      </div>
+    </div>
+  </TemplateRef>
+
   <div class="wrap">
     <div class="buttons">
       <button type="button" class="doc-btn primary" @click="openDialog('dialog-a')">

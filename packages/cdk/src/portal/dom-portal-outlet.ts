@@ -15,6 +15,8 @@ export interface DomPortalOutletOptions {
    * portal 自带 appContext 时优先使用 portal 的。
    */
   appContext?: AppContext | null;
+  /** 来源模板卸载后的附加清理；出口先卸载内容，再调用此回调，供 overlay 清理遮罩与策略。 */
+  onTemplateDestroy?: () => void;
 }
 
 /**
@@ -29,11 +31,13 @@ export class DomPortalOutlet extends BasePortalOutlet {
   /** 内容投影到的目标元素。 */
   readonly outletElement: Element;
   private _appContext: AppContext | null;
+  private _onTemplateDestroy?: () => void;
 
   constructor(outletElement: Element, options: DomPortalOutletOptions = {}) {
     super();
     this.outletElement = outletElement;
     this._appContext = options.appContext ?? null;
+    this._onTemplateDestroy = options.onTemplateDestroy;
   }
 
   /**
@@ -61,15 +65,28 @@ export class DomPortalOutlet extends BasePortalOutlet {
 
   /** 挂载模板 Portal：经 PortalTemplate 包装后渲染，保证父级响应式状态可驱动更新。 */
   attachTemplatePortal<C>(portal: TemplatePortal<C>): VNode {
+    const unsubscribe = portal.templateRef?.subscribe(() => {
+      this.detach();
+      this._onTemplateDestroy?.();
+    });
     const vnode = h(PortalTemplate, {
       render: portal.render as TemplateRenderFn,
       context: portal.context,
     });
     this._applyAppContext(vnode, portal.appContext);
-    render(vnode, this.outletElement);
+    try {
+      render(vnode, this.outletElement);
+    } catch (error) {
+      unsubscribe?.();
+      render(null, this.outletElement);
+      throw error;
+    }
     portal.setAttachedHost(this);
     this._attachedPortal = portal;
-    this.setDisposeFn(() => render(null, this.outletElement));
+    this.setDisposeFn(() => {
+      unsubscribe?.();
+      render(null, this.outletElement);
+    });
     return vnode;
   }
 

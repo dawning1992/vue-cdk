@@ -1,3 +1,4 @@
+import {captureTemplate} from './template-ref';
 import {
   defineComponent,
   getCurrentInstance,
@@ -24,7 +25,9 @@ import {DomPortalOutlet} from './dom-portal-outlet';
  *
  * 自身不渲染任何 DOM；把默认插槽捕获为 `TemplatePortal` 的渲染函数，
  * 通过模板 ref 暴露给父级。插槽 props 即模板上下文，等价 Angular 的
- * `$implicit`；插槽内的父级响应式状态会在内容挂载后继续驱动更新。
+ * 上下文对象；插槽内的父级响应式状态会在内容挂载后继续驱动更新。
+ *
+ * 来源组件卸载后自动卸载内容且 portal 永久失效；仅保证应用级 provide/inject。
  *
  * 用法：
  * ```vue
@@ -33,26 +36,13 @@ import {DomPortalOutlet} from './dom-portal-outlet';
  * </VPortal>
  * ```
  * ```ts
- * source.value.attach(outlet, {data: 'hello'}); // 或 source.value.portal.attach(...)
+ * source.value.portal.attach(outlet, {data: 'hello'}); // 或 source.value.portal.attach(...)
  * ```
  */
 export const VPortal = defineComponent({
   name: 'VcdkPortal',
   setup(_props, {expose}) {
-    const instance = getCurrentInstance()!;
-
-    // 门户实例在组件生命周期内保持稳定；渲染函数每次调用时读取最新插槽，
-    // 因此插槽内容即使引用父级响应式状态，也能在挂载后持续更新。
-    const portal = new TemplatePortal<unknown>(
-      context => {
-        const slot = instance.slots.default;
-        // 未提供上下文时按空对象调用插槽，符合 Vue 作用域插槽 props 约定，
-        // 避免 `v-slot="{data}"` 在 undefined 上解构报错。
-        return slot ? slot(context ?? {}) : null;
-      },
-      undefined,
-      instance.appContext,
-    );
+    const portal = new TemplatePortal(captureTemplate());
 
     expose({
       /** 捕获的模板 Portal。 */

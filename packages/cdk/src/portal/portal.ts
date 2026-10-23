@@ -1,3 +1,4 @@
+import type {TemplateRefHandle} from './template-ref';
 import type {AppContext, Component, ComponentPublicInstance, MaybeRefOrGetter, VNode} from 'vue';
 import {
   throwNoPortalAttachedError,
@@ -52,7 +53,13 @@ export abstract class Portal<T> {
       throwPortalAlreadyAttachedError();
     }
     this._attachedHost = host;
-    return host.attach(this) as T;
+    try {
+      return host.attach(this) as T;
+    } catch (error) {
+      // 出口可能在分发前拒绝挂载（例如已 dispose），不能留下虚假的宿主引用。
+      this._attachedHost = null;
+      throw error;
+    }
   }
 
   /** 从当前出口卸载自身；未挂载时抛错。 */
@@ -111,8 +118,8 @@ export class ComponentPortal<T extends Component = Component> extends Portal<Com
  * 模板 Portal：挂载时用上下文调用渲染函数生成内容。
  *
  * Vue 与 Angular 的能力映射：
- * - Angular `TemplateRef` → 渲染函数 `(context) => VNode | VNode[] | null`；
- *   声明式场景由 `VPortal` 组件把插槽捕获为渲染函数；
+ * - Angular `TemplateRef` → `TemplateRefHandle<C>`（TemplateRef 组件 ref）或渲染函数；
+ *   VPortal 复用相同捕获能力并直接暴露 Portal。
  * - Angular `context`/`$implicit` → 渲染函数参数 / 插槽 props；
  * - Angular `injector` → `appContext`。
  *
@@ -120,6 +127,8 @@ export class ComponentPortal<T extends Component = Component> extends Portal<Com
  * `detach()` 会清空上下文，与 Angular 语义一致。
  */
 export class TemplatePortal<C = unknown> extends Portal<VNode | null> {
+  /** 模板来源；渲染函数构造时为空，供出口管理来源失效订阅。 */
+  readonly templateRef: TemplateRefHandle<C> | null;
   /** 生成内容的渲染函数。 */
   readonly render: TemplateRenderFn<C>;
   /** 当前上下文；attach 时可覆盖。 */
@@ -127,11 +136,19 @@ export class TemplatePortal<C = unknown> extends Portal<VNode | null> {
   /** 渲染时使用的应用上下文；null 表示回退到出口上下文。 */
   appContext: AppContext | null;
 
-  constructor(render: TemplateRenderFn<C>, context?: C, appContext?: AppContext | null) {
+  /**
+   * 创建模板内容源；构造不挂载内容，也不取得 DOM 所有权。
+   * @param render 已就绪的模板句柄或兼容的渲染函数；不得传入 null 或组件定义。
+   * @param context 初始上下文；缺省传给句柄插槽时归一化为空对象。
+   * @param appContext 应用上下文；缺省优先来源句柄，再回退出口。局部 provide 不保证继承。
+   * 来源卸载后挂载抛错；detach/dispose 销毁内容实例，再挂载创建新实例。
+   */
+  constructor(render: TemplateRenderFn<C> | TemplateRefHandle<C>, context?: C, appContext?: AppContext | null) {
     super();
-    this.render = render;
+    this.templateRef = typeof render === 'function' ? null : render;
+    this.render = typeof render === 'function' ? render : render.render;
     this.context = context;
-    this.appContext = appContext ?? null;
+    this.appContext = appContext ?? this.templateRef?.appContext ?? null;
   }
 
   /** 挂载；传入 context 时覆盖实例上的上下文并生效。 */

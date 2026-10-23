@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import {getCurrentInstance, onBeforeUnmount, ref} from 'vue';
-import {ComponentPortal} from 'vue-cdk/portal';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {TemplateRef, TemplatePortal, type TemplateRefHandle} from 'vue-cdk/portal';
 import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
-import OverlayPortalContent from '../overlay/OverlayPortalContent.vue';
 
 const overlay = useOverlay();
-const appContext = getCurrentInstance()!.appContext;
+const tpl = shallowRef<TemplateRefHandle | null>(null);
 const clicks = ref(0);
 const log = ref('');
 let overlayRef: OverlayRef | null = null;
 
-/** 以组件 Portal 向 overlay 挂载 SFC，验证 overlay 分层构建在 portal 之上。 */
+/** 以模板 Portal 向 overlay 挂载插槽，验证 overlay 分层构建在 portal 之上。 */
 function openPanel(): void {
-  if (overlayRef?.hasAttached()) {
+  if (!tpl.value || overlayRef?.hasAttached()) {
     return;
   }
   overlayRef = overlay.create({
@@ -20,18 +19,12 @@ function openPanel(): void {
     positionStrategy: overlay.position().global().centerHorizontally().centerVertically(),
     scrollStrategy: overlay.scrollStrategies.block(),
   });
-  overlayRef.attach(new ComponentPortal(OverlayPortalContent, {
-    appContext,
-    props: {
-      clicks,
-      onClose: closePanel,
-      onClick: () => clicks.value++,
-    },
-  }));
+  overlayRef.attach(new TemplatePortal(tpl.value));
   overlayRef.backdropClick().subscribe(() => closePanel());
-  log.value = '已打开：overlayRef.attach(ComponentPortal)';
+  log.value = '已打开：overlayRef.attach(TemplatePortal)';
 }
 
+/** 销毁浮层资源；父级计数保留，下一次打开创建新的内容视图。 */
 function closePanel(): void {
   overlayRef?.detach();
   overlayRef?.dispose();
@@ -46,6 +39,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <TemplateRef ref="tpl">
+    <section style="padding: 24px; background: white">
+      <p>点击次数：{{ clicks }}</p>
+      <button @click="clicks++">增加</button>
+      <button @click="closePanel">关闭</button>
+    </section>
+  </TemplateRef>
   <div class="wrap">
     <button type="button" class="doc-btn primary" @click="openPanel">
       用 TemplatePortal 打开浮层

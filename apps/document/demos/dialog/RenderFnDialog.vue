@@ -5,7 +5,7 @@ import {useDialog, type DialogRef} from 'vue-cdk/dialog';
 const dialog = useDialog();
 const result = ref('');
 
-/** 渲染函数内容：等价 Angular 的 TemplateRef，上下文含 $implicit 与 dialogRef。 */
+/** 专门演示兼容的渲染函数 API，因此保留 h()；上下文含 $implicit 与 dialogRef。 */
 function openRenderFn(): void {
   const dialogRef = dialog.open(
     (ctx: Record<string, unknown>) =>

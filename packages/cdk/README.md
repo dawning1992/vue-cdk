@@ -834,17 +834,49 @@ const activePortal = ref<Portal<unknown> | null>(null);
 Imperative (component/template/DOM):
 
 ```ts
-import {h} from 'vue';
-import {ComponentPortal, DomPortal, DomPortalOutlet, TemplatePortal} from 'vue-cdk/portal';
+import {ComponentPortal, DomPortal, DomPortalOutlet} from 'vue-cdk/portal';
 import MyComponent from './MyComponent.vue';
 
 const outlet = new DomPortalOutlet(document.querySelector('#slot')!);
 outlet.attach(new ComponentPortal(MyComponent, {props: {title: 'Hello'}}));
 outlet.detach();
-outlet.attach(new TemplatePortal(ctx => h('p', ctx.msg), {msg: 'hi'}));
-outlet.detach();
 outlet.attach(new DomPortal(document.querySelector('#movable')!));
 ```
+
+
+显式模板引用（完整 SFC）：
+
+```vue
+<script setup lang="ts">
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {TemplateRef, TemplatePortal, type TemplateRefHandle} from 'vue-cdk/portal';
+import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
+const tpl = shallowRef<TemplateRefHandle<{msg: string}> | null>(null);
+const count = ref(0);
+const overlay = useOverlay();
+let panel: OverlayRef | null = null;
+/** 挂载后用户事件中检查引用就绪，关闭后允许重开。 */
+function open() {
+  if (!tpl.value || panel?.hasAttached()) return;
+  panel ??= overlay.create();
+  panel.attach(new TemplatePortal<{msg: string}>(tpl.value, {msg: '你好'}));
+}
+/** 关闭内容但保留浮层引用以便重开。 */
+function close() { panel?.detach(); }
+onBeforeUnmount(() => panel?.dispose());
+</script>
+<template>
+  <button @click="open">打开</button>
+  <TemplateRef ref="tpl" v-slot="{msg}">
+    <button @click="count++">{{ msg }}：{{ count }}</button>
+    <button @click="close">关闭</button>
+  </TemplateRef>
+</template>
+```
+
+TemplateRef 自身不渲染内容；Vue 裸 `<template ref="tpl">` 不支持此契约。
+来源卸载自动卸载内容，之后句柄失效。仅保证应用级上下文，不保证局部 provide/inject。
+更多上下文、重挂载与清理约定见 [模板引用指南](src/portal/TEMPLATE_REF.md)。
 
 ## scrolling
 

@@ -1,32 +1,22 @@
 <script setup lang="ts">
-import {h, onBeforeUnmount, ref} from 'vue';
-import {DomPortalOutlet, TemplatePortal} from 'vue-cdk/portal';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {DomPortalOutlet, TemplatePortal, TemplateRef, type TemplateRefHandle} from 'vue-cdk/portal';
 
 const outletEl = ref<HTMLElement | null>(null);
 const statusInfo = ref('');
 let outlet: DomPortalOutlet | null = null;
 
-/** 模板 Portal：渲染函数接收上下文，attach 时传入的上下文可覆盖构造值。 */
-const portal = new TemplatePortal<{status: 'fresh' | 'rotten'}>(
-  ctx =>
-    h('div', {class: 'portal-card'}, [
-      h('strong', `香蕉状态：${ctx.status}`),
-      h(
-        'span',
-        {class: ctx.status === 'fresh' ? 'fresh-tag' : 'rotten-tag'},
-        ctx.status === 'fresh' ? '（新鲜，推荐食用）' : '（腐烂，请勿食用）',
-      ),
-    ]),
-  {status: 'fresh'},
-);
+const tpl = shallowRef<TemplateRefHandle<{status: 'fresh' | 'rotten'}> | null>(null);
+let portal: TemplatePortal<{status: 'fresh' | 'rotten'}> | null = null;
 
 /** attach 时传入上下文覆盖构造上下文。 */
 function attachWith(status: 'fresh' | 'rotten'): void {
-  if (!outletEl.value) {
+  if (!outletEl.value || !tpl.value) {
     return;
   }
+  portal ??= new TemplatePortal<{status: 'fresh' | 'rotten'}>(tpl.value, {status: 'fresh'});
   outlet ??= new DomPortalOutlet(outletEl.value);
-  if (portal.isAttached) {
+  if (portal?.isAttached) {
     portal.detach();
   }
   portal.attach(outlet, {status});
@@ -35,10 +25,10 @@ function attachWith(status: 'fresh' | 'rotten'): void {
 
 /** detach 会清空上下文。 */
 function clearPortal(): void {
-  if (portal.isAttached) {
+  if (portal?.isAttached) {
     portal.detach();
   }
-  statusInfo.value = `已 detach，portal.context 已清空（${portal.context}）`;
+  statusInfo.value = `已 detach，portal.context 已清空（${portal?.context}）`;
 }
 
 onBeforeUnmount(() => {
@@ -48,6 +38,14 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <TemplateRef ref="tpl" v-slot="{status}">
+    <div class="portal-card">
+      <strong>香蕉状态：{{ status }}</strong>
+      <span :class="status === 'fresh' ? 'fresh-tag' : 'rotten-tag'">
+        {{ status === 'fresh' ? '（新鲜，推荐食用）' : '（腐烂，请勿食用）' }}
+      </span>
+    </div>
+  </TemplateRef>
   <div class="wrap column">
     <div class="controls">
       <button type="button" class="doc-btn primary" @click="attachWith('fresh')">
@@ -59,7 +57,6 @@ onBeforeUnmount(() => {
       <button type="button" class="doc-btn" @click="clearPortal">卸载</button>
     </div>
     <div ref="outletEl" class="portal-outlet">
-      <p v-if="!portal.isAttached" class="placeholder">出口空闲</p>
     </div>
     <p class="result">{{ statusInfo || '—' }}</p>
   </div>

@@ -86,7 +86,10 @@ export class OverlayRef {
     this._keyboardDispatcher = deps.keyboardDispatcher;
     this._outsideClickDispatcher = deps.outsideClickDispatcher;
     this._animationsDisabled = deps.animationsDisabled ?? false;
-    this._outlet = new DomPortalOutlet(this._pane, {appContext: deps.appContext ?? null});
+    this._outlet = new DomPortalOutlet(this._pane, {
+      appContext: deps.appContext ?? null,
+      onTemplateDestroy: () => this.detach(),
+    });
 
     if (config.scrollStrategy) {
       this._scrollStrategy = config.scrollStrategy;
@@ -136,19 +139,25 @@ export class OverlayRef {
     this._attachHost();
 
     let attachedResult: VNode | null | unknown = null;
-    if (content != null) {
-      if (content instanceof Portal) {
-        // Portal 路径：内容生命周期由 portal 出口统一管理。
-        attachedResult = this._outlet.attach(content);
-      } else {
-        // 旧路径兼容：VNode 或渲染函数经模板 Portal 包装后挂载，
-        // 包装组件会追踪渲染函数内的响应式依赖，父级状态变化可驱动内容更新。
-        const vnode = normalizeContent(content);
-        const renderFn: () => VNode | VNode[] | null =
-          typeof content === 'function' ? content : () => content;
-        this._outlet.attachTemplatePortal(new TemplatePortal(renderFn, undefined));
-        attachedResult = vnode;
+    try {
+      if (content != null) {
+        if (content instanceof Portal) {
+          // Portal 路径：内容生命周期由 portal 出口统一管理。
+          attachedResult = this._outlet.attach(content);
+        } else {
+          // 旧路径兼容：VNode 或渲染函数经模板 Portal 包装后挂载，
+          // 包装组件会追踪渲染函数内的响应式依赖，父级状态变化可驱动内容更新。
+          const vnode = normalizeContent(content);
+          const renderFn: () => VNode | VNode[] | null =
+            typeof content === 'function' ? content : () => content;
+          this._outlet.attachTemplatePortal(new TemplatePortal(renderFn, undefined));
+          attachedResult = vnode;
+        }
       }
+    } catch (error) {
+      // 内容失败时尚未启用策略；恢复宿主与挂载标记，允许修正内容后重试。
+      this.detach();
+      throw error;
     }
 
     this._positionStrategy?.attach(this);

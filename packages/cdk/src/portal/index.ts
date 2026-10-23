@@ -20,3 +20,5 @@ export {
   type DomPortalOutletOptions,
 } from './dom-portal-outlet';
 export {VPortal, VPortalOutlet} from './v-portal';
+
+export {TemplateRef, type TemplateRefHandle} from './template-ref';
