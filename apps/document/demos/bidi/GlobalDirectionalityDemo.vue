@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {computed} from 'vue';
 import {useDirectionality} from 'vue-cdk/bidi';
+import {useLocale} from '../../composables/useLocale';
+const {locale} = useLocale();
 
 const directionality = useDirectionality();
 const label = computed(() => directionality.valueSignal.value.toUpperCase());
@@ -12,8 +14,8 @@ function toggle() {
 
 <template>
   <div class="demo-row">
-    <span>当前方向：<strong>{{ label }}</strong></span>
-    <button type="button" @click="toggle">切换方向上下文</button>
+    <span>{{ locale === 'en-US' ? 'Current direction: ' : '当前方向：' }}<strong>{{ label }}</strong></span>
+    <button type="button" @click="toggle">{{ locale === 'en-US' ? 'Toggle direction context' : '切换方向上下文' }}</button>
   </div>
 </template>
 

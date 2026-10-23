@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {CdkAccordion, CdkAccordionItem} from 'vue-cdk/accordion';
+import {useLocale} from '../../composables/useLocale';
+const {locale} = useLocale();
 </script>
 
 <template>
@@ -13,7 +15,7 @@ import {CdkAccordion, CdkAccordionItem} from 'vue-cdk/accordion';
         :aria-controls="`basic-panel-${index}`"
         @click="item.toggle"
       >
-        第 {{ index }} 项
+        {{ locale === 'en-US' ? `Item ${index}` : `第 ${index} 项` }}
         <span>{{ item.expanded ? '−' : '+' }}</span>
       </button>
       <div
@@ -23,7 +25,7 @@ import {CdkAccordion, CdkAccordionItem} from 'vue-cdk/accordion';
         :aria-labelledby="`basic-header-${index}`"
         class="panel"
       >
-        默认是单选模式；展开本项会自动收起同组的其他项。
+        {{ locale === 'en-US' ? 'Single-selection mode is enabled; expanding this item closes the other items in the group.' : '默认是单选模式；展开本项会自动收起同组的其他项。' }}
       </div>
     </CdkAccordionItem>
   </CdkAccordion>

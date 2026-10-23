@@ -8,11 +8,15 @@ export interface ApiRow {
   default?: string;
   /** 中文说明：职责、参数/返回值语义、注意事项。 */
   description: string;
+  /** 英文说明；未提供时由界面回退到中文，避免错误翻译技术契约。 */
+  descriptionEn?: string;
 }
 
 /** API 分组：按功能领域将同一模块的导出拆成若干表格。 */
 export interface ApiGroup {
   title: string;
+  /** 英文分组标题；未提供时回退中文。 */
+  titleEn?: string;
   rows: readonly ApiRow[];
 }
 
@@ -30,6 +34,8 @@ export interface ApiAnchorEntry {
 export interface ApiAnchorGroup {
   /** 分组标题（与 ApiGroup.title 一致）。 */
   title: string;
+  /** 英文分组标题；未提供时回退中文。 */
+  titleEn?: string;
   /** 分组标题锚点 id。 */
   anchor: string;
   /** 组内行锚点信息（含原始行数据），顺序与 ApiGroup.rows 一致。 */

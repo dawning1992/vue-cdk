@@ -7,13 +7,17 @@ import {
   type PortalOutlet,
   type TemplatePortal,
 } from 'vue-cdk/portal';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
+const t = (zh: string, en: string) => locale.value === 'en-US' ? en : zh;
 
 // 门户实例是类对象，shallowRef 避免模板 UnwrapRef 剥掉类私有成员导致类型丢失。
 const first = shallowRef<{portal: TemplatePortal<unknown>} | null>(null);
 const second = shallowRef<{portal: TemplatePortal<unknown>} | null>(null);
 const outletRef = shallowRef<PortalOutlet | null>(null);
 const activePortal = shallowRef<Portal<unknown> | null>(null);
-const current = ref('甲');
+const current = ref('A');
 const attachedInfo = ref('');
 
 /** 通过 portal prop 声明式切换内容源。 */
@@ -25,7 +29,7 @@ function attachViaProp(source: 'first' | 'second'): void {
 function attachWithContext(): void {
   activePortal.value = null;
   nextTick(() => {
-    first.value?.portal.attach(outletRef.value!, {data: '来自 attach 的上下文'});
+    first.value?.portal.attach(outletRef.value!, {data: t('来自 attach 的上下文', 'Context passed to attach')});
   });
 }
 
@@ -36,7 +40,7 @@ function detachAll(): void {
 }
 
 function onAttached(attachedRef: unknown): void {
-  attachedInfo.value = `attached 事件载荷类型：${attachedRef ? typeof attachedRef : 'null'}`;
+  attachedInfo.value = t(`attached 事件载荷类型：${attachedRef ? typeof attachedRef : 'null'}`, `attached event payload type: ${attachedRef ? typeof attachedRef : 'null'}`);
 }
 </script>
 
@@ -44,32 +48,31 @@ function onAttached(attachedRef: unknown): void {
   <div class="wrap column">
     <div class="controls">
       <button type="button" class="doc-btn primary" @click="attachViaProp('first')">
-        挂载源一（prop）
+        {{ t('挂载源一（prop）', 'Attach source A (prop)') }}
       </button>
       <button type="button" class="doc-btn" @click="attachViaProp('second')">
-        挂载源二（prop）
+        {{ t('挂载源二（prop）', 'Attach source B (prop)') }}
       </button>
       <button type="button" class="doc-btn" @click="attachWithContext">
-        以上下文挂载源一
+        {{ t('以上下文挂载源一', 'Attach source A with context') }}
       </button>
-      <button type="button" class="doc-btn" @click="detachAll">卸载</button>
-      <button type="button" class="doc-btn" @click="current = current === '甲' ? '乙' : '甲'">
-        切换状态：{{ current }}
+      <button type="button" class="doc-btn" @click="detachAll">{{ t('卸载', 'Detach') }}</button>
+      <button type="button" class="doc-btn" @click="current = current === 'A' ? 'B' : 'A'">
+        {{ t('切换状态：', 'Toggle state: ') }}{{ current }}
       </button>
     </div>
     <p class="tip">
-      源一模板读取父级响应式状态：挂载后点击「切换状态」，出口内容会同步更新；
-      插槽 props 即模板上下文。
+      {{ t('源一模板读取父级响应式状态：挂载后点击「切换状态」，出口内容会同步更新；插槽 props 即模板上下文。', 'Source A reads reactive parent state: after attaching, click “Toggle state” to update the outlet content. Slot props are the template context.') }}
     </p>
 
     <VPortal ref="first">
       <template #default="{data}">
-        <div class="portal-card">源一：{{ current }} / 上下文 {{ data ?? '无' }}</div>
+        <div class="portal-card">{{ t('源一：', 'Source A: ') }}{{ current }} / {{ t('上下文 ', 'context ') }}{{ data ?? t('无', 'none') }}</div>
       </template>
     </VPortal>
     <VPortal ref="second">
       <template #default="{data}">
-        <div class="portal-card">源二：{{ data ?? '无' }}</div>
+        <div class="portal-card">{{ t('源二：', 'Source B: ') }}{{ data ?? t('无', 'none') }}</div>
       </template>
     </VPortal>
 

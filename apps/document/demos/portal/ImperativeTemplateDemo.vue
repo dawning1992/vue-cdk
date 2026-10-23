@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {DomPortalOutlet, TemplatePortal, TemplateRef, type TemplateRefHandle} from 'vue-cdk/portal';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
+const t = (zh: string, en: string) => locale.value === 'en-US' ? en : zh;
 
 const outletEl = ref<HTMLElement | null>(null);
 const statusInfo = ref('');
@@ -20,7 +24,7 @@ function attachWith(status: 'fresh' | 'rotten'): void {
     portal.detach();
   }
   portal.attach(outlet, {status});
-  statusInfo.value = `attach(outlet, {status: '${status}'}) 覆盖构造上下文`;
+  statusInfo.value = t(`attach(outlet, {status: '${status}'}) 覆盖构造上下文`, `attach(outlet, {status: '${status}'}) overrides constructor context`);
 }
 
 /** detach 会清空上下文。 */
@@ -28,7 +32,7 @@ function clearPortal(): void {
   if (portal?.isAttached) {
     portal.detach();
   }
-  statusInfo.value = `已 detach，portal.context 已清空（${portal?.context}）`;
+  statusInfo.value = t(`已 detach，portal.context 已清空（${portal?.context}）`, `Detached; portal.context cleared (${portal?.context})`);
 }
 
 onBeforeUnmount(() => {
@@ -40,21 +44,21 @@ onBeforeUnmount(() => {
 <template>
   <TemplateRef ref="tpl" v-slot="{status}">
     <div class="portal-card">
-      <strong>香蕉状态：{{ status }}</strong>
+      <strong>{{ t('香蕉状态：', 'Banana status: ') }}{{ status }}</strong>
       <span :class="status === 'fresh' ? 'fresh-tag' : 'rotten-tag'">
-        {{ status === 'fresh' ? '（新鲜，推荐食用）' : '（腐烂，请勿食用）' }}
+        {{ status === 'fresh' ? t('（新鲜，推荐食用）', '(Fresh, recommended)') : t('（腐烂，请勿食用）', '(Rotten, do not eat)') }}
       </span>
     </div>
   </TemplateRef>
   <div class="wrap column">
     <div class="controls">
       <button type="button" class="doc-btn primary" @click="attachWith('fresh')">
-        以「新鲜」上下文挂载
+        {{ t('以「新鲜」上下文挂载', 'Attach with “fresh” context') }}
       </button>
       <button type="button" class="doc-btn" @click="attachWith('rotten')">
-        以「腐烂」上下文挂载
+        {{ t('以「腐烂」上下文挂载', 'Attach with “rotten” context') }}
       </button>
-      <button type="button" class="doc-btn" @click="clearPortal">卸载</button>
+      <button type="button" class="doc-btn" @click="clearPortal">{{ t('卸载', 'Detach') }}</button>
     </div>
     <div ref="outletEl" class="portal-outlet">
     </div>

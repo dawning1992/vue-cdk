@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type {Ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 
 const props = defineProps<{
   clicks: Ref<number>;
@@ -9,15 +10,16 @@ const props = defineProps<{
 const emit = defineEmits<{
   click: [];
 }>();
+const {locale} = useLocale();
 </script>
 
 <template>
   <div class="content">
     <h3 class="title">overlay + ComponentPortal</h3>
-    <p class="description">组件 Portal 内的响应式状态：点击次数 {{ props.clicks }}</p>
+    <p class="description">{{ locale === 'en-US' ? 'Reactive state inside the component Portal: clicks ' : '组件 Portal 内的响应式状态：点击次数 ' }}{{ props.clicks }}</p>
     <div class="actions">
-      <button type="button" class="doc-btn" @click="emit('click')">记录一次点击</button>
-      <button type="button" class="doc-btn primary" @click="props.onClose">关闭</button>
+      <button type="button" class="doc-btn" @click="emit('click')">{{ locale === 'en-US' ? 'Record a click' : '记录一次点击' }}</button>
+      <button type="button" class="doc-btn primary" @click="props.onClose">{{ locale === 'en-US' ? 'Close' : '关闭' }}</button>
     </div>
   </div>
 </template>

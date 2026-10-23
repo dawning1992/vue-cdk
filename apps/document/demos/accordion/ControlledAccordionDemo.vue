@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {CdkAccordion, CdkAccordionItem, type CdkAccordionItemPublicApi} from 'vue-cdk/accordion';
+import {useLocale} from '../../composables/useLocale';
+const {locale} = useLocale();
 
 const expanded = ref(false);
 const item = ref<CdkAccordionItemPublicApi | null>(null);
@@ -9,15 +11,15 @@ const item = ref<CdkAccordionItemPublicApi | null>(null);
 <template>
   <div class="demo">
     <div class="actions">
-      <button type="button" class="doc-btn primary" @click="item?.toggle()">通过实例 toggle()</button>
-      <button type="button" class="doc-btn" @click="expanded = !expanded">直接修改 v-model</button>
+      <button type="button" class="doc-btn primary" @click="item?.toggle()">{{ locale === 'en-US' ? 'Toggle via instance' : '通过实例 toggle()' }}</button>
+      <button type="button" class="doc-btn" @click="expanded = !expanded">{{ locale === 'en-US' ? 'Update v-model directly' : '直接修改 v-model' }}</button>
     </div>
     <CdkAccordion>
       <CdkAccordionItem ref="item" v-model:expanded="expanded" v-slot="state" as="article" class="item">
         <button type="button" class="header" :aria-expanded="state.expanded" @click="state.toggle">
-          受控项目：{{ expanded ? '已展开' : '已收起' }}
+          {{ locale === 'en-US' ? 'Controlled item: ' : '受控项目：' }}{{ expanded ? (locale === 'en-US' ? 'expanded' : '已展开') : (locale === 'en-US' ? 'collapsed' : '已收起') }}
         </button>
-        <p v-show="state.expanded" class="panel">命令式调用、插槽操作与 v-model 始终共享同一状态。</p>
+        <p v-show="state.expanded" class="panel">{{ locale === 'en-US' ? 'Imperative calls, slot actions, and v-model always share the same state.' : '命令式调用、插槽操作与 v-model 始终共享同一状态。' }}</p>
       </CdkAccordionItem>
     </CdkAccordion>
   </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {ref, watch} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   getEventTarget,
   hasModifierKey,
@@ -10,7 +11,13 @@ import {
 } from 'vue-cdk/platform';
 
 const output = ref('');
-const keyResult = ref('请在下框内按键（试试 Shift / Ctrl / Alt / Meta）');
+const {locale} = useLocale();
+const keyResult = ref(locale.value === 'en-US' ? 'Press a key in the input below (try Shift / Ctrl / Alt / Meta)' : '请在下框内按键（试试 Shift / Ctrl / Alt / Meta）');
+watch(locale, value => {
+  keyResult.value = value === 'en-US'
+    ? 'Press a key in the input below (try Shift / Ctrl / Alt / Meta)'
+    : '请在下框内按键（试试 Shift / Ctrl / Alt / Meta）';
+});
 
 function detect(): void {
   output.value = [
@@ -24,21 +31,21 @@ function detect(): void {
 function onKeydown(event: KeyboardEvent): void {
   const target = getEventTarget(event);
   keyResult.value =
-    `按键：${event.key}；target：${target?.tagName ?? 'null'}；` +
-    `hasModifierKey() = ${hasModifierKey(event)}；` +
+    `${locale.value === 'en-US' ? 'Key' : '按键'}: ${event.key}; target: ${target?.tagName ?? 'null'}; ` +
+    `hasModifierKey() = ${hasModifierKey(event)}; ` +
     `hasModifierKey(event, 'ctrlKey') = ${hasModifierKey(event, 'ctrlKey')}`;
 }
 </script>
 
 <template>
   <div class="wrap">
-    <button type="button" class="doc-btn primary" @click="detect">运行能力检测</button>
+    <button type="button" class="doc-btn primary" @click="detect">{{ locale === 'en-US' ? 'Run capability checks' : '运行能力检测' }}</button>
     <input
       class="doc-input key-input"
-      placeholder="聚焦后按键，测试 hasModifierKey"
+      :placeholder="locale === 'en-US' ? 'Focus and press a key to test hasModifierKey' : '聚焦后按键，测试 hasModifierKey'"
       @keydown="onKeydown"
     />
-    <pre class="doc-output">{{ output || '点击按钮查看环境检测结果' }}</pre>
+    <pre class="doc-output">{{ output || (locale === 'en-US' ? 'Click the button to inspect environment checks' : '点击按钮查看环境检测结果') }}</pre>
     <div class="doc-output">{{ keyResult }}</div>
   </div>
 </template>

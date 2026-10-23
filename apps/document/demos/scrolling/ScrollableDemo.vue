@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {onBeforeUnmount, ref, reactive} from 'vue';
 import {scrollDispatcher, useScrollable, vScrollable} from 'vue-cdk/scrolling';
+import {useLocale} from '../../composables/useLocale';
 
 const box2 = ref<HTMLElement | null>(null);
 const count = ref(0);
+const {locale} = useLocale();
 const offsets = reactive({top: 0, left: 0, start: 0, end: 0, right: 0, bottom: 0});
 
 // 组合式注册：返回 Scrollable 实例，提供 scrollTo / measureScrollOffset。
@@ -36,16 +38,16 @@ onBeforeUnmount(() => unsubscribe());
   <div class="wrap">
     <div class="cols">
       <div class="col">
-        <p class="label">v-scrollable（注册到全局分发）</p>
+        <p class="label">{{ locale === 'en-US' ? 'v-scrollable (register with global dispatcher)' : 'v-scrollable（注册到全局分发）' }}</p>
         <div v-scrollable class="box">
-          <p v-for="n in 30" :key="n" class="line">滚动行 {{ n }}</p>
+          <p v-for="n in 30" :key="n" class="line">{{ locale === 'en-US' ? 'Scroll row' : '滚动行' }} {{ n }}</p>
         </div>
       </div>
       <div class="col">
-        <p class="label">useScrollable（scrollTo / measureScrollOffset）</p>
+        <p class="label">{{ locale === 'en-US' ? 'useScrollable (scrollTo / measureScrollOffset)' : 'useScrollable（scrollTo / measureScrollOffset）' }}</p>
         <div ref="box2" class="box">
           <div class="wide">
-            <p v-for="n in 30" :key="n" class="line">横向内容行 {{ n }}</p>
+            <p v-for="n in 30" :key="n" class="line">{{ locale === 'en-US' ? 'Horizontal content row' : '横向内容行' }} {{ n }}</p>
           </div>
         </div>
       </div>
@@ -64,7 +66,7 @@ onBeforeUnmount(() => unsubscribe());
     </div>
 
     <div class="doc-output">
-      滚动事件：{{ count }} 次
+      {{ locale === 'en-US' ? 'Scroll events:' : '滚动事件：' }} {{ count }} {{ locale === 'en-US' ? 'times' : '次' }}
       top={{ offsets.top }} bottom={{ offsets.bottom }} left={{ offsets.left }}
       right={{ offsets.right }} start={{ offsets.start }} end={{ offsets.end }}
     </div>

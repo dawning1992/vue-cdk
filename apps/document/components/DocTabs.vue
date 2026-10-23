@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import {useLocale} from '../composables/useLocale';
+
+const {messages} = useLocale();
 const props = withDefaults(
   defineProps<{
     /** tab 配置，默认示例 + API 文档。 */
@@ -8,8 +11,8 @@ const props = withDefaults(
   }>(),
   {
     tabs: () => [
-      {key: 'demo', label: '示例'},
-      {key: 'api', label: 'API 文档'},
+      {key: 'demo', label: 'demo'},
+      {key: 'api', label: 'api'},
     ],
     modelValue: 'demo',
   },
@@ -30,7 +33,7 @@ const emit = defineEmits<{(e: 'update:modelValue', value: string): void}>();
       :aria-selected="tab.key === props.modelValue"
       @click="emit('update:modelValue', tab.key)"
     >
-      {{ tab.label }}
+      {{ tab.key === 'demo' ? messages.demo : messages.api }}
     </button>
   </div>
 </template>

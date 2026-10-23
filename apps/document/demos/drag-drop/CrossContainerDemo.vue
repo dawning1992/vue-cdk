@@ -2,9 +2,12 @@
 import {ref} from 'vue';
 import {transferArrayItem, VDrag, VDropList} from 'vue-cdk/drag-drop';
 import type {VDragDrop} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
 
-const todo = ref(['写周报', '回邮件', '整理代码']);
-const done = ref(['喝咖啡']);
+const {locale} = useLocale();
+
+const todo = ref(locale.value === 'en-US' ? ['Write weekly report', 'Reply to email', 'Refactor code'] : ['写周报', '回邮件', '整理代码']);
+const done = ref(locale.value === 'en-US' ? ['Drink coffee'] : ['喝咖啡']);
 
 /** 跨容器放下：把条目从 previousContainer 的数据移到 container 的数据。 */
 function onDrop(event: VDragDrop<string>): void {
@@ -23,7 +26,7 @@ function onDrop(event: VDragDrop<string>): void {
 <template>
   <div class="columns">
     <div class="column">
-      <p class="column-title">待办（{{ todo.length }}）</p>
+      <p class="column-title">{{ locale === 'en-US' ? 'To do' : '待办' }}（{{ todo.length }}）</p>
       <VDropList id="todo" :data="todo" :connected-to="['done']" class="drop-area" @dropped="onDrop">
         <VDrag v-for="item in todo" :key="item" :data="item" class="task">
           {{ item }}
@@ -31,7 +34,7 @@ function onDrop(event: VDragDrop<string>): void {
       </VDropList>
     </div>
     <div class="column">
-      <p class="column-title">已完成（{{ done.length }}）</p>
+      <p class="column-title">{{ locale === 'en-US' ? 'Done' : '已完成' }}（{{ done.length }}）</p>
       <VDropList id="done" :data="done" class="drop-area" @dropped="onDrop">
         <VDrag v-for="item in done" :key="item" :data="item" class="task">
           {{ item }}

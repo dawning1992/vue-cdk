@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {onBeforeUnmount, onMounted, ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   getRtlScrollAxisType,
   normalizePassiveListenerOptions,
@@ -12,6 +13,7 @@ const passiveSupported = ref(supportsPassiveEventListeners());
 const scrollBehaviorSupported = ref(supportsScrollBehavior());
 const rtlType = ref(getRtlScrollAxisType());
 const pressCount = ref(0);
+const {locale} = useLocale();
 const box = ref<HTMLElement | null>(null);
 const normalized = ref('');
 
@@ -44,9 +46,9 @@ onBeforeUnmount(() => cleanup?.());
       normalizePassiveListenerOptions({passive: true}) = {{ normalized || '—' }}
     </div>
     <button ref="box" type="button" class="doc-btn primary">
-      点击 / 触摸测试被动监听（累计 {{ pressCount }} 次）
+      {{ locale === 'en-US' ? `Click / touch to test passive listeners (${pressCount} total)` : `点击 / 触摸测试被动监听（累计 ${pressCount} 次）` }}
     </button>
-    <p class="hint">RTL 滚动轴类型影响虚拟滚动与 scrollTo 的归一化方向，检测结果按进程缓存。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'The RTL scroll-axis type affects normalized directions in virtual scrolling and scrollTo. The detected result is cached for the process.' : 'RTL 滚动轴类型影响虚拟滚动与 scrollTo 的归一化方向，检测结果按进程缓存。' }}</p>
   </div>
 </template>
 

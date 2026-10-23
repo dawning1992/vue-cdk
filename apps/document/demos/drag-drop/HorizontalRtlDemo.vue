@@ -2,8 +2,11 @@
 import {ref} from 'vue';
 import {moveItemInArray, VDrag, VDropList} from 'vue-cdk/drag-drop';
 import type {VDragDrop} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
 
-const items = ref(['一', '二', '三', '四']);
+const {locale} = useLocale();
+
+const items = ref(['1', '2', '3', '4']);
 const rtl = ref(false);
 
 function onDrop(event: VDragDrop<string>): void {
@@ -14,7 +17,7 @@ function onDrop(event: VDragDrop<string>): void {
 <template>
   <label class="toggle">
     <input v-model="rtl" type="checkbox" />
-    RTL 布局（dir="rtl"）
+    {{ locale === 'en-US' ? 'RTL layout (dir="rtl")' : 'RTL 布局（dir="rtl"）' }}
   </label>
   <div :dir="rtl ? 'rtl' : 'ltr'">
     <VDropList :data="items" orientation="horizontal" class="row-list" @dropped="onDrop">

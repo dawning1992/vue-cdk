@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {VTree, VTreeNode} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface A11yItem {
   name: string;
@@ -44,22 +47,22 @@ function onFocus(name: string): void {
         >
           <span class="dot" :class="{disabled: node.disabled}"></span>
           <span :class="{strike: node.disabled}">{{ node.name }}</span>
-          <span v-if="node.typeaheadLabel" class="badge">typeahead 标签</span>
+          <span v-if="node.typeaheadLabel" class="badge">{{ locale === 'en-US' ? 'typeahead label' : 'typeahead 标签' }}</span>
         </VTreeNode>
       </template>
     </VTree>
     <div class="status">
-      <p>聚焦：{{ focused || '（点击节点或用方向键）' }}</p>
-      <p>激活：{{ activated || '（按 Enter / Space）' }}</p>
+      <p>{{ locale === 'en-US' ? 'Focused: ' : '聚焦：' }}{{ focused || (locale === 'en-US' ? '(click a node or use arrow keys)' : '（点击节点或用方向键）') }}</p>
+      <p>{{ locale === 'en-US' ? 'Activated: ' : '激活：' }}{{ activated || (locale === 'en-US' ? '(press Enter / Space)' : '（按 Enter / Space）') }}</p>
     </div>
     <ul class="keys">
-      <li>↑ / ↓：移动焦点</li>
-      <li>→：展开 / 聚焦第一个子节点</li>
-      <li>←：收起 / 聚焦父节点</li>
-      <li>Home / End：首 / 末节点</li>
-      <li>Enter / Space：激活</li>
-      <li>字母键：typeahead 定位（200ms 防抖）</li>
-      <li>*：展开当前层级全部节点</li>
+      <li>{{ locale === 'en-US' ? '↑ / ↓: move focus' : '↑ / ↓：移动焦点' }}</li>
+      <li>{{ locale === 'en-US' ? '→: expand / focus first child' : '→：展开 / 聚焦第一个子节点' }}</li>
+      <li>{{ locale === 'en-US' ? '←: collapse / focus parent' : '←：收起 / 聚焦父节点' }}</li>
+      <li>{{ locale === 'en-US' ? 'Home / End: first / last node' : 'Home / End：首 / 末节点' }}</li>
+      <li>{{ locale === 'en-US' ? 'Enter / Space: activate' : 'Enter / Space：激活' }}</li>
+      <li>{{ locale === 'en-US' ? 'Letters: typeahead (200 ms debounce)' : '字母键：typeahead 定位（200ms 防抖）' }}</li>
+      <li>{{ locale === 'en-US' ? '*: expand all nodes at this level' : '*：展开当前层级全部节点' }}</li>
     </ul>
   </div>
 </template>

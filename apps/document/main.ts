@@ -6,6 +6,10 @@ import App from './App.vue';
 import {router} from './router';
 import './styles/main.css';
 
+if (typeof document !== 'undefined') {
+  document.documentElement.lang = localStorage.getItem('vue-cdk-document-locale') === 'en-US' ? 'en-US' : 'zh-CN';
+}
+
 const app = createApp(App);
 
 // 供 portal 示例演示命令式内容访问 app 级 provide（ComponentPortal 的 appContext 通道）。

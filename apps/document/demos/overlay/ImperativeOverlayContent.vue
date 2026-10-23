@@ -1,16 +1,18 @@
 <script setup lang="ts">
+import {useLocale} from '../../composables/useLocale';
 /** 命令式浮层内容的关闭回调；由创建浮层的父组件负责销毁 Overlay。 */
 const props = defineProps<{
   onClose: () => void;
 }>();
+const {locale} = useLocale();
 </script>
 
 <template>
   <div class="content">
-    <h3 class="title">命令式浮层</h3>
-    <p class="description">由 useOverlay() 创建并全局居中；点击遮罩或下方按钮关闭。</p>
+    <h3 class="title">{{ locale === 'en-US' ? 'Imperative overlay' : '命令式浮层' }}</h3>
+    <p class="description">{{ locale === 'en-US' ? 'Created by useOverlay() and centered globally; click the backdrop or the button below to close.' : '由 useOverlay() 创建并全局居中；点击遮罩或下方按钮关闭。' }}</p>
     <div class="actions">
-      <button type="button" class="doc-btn primary" @click="props.onClose">关闭</button>
+      <button type="button" class="doc-btn primary" @click="props.onClose">{{ locale === 'en-US' ? 'Close' : '关闭' }}</button>
     </div>
   </div>
 </template>

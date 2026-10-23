@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import {ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {useOverlay} from 'vue-cdk/overlay';
 import {ComponentPortal} from 'vue-cdk/portal';
 import ImperativeOverlayContent from './ImperativeOverlayContent.vue';
 
 const overlay = useOverlay();
 const log = ref('');
+const {locale} = useLocale();
 
 /** 命令式创建全局居中的浮层：ComponentPortal 挂载 SFC，遮罩点击关闭。 */
 function openCenter(): void {
@@ -19,19 +21,19 @@ function openCenter(): void {
     props: {
       onClose: () => {
         overlayRef.detach();
-        log.value = '已关闭（detach）';
+        log.value = locale.value === 'en-US' ? 'Closed (detach)' : '已关闭（detach）';
       },
     },
   }));
   overlayRef.backdropClick().subscribe(() => overlayRef.detach());
-  log.value = '已打开（attach）';
+  log.value = locale.value === 'en-US' ? 'Opened (attach)' : '已打开（attach）';
 }
 </script>
 
 <template>
   <div class="wrap">
     <button type="button" class="doc-btn primary" @click="openCenter">
-      打开全局居中浮层
+      {{ locale === 'en-US' ? 'Open globally centered overlay' : '打开全局居中浮层' }}
     </button>
     <span class="log">{{ log || '—' }}</span>
   </div>

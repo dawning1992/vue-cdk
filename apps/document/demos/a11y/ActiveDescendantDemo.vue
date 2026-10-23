@@ -1,19 +1,27 @@
 <script setup lang="ts">
-import {onBeforeUnmount, ref} from 'vue';
+import {onBeforeUnmount, ref, watch} from 'vue';
 import {ActiveDescendantKeyManager, type Highlightable} from 'vue-cdk/a11y';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Option extends Highlightable {
   id: string;
   label: string;
+  labelZh: string;
+  labelEn: string;
 }
 
 /** 活动项 id 用于同步 aria-activedescendant 与高亮样式。 */
 const activeId = ref('');
 
-function makeOption(id: string, label: string): Option {
+function makeOption(id: string, labelZh: string, labelEn: string): Option {
+  const label = locale.value === 'en-US' ? labelEn : labelZh;
   return {
     id,
     label,
+    labelZh,
+    labelEn,
     getLabel: () => label,
     setActiveStyles: () => {
       activeId.value = id;
@@ -27,14 +35,20 @@ function makeOption(id: string, label: string): Option {
 }
 
 const options = ref<Option[]>([
-  makeOption('apple', '苹果'),
-  makeOption('banana', '香蕉'),
-  makeOption('cherry', '樱桃'),
-  makeOption('durian', '榴莲'),
+  makeOption('apple', '苹果', 'Apple'),
+  makeOption('banana', '香蕉', 'Banana'),
+  makeOption('cherry', '樱桃', 'Cherry'),
+  makeOption('durian', '榴莲', 'Durian'),
 ]);
 
 const manager = new ActiveDescendantKeyManager(options).withWrap().withTypeAhead();
 const open = ref(false);
+
+watch(locale, value => {
+  options.value.forEach(option => {
+    option.label = value === 'en-US' ? option.labelEn : option.labelZh;
+  });
+});
 
 function onFocus(): void {
   open.value = true;
@@ -61,7 +75,7 @@ onBeforeUnmount(() => manager.destroy());
         :aria-expanded="open"
         :aria-activedescendant="activeId ? `ad-${activeId}` : undefined"
         aria-controls="ad-listbox"
-        placeholder="聚焦后使用 ↑ ↓ 选择（可输入字母）"
+        :placeholder="locale === 'en-US' ? 'Focus and use ↑ ↓ to choose (type to search)' : '聚焦后使用 ↑ ↓ 选择（可输入字母）'"
         @focus="onFocus"
         @blur="onBlur"
         @keydown="onKeydown"
@@ -80,7 +94,7 @@ onBeforeUnmount(() => manager.destroy());
       </ul>
     </div>
     <p class="hint">
-      aria-activedescendant = {{ activeId ? `ad-${activeId}` : '（无）' }}；activeId 由条目自身的 setActiveStyles / setInactiveStyles 维护。
+      {{ locale === 'en-US' ? `aria-activedescendant = ${activeId ? `ad-${activeId}` : '(none)'}; activeId is maintained by each item's setActiveStyles / setInactiveStyles.` : `aria-activedescendant = ${activeId ? `ad-${activeId}` : '（无）'}；activeId 由条目自身的 setActiveStyles / setInactiveStyles 维护。` }}
     </p>
   </div>
 </template>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 
 const props = defineProps<{text: string}>();
+const {locale} = useLocale();
 const copied = ref<boolean | null>(null);
 
 function onCopied(successful: boolean): void {
@@ -16,10 +18,10 @@ function onCopied(successful: boolean): void {
       class="doc-btn primary"
       v-copy-to-clipboard="{text: props.text, onCopied}"
     >
-      复制（未显式传 attempts）
+      {{ locale === 'en-US' ? 'Copy (attempts omitted)' : '复制（未显式传 attempts）' }}
     </button>
     <span class="hint">
-      状态：{{ copied === null ? '未复制' : copied ? '复制成功' : '复制失败' }}
+      {{ locale === 'en-US' ? 'Status: ' : '状态：' }}{{ copied === null ? (locale === 'en-US' ? 'Not copied' : '未复制') : copied ? (locale === 'en-US' ? 'Copied' : '复制成功') : (locale === 'en-US' ? 'Copy failed' : '复制失败') }}
     </span>
   </div>
 </template>

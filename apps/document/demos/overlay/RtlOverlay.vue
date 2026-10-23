@@ -2,6 +2,7 @@
 import {onBeforeUnmount, ref, watch} from 'vue';
 import {ListKeyManager, type ListKeyManagerOption} from 'vue-cdk/a11y';
 import {STANDARD_DROPDOWN_BELOW_POSITIONS, VConnectedOverlay, VOverlayOrigin} from 'vue-cdk/overlay';
+import {useLocale} from '../../composables/useLocale';
 
 /** 菜单条目：getLabel 供 ListKeyManager 的 typeahead 能力使用。 */
 interface MenuItem extends ListKeyManagerOption {
@@ -10,13 +11,28 @@ interface MenuItem extends ListKeyManagerOption {
 
 const rtl = ref(false);
 const open = ref(false);
-const selected = ref('首项（start 侧）');
+const {locale} = useLocale();
+const selected = ref(locale.value === 'en-US' ? 'First item (start side)' : '首项（start 侧）');
 
-const items = ref<MenuItem[]>([
-  {label: '首项（start 侧）', getLabel: () => '首项（start 侧）'},
-  {label: '中间项', getLabel: () => '中间项'},
-  {label: '末项（end 侧）', getLabel: () => '末项（end 侧）'},
-]);
+function createItems(): MenuItem[] {
+  return locale.value === 'en-US'
+    ? [
+        {label: 'First item (start side)', getLabel: () => 'First item (start side)'},
+        {label: 'Middle item', getLabel: () => 'Middle item'},
+        {label: 'Last item (end side)', getLabel: () => 'Last item (end side)'},
+      ]
+    : [
+        {label: '首项（start 侧）', getLabel: () => '首项（start 侧）'},
+        {label: '中间项', getLabel: () => '中间项'},
+        {label: '末项（end 侧）', getLabel: () => '末项（end 侧）'},
+      ];
+}
+
+const items = ref<MenuItem[]>(createItems());
+watch(locale, () => {
+  items.value = createItems();
+  selected.value = items.value[0].label;
+});
 
 /** RTL 仅镜像连接点与 transform-origin，竖向菜单的方向键行为不变。 */
 const manager = new ListKeyManager(items).withWrap().withHomeAndEnd();
@@ -78,16 +94,15 @@ onBeforeUnmount(() => manager.destroy());
 <template>
   <div class="wrap">
     <p class="hint">
-      切换文本方向：RTL 下 <code>start</code> 对齐右边缘，下拉菜单的连接点与
-      transform-origin 全部镜像；打开后 ↑/↓/Home/End 导航、Enter 选中。
+      {{ locale === 'en-US' ? 'Switch text direction: in RTL, ' : '切换文本方向：RTL 下 ' }}<code>start</code>{{ locale === 'en-US' ? ' aligns to the right edge; connection points and transform-origin mirror. Navigate with ↑/↓/Home/End and select with Enter.' : ' 对齐右边缘，下拉菜单的连接点与 transform-origin 全部镜像；打开后 ↑/↓/Home/End 导航、Enter 选中。' }}
     </p>
     <div class="row">
       <button type="button" class="doc-btn" @click="rtl = !rtl">
-        切换到 {{ rtl ? 'LTR' : 'RTL' }}
+        {{ locale === 'en-US' ? 'Switch to ' : '切换到 ' }}{{ rtl ? 'LTR' : 'RTL' }}
       </button>
       <VOverlayOrigin>
         <button type="button" class="doc-btn primary" @click="open = !open" @keydown="onTriggerKeydown">
-          RTL 下拉菜单：{{ selected }} ▾
+          {{ locale === 'en-US' ? 'RTL menu: ' : 'RTL 下拉菜单：' }}{{ selected }} ▾
         </button>
         <VConnectedOverlay
           :open="open"

@@ -1,9 +1,9 @@
 import type {ApiGroup} from '../api';
 
 /** overlay 模块 API 分组：按功能领域拆分全部对外导出。 */
-export const apiGroups: readonly ApiGroup[] = [
+const apiGroupsZh: readonly ApiGroup[] = [
   {
-    title: '组合式函数与服务',
+    title: '组合式函数与服务', titleEn: 'Composables and services',
     rows: [
       {
         name: 'useOverlay',
@@ -26,7 +26,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '配置与引用',
+    title: '配置与引用', titleEn: 'Configuration and references',
     rows: [
       {
         name: 'OverlayConfig',
@@ -69,7 +69,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '容器',
+    title: '容器', titleEn: 'Containers',
     rows: [
       {
         name: 'OverlayContainer',
@@ -89,7 +89,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '事件分发器',
+    title: '事件分发器', titleEn: 'Event dispatchers',
     rows: [
       {
         name: 'OverlayKeyboardDispatcher',
@@ -114,7 +114,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '定位策略',
+    title: '定位策略', titleEn: 'Position strategies',
     rows: [
       {
         name: 'PositionStrategy',
@@ -188,7 +188,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '连接位置类型与校验',
+    title: '连接位置类型与校验', titleEn: 'Connected position types and validation',
     rows: [
       {
         name: 'ConnectedPosition',
@@ -256,7 +256,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '滚动策略',
+    title: '滚动策略', titleEn: 'Scroll strategies',
     rows: [
       {
         name: 'ScrollStrategy',
@@ -326,7 +326,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '滚动裁剪检测',
+    title: '滚动裁剪检测', titleEn: 'Scroll clipping detection',
     rows: [
       {
         name: 'isElementScrolledOutsideView',
@@ -346,7 +346,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '声明式组件与样式',
+    title: '声明式组件与样式', titleEn: 'Declarative components and styling',
     rows: [
       {
         name: 'VOverlayOrigin',
@@ -383,7 +383,7 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '事件发射器（重导出）',
+    title: '事件发射器（重导出）', titleEn: 'Event emitter (re-export)',
     rows: [
       {
         name: 'Emitter',
@@ -393,3 +393,76 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
 ];
+
+const descriptionEn: Record<string, string> = {
+  useOverlay: 'Composable entry point matching Angular Overlay. In component setup it captures app context for imperative content and returns create(), position(), and scrollStrategies.',
+  createOverlayRef: 'Imperatively creates an OverlayRef, merges default direction and Popover fallback settings, creates and inserts the pane and host, and injects structural styles.',
+  CreateOverlayRefOptions: 'Additional createOverlayRef options: appContext preserves provide/inject for imperative content; container accepts an OverlayContainer or HTMLElement and defaults to the global singleton.',
+  OverlayConfig: 'Creation settings for position and scroll strategies, panel and backdrop classes, dimensions, direction, navigation disposal, native Popover fallback, animations, and event filtering; defaults align with Angular CDK.',
+  OverlayRef: 'Overlay handle for attach/detach/dispose, position and size updates, direction changes, panel classes, element references, and attachment, backdrop, keyboard, and outside-pointer event streams.',
+  OverlayContent: 'Content mountable in an overlay: VNode, render function returning normalized VNodes, or Portal with a mount reference; mounting uses vue-cdk/portal.',
+  OverlayRefDeps: 'Dependencies injected into OverlayRef: document, global keyboard and outside-click dispatchers, container, animation setting, and app context for provide/inject.',
+  OverlaySizeConfig: 'Size options for updateSize: width, height, min/max width, and min/max height; every field accepts number or string, with numbers interpreted as pixels.',
+  BackdropRef: 'Backdrop handle that creates and fades out the backdrop; detach waits for transitionend or a 500 ms fallback, while dispose removes it immediately and cleans listeners.',
+  OverlayContainer: 'Overlay container that can use a custom host element; getContainerElement() lazily adds the vcdk-overlay-container class. Without a host it creates one under body, and dispose removes only library-owned containers.',
+  FullscreenOverlayContainer: 'Full-viewport container rendered at the top level for overlays that need to cover the entire viewport.',
+  overlayContainer: 'Module-level singleton container used by createOverlayRef by default.',
+  OverlayKeyboardDispatcher: 'Global keyboard dispatcher that sends keydown events to visible overlays in opening order.',
+  overlayKeyboardDispatcher: 'Module-level singleton keyboard dispatcher.',
+  OverlayOutsideClickDispatcher: 'Global outside-click dispatcher that sends events to overlays when the pointer is outside, with eventPredicate filtering.',
+  overlayOutsideClickDispatcher: 'Module-level singleton outside-click dispatcher.',
+  PositionStrategy: 'Position strategy contract: attach an overlay reference, apply positioning, and release resources with detach or dispose.',
+  GlobalPositionStrategy: 'Global positioning with top/bottom/left/right/start/end, width/height, and centered horizontal or vertical offsets; chain calls before apply().',
+  createGlobalPositionStrategy: 'Factory for a global position strategy.',
+  FlexibleConnectedPositionStrategy: 'Connected positioning with automatic candidate selection, flipping, flexible dimensions, viewport push, locked position, RTL support, and a chainable configuration API.',
+  OverlayPositionBuilder: 'Position builder whose global() returns a global strategy and flexibleConnectedTo(origin) returns a connected strategy.',
+  overlayPositionBuilder: 'Module-level position builder singleton returned by useOverlay().position().',
+  STANDARD_DROPDOWN_BELOW_POSITIONS: 'Standard dropdown positions below the origin with start/end alignment and RTL adaptation.',
+  STANDARD_DROPDOWN_ADJACENT_POSITIONS: 'Standard adjacent dropdown positions to the right of the origin, above or below, for side-opening menus.',
+  FlexibleConnectedPositionStrategyOrigin: 'Connected-position origin input: an element, point, ref, or lazily evaluated function.',
+  FlexibleOverlayPopoverLocation: 'Popover placement for withPopoverLocation: global inserts into the top-level body container, inline inserts inside the origin, and parent inserts into a specified parent element.',
+  Point: 'Viewport coordinate point that can be used as a connected-position origin.',
+  ScrollableContainer: 'Scrollable container input used for scroll observation: an HTMLElement or an object containing one.',
+  FlexibleConnectedPositionStrategyDeps: 'Connected strategy dependencies: viewport measurement, document, and overlay container; omitted values use module-level defaults.',
+  ConnectedPosition: 'Origin and overlay horizontal/vertical alignment pair with optional candidate weight, pixel offsets, and a panel class for the selected position.',
+  OriginConnectionPosition: 'Horizontal and vertical connection position on the origin side.',
+  OverlayConnectionPosition: 'Horizontal and vertical connection position on the overlay side.',
+  ConnectionPositionPair: 'Pair combining origin and overlay positions, including RTL start mapping and offsets.',
+  ScrollingVisibility: 'Visibility state for a connected position: whether the origin or overlay is clipped or fully outside the viewport.',
+  ConnectedOverlayPositionChange: 'Position-change event payload containing the new connected position and position pair.',
+  Direction: 'Text direction, either ltr or rtl.',
+  HorizontalConnectionPos: 'Horizontal connection position: start, center, or end.',
+  VerticalConnectionPos: 'Vertical connection position: top, center, or bottom.',
+  ViewportMargin: 'Minimum gap between the overlay and viewport edges, specified as one number or per side.',
+  validateHorizontalPosition: 'Validates a horizontal position value and throws for invalid input.',
+  validateVerticalPosition: 'Validates a vertical position value and throws for invalid input.',
+  ScrollStrategy: 'Scroll strategy contract: attach listeners, enable or disable behavior, and release with detach.',
+  scrollStrategies: 'Scroll strategy factories returned by useOverlay().scrollStrategies: noop, close, block, and reposition.',
+  NoopScrollStrategy: 'No-op scroll strategy that neither observes nor changes scrolling.',
+  createNoopScrollStrategy: 'Factory for a no-op scroll strategy.',
+  CloseScrollStrategy: 'Closes the overlay when scrolling occurs, matching Escape-style dismissal semantics.',
+  createCloseScrollStrategy: 'Factory for a close-on-scroll strategy.',
+  CloseScrollStrategyConfig: 'Close-on-scroll configuration; threshold is the minimum scroll distance that triggers closing.',
+  BlockScrollStrategy: 'Locks page scrolling while enabled by disabling html/body scrolling and caching restoration state.',
+  createBlockScrollStrategy: 'Factory for a scroll-locking strategy.',
+  RepositionScrollStrategy: 'Recalculates overlay position during scrolling at a throttled interval to prevent drift.',
+  createRepositionScrollStrategy: 'Factory for a reposition-on-scroll strategy.',
+  RepositionScrollStrategyConfig: 'Reposition configuration; scrollThrottle is the throttling interval in milliseconds.',
+  getScrollStrategyAlreadyAttachedError: 'Error factory for attempting to attach one scroll strategy to multiple overlays.',
+  isElementScrolledOutsideView: 'Checks whether an element has scrolled outside the viewport or specified scroll containers.',
+  isElementClippedByScrolling: 'Checks whether scrolling containers clip an element partially or completely.',
+  Dimensions: 'Simplified DOMRect shape retaining the geometry needed by positioning: top, left, right, bottom, width, and height.',
+  VOverlayOrigin: 'Declarative origin container that provides its anchor element to nested VConnectedOverlay; it also exposes an origin function through its slot.',
+  OVERLAY_ORIGIN_KEY: 'Injection key used by VConnectedOverlay to read the nearest VOverlayOrigin.',
+  VConnectedOverlay: 'Declarative connected-overlay component with open state, origin and positions, dimensions, classes, scroll and close behavior, Popover options, direction, and attach/detach/position events.',
+  injectOverlayStyles: 'Idempotently injects overlay structural styles into the document and deduplicates repeated calls.',
+  removeInjectedOverlayStyles: 'Removes previously injected overlay structural styles.',
+  vcdkOverlayStyles: 'Overlay structural style source for scenarios that require manual control.',
+  Emitter: 'Re-export of the typed event emitter from vue-cdk/emitter; subscribe returns an unsubscribe function.',
+};
+
+/** API 表格使用独立英文映射，避免把中文契约误当作英文翻译。 */
+export const apiGroups: readonly ApiGroup[] = apiGroupsZh.map(group => ({
+  ...group,
+      rows: group.rows.map(row => ({...row, descriptionEn: descriptionEn[row.name] ?? 'English description unavailable'})),
+}));

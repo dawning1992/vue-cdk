@@ -3,6 +3,9 @@ import {onMounted, ref} from 'vue';
 import {DataSource} from 'vue-cdk/collections';
 import {Emitter} from 'vue-cdk/emitter';
 import {VTree, VTreeNode} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Item {
   name: string;
@@ -53,7 +56,7 @@ onMounted(() => {
 <template>
   <div class="source-demo">
     <section class="source-card">
-      <h4>Ref 数据源（深层监听）</h4>
+      <h4>{{ locale === 'en-US' ? 'Ref data source (deep watch)' : 'Ref 数据源（深层监听）' }}</h4>
       <VTree
         :data-source="refItems"
         :level-accessor="(node: Item) => node.level"
@@ -64,12 +67,12 @@ onMounted(() => {
         </template>
       </VTree>
       <button type="button" class="doc-btn" @click="refItems.push({name: `ref-${refItems.length + 1}`, level: 0, expandable: false})">
-        追加节点
+        {{ locale === 'en-US' ? 'Add node' : '追加节点' }}
       </button>
     </section>
 
     <section class="source-card">
-      <h4>Emitter 数据源（手动推流）</h4>
+      <h4>{{ locale === 'en-US' ? 'Emitter data source (manual stream)' : 'Emitter 数据源（手动推流）' }}</h4>
       <VTree
         :data-source="emitter"
         :level-accessor="(node: Item) => node.level"
@@ -84,12 +87,12 @@ onMounted(() => {
         class="doc-btn"
         @click="emitter.next([{name: `emitter-${emitterItems.length + 1}`, level: 0, expandable: false}])"
       >
-        派发数据
+        {{ locale === 'en-US' ? 'Emit data' : '派发数据' }}
       </button>
     </section>
 
     <section class="source-card">
-      <h4>自定义 DataSource（connect / disconnect）</h4>
+      <h4>{{ locale === 'en-US' ? 'Custom DataSource (connect / disconnect)' : '自定义 DataSource（connect / disconnect）' }}</h4>
       <VTree
         :data-source="demoSource"
         :level-accessor="(node: Item) => node.level"
@@ -99,8 +102,8 @@ onMounted(() => {
           <VTreeNode :node="node" :is-expandable="node.expandable">{{ node.name }}</VTreeNode>
         </template>
       </VTree>
-      <button type="button" class="doc-btn" @click="demoSource.refresh()">刷新数据</button>
-      <p class="hint">卸载树组件时会调用 DataSource.disconnect() 释放连接。</p>
+      <button type="button" class="doc-btn" @click="demoSource.refresh()">{{ locale === 'en-US' ? 'Refresh data' : '刷新数据' }}</button>
+      <p class="hint">{{ locale === 'en-US' ? 'DataSource.disconnect() is called to release the connection when the tree unmounts.' : '卸载树组件时会调用 DataSource.disconnect() 释放连接。' }}</p>
     </section>
   </div>
 </template>

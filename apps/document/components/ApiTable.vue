@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import {computed} from 'vue';
 import {useRouter} from 'vue-router';
 import type {ApiAnchorGroup} from '../api';
 import {linkify, scrollToAnchor, type AnchorResolver} from '../apis/anchors';
+import {useLocale} from '../composables/useLocale';
 
 const props = defineProps<{
   /** 分组锚点信息：标题、锚点、行数据与行锚点。 */
@@ -11,6 +13,8 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const {locale, messages} = useLocale();
+const hasDefaultValues = computed(() => props.group.items.some(({row}) => Boolean(row.default)));
 
 /**
  * 表格内提及链接的委托点击：跨模块跳转走路由，同页锚点平滑滚动。
@@ -33,15 +37,15 @@ function onMentionClick(event: MouseEvent) {
 
 <template>
   <section class="api-table">
-    <h3 :id="props.group.anchor">{{ props.group.title }}</h3>
+    <h3 :id="props.group.anchor">{{ locale === 'en-US' ? props.group.titleEn ?? props.group.title : props.group.title }}</h3>
     <div class="table-wrap" @click="onMentionClick">
       <table>
         <thead>
           <tr>
             <th>API</th>
-            <th>签名</th>
-            <th>默认值</th>
-            <th>说明</th>
+            <th>{{ locale === 'en-US' ? 'Signature' : '签名' }}</th>
+            <th v-if="hasDefaultValues">{{ locale === 'en-US' ? 'Default' : '默认值' }}</th>
+            <th :class="{'description-with-default': hasDefaultValues, 'description-without-default': !hasDefaultValues}">{{ locale === 'en-US' ? 'Description' : '说明' }}</th>
           </tr>
         </thead>
         <tbody>
@@ -50,8 +54,8 @@ function onMentionClick(event: MouseEvent) {
             <td class="cell-signature">
               <code v-html="linkify(item.row.signature, props.resolveLink)"></code>
             </td>
-            <td class="cell-default"><code v-if="item.row.default">{{ item.row.default }}</code></td>
-            <td class="cell-desc" v-html="linkify(item.row.description, props.resolveLink)"></td>
+            <td v-if="hasDefaultValues" class="cell-default"><code v-if="item.row.default">{{ item.row.default }}</code></td>
+            <td class="cell-desc" v-html="linkify(locale === 'en-US' ? item.row.descriptionEn ?? messages.missingEnglishDescription : item.row.description, props.resolveLink)"></td>
           </tr>
         </tbody>
       </table>
@@ -101,7 +105,7 @@ th {
   white-space: nowrap;
 }
 
-/* 固定布局下首行单元格宽度即列宽：API 20% / 签名 34% / 默认值 8% / 说明 38%。 */
+/* 默认值列按分组动态显示；两种布局分别保证说明列获得剩余空间。 */
 th:nth-child(1) {
   width: 20%;
 }
@@ -114,8 +118,12 @@ th:nth-child(3) {
   width: 8%;
 }
 
-th:nth-child(4) {
+th.description-with-default {
   width: 38%;
+}
+
+th.description-without-default {
+  width: 46%;
 }
 
 tr:last-child td {
@@ -135,7 +143,7 @@ td code {
 }
 
 .cell-default {
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 .cell-desc {

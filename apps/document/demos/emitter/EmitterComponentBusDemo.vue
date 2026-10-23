@@ -2,6 +2,10 @@
 import {ref} from 'vue';
 import {Emitter} from 'vue-cdk/emitter';
 import BusChild from './BusChild.vue';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
+const t = (zh: string, en: string) => locale.value === 'en-US' ? en : zh;
 
 interface Payload {
   action: string;
@@ -19,7 +23,7 @@ function emit(action: string): void {
   const payload = {action, value: ++sequence};
   bus.next(payload);
   hasListeners.value = bus.hasListeners;
-  log.value.unshift(`父组件发射：${payload.action} +${payload.value}`);
+  log.value.unshift(t(`父组件发射：${payload.action} +${payload.value}`, `Parent emitted: ${payload.action} +${payload.value}`));
   if (log.value.length > 4) {
     log.value.pop();
   }
@@ -28,24 +32,24 @@ function emit(action: string): void {
 function toggleChild(): void {
   childMounted.value = !childMounted.value;
   hasListeners.value = bus.hasListeners;
-  log.value.unshift(childMounted.value ? '子组件已挂载（重新订阅）' : '子组件已卸载（自动退订）');
+  log.value.unshift(childMounted.value ? t('子组件已挂载（重新订阅）', 'Child mounted (subscribed again)') : t('子组件已卸载（自动退订）', 'Child unmounted (automatically unsubscribed)'));
 }
 </script>
 
 <template>
   <div class="wrap">
     <div class="buttons">
-      <button type="button" class="doc-btn primary" @click="emit('新增')">发射「新增」</button>
-      <button type="button" class="doc-btn primary" @click="emit('删除')">发射「删除」</button>
+      <button type="button" class="doc-btn primary" @click="emit(t('新增', 'Add'))">{{ t('发射「新增」', 'Emit “Add”') }}</button>
+      <button type="button" class="doc-btn primary" @click="emit(t('删除', 'Delete'))">{{ t('发射「删除」', 'Emit “Delete”') }}</button>
       <button type="button" class="doc-btn" @click="toggleChild">
-        {{ childMounted ? '卸载子组件' : '重新挂载子组件' }}
+        {{ childMounted ? t('卸载子组件', 'Unmount child') : t('重新挂载子组件', 'Mount child again') }}
       </button>
     </div>
     <div class="stage">
       <BusChild v-if="childMounted" :bus="bus" />
     </div>
-    <div class="doc-output">{{ log.join('\n') || '发射事件观察父子通信' }}</div>
-    <p class="hint">bus.hasListeners = {{ hasListeners }}：子组件卸载时退订，父组件发射变为空操作。</p>
+    <div class="doc-output">{{ log.join('\n') || t('发射事件观察父子通信', 'Emit events to observe parent-child communication') }}</div>
+    <p class="hint">bus.hasListeners = {{ hasListeners }}{{ t('：子组件卸载时退订，父组件发射变为空操作。', ': the child unsubscribes on unmount, so parent emissions become no-ops.') }}</p>
   </div>
 </template>
 

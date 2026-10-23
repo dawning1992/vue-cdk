@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {useDialog, type AutoFocusTarget} from 'vue-cdk/dialog';
+import {useLocale} from '../../composables/useLocale';
 import ConfigContent from './ConfigContent.vue';
 
 const dialog = useDialog();
 const result = ref('');
+const {locale} = useLocale();
 
 const disableClose = ref(false);
 const blockCancel = ref(false);
@@ -23,12 +25,12 @@ function openWithConfig(): void {
     data: {
       role: role.value,
       note: blockCancel.value
-        ? 'closePredicate 已启用：点击「取消」会被阻止，焦点重新捕获回对话框。'
-        : 'closePredicate 未启用，ESC / 遮罩 / 按钮均可关闭。',
+        ? (locale.value === 'en-US' ? 'closePredicate is enabled: Cancel is blocked and focus is recaptured by the dialog.' : 'closePredicate 已启用：点击「取消」会被阻止，焦点重新捕获回对话框。')
+        : (locale.value === 'en-US' ? 'closePredicate is disabled; Escape, the backdrop, and buttons can close the dialog.' : 'closePredicate 未启用，ESC / 遮罩 / 按钮均可关闭。'),
     },
     disableClose: disableClose.value,
     closePredicate: blockCancel.value
-      ? result => result !== '取消'
+      ? result => result !== (locale.value === 'en-US' ? 'Cancel' : '取消')
       : undefined,
     autoFocus: autoFocus.value === 'false' ? false : autoFocus.value,
     restoreFocus:
@@ -45,7 +47,7 @@ function openWithConfig(): void {
     panelClass: panelClass.value || 'doc-dialog-panel',
   });
   dialogRef.closed.subscribe(value => {
-    result.value = String(value ?? '未返回结果');
+    result.value = String(value ?? (locale.value === 'en-US' ? 'No result' : '未返回结果'));
   });
 }
 </script>
@@ -55,11 +57,11 @@ function openWithConfig(): void {
     <div class="grid">
       <label class="check">
         <input v-model="disableClose" type="checkbox" />
-        disableClose（禁止 ESC / 遮罩关闭）
+        {{ locale === 'en-US' ? 'disableClose (blocks Escape/backdrop close)' : 'disableClose（禁止 ESC / 遮罩关闭）' }}
       </label>
       <label class="check">
         <input v-model="blockCancel" type="checkbox" />
-        closePredicate（阻止「取消」）
+        {{ locale === 'en-US' ? 'closePredicate (blocks Cancel)' : 'closePredicate（阻止「取消」）' }}
       </label>
       <label class="check">
         <input v-model="hasBackdrop" type="checkbox" />
@@ -76,15 +78,15 @@ function openWithConfig(): void {
           <option value="first-tabbable">first-tabbable</option>
           <option value="first-heading">first-heading</option>
           <option value="dialog">dialog</option>
-          <option value="false">false（不主动聚焦）</option>
+          <option value="false">{{ locale === 'en-US' ? 'false (no automatic focus)' : 'false（不主动聚焦）' }}</option>
         </select>
       </label>
       <label class="field">
         restoreFocus
         <select v-model="restoreFocus" class="doc-input">
-          <option value="true">true（恢复原聚焦元素）</option>
-          <option value="false">false（不恢复）</option>
-          <option value="target">选择器 #doc-dialog-focus-target</option>
+          <option value="true">{{ locale === 'en-US' ? 'true (restore previous focus)' : 'true（恢复原聚焦元素）' }}</option>
+          <option value="false">{{ locale === 'en-US' ? 'false (do not restore)' : 'false（不恢复）' }}</option>
+          <option value="target">{{ locale === 'en-US' ? 'Selector #doc-dialog-focus-target' : '选择器 #doc-dialog-focus-target' }}</option>
         </select>
       </label>
       <label class="field">
@@ -95,12 +97,12 @@ function openWithConfig(): void {
         </select>
       </label>
       <label class="field">
-        width（px）
-        <input v-model="width" class="doc-input" placeholder="留空 = 自动" />
+        {{ locale === 'en-US' ? 'width (px)' : 'width（px）' }}
+        <input v-model="width" class="doc-input" :placeholder="locale === 'en-US' ? 'Empty = automatic' : '留空 = 自动'" />
       </label>
       <label class="field">
-        height（px）
-        <input v-model="height" class="doc-input" placeholder="留空 = 自动" />
+        {{ locale === 'en-US' ? 'height (px)' : 'height（px）' }}
+        <input v-model="height" class="doc-input" :placeholder="locale === 'en-US' ? 'Empty = automatic' : '留空 = 自动'" />
       </label>
       <label class="field">
         panelClass
@@ -109,11 +111,11 @@ function openWithConfig(): void {
     </div>
 
     <div class="bar">
-      <input id="doc-dialog-focus-target" class="doc-input" placeholder="restoreFocus 指定元素" />
-      <button type="button" class="doc-btn primary" @click="openWithConfig">按配置打开</button>
-      <span class="result">最近结果：{{ result || '—' }}</span>
+      <input id="doc-dialog-focus-target" class="doc-input" :placeholder="locale === 'en-US' ? 'restoreFocus target' : 'restoreFocus 指定元素'" />
+      <button type="button" class="doc-btn primary" @click="openWithConfig">{{ locale === 'en-US' ? 'Open with config' : '按配置打开' }}</button>
+      <span class="result">{{ locale === 'en-US' ? 'Latest result: ' : '最近结果：' }}{{ result || '—' }}</span>
     </div>
-    <p class="hint">focus 目标演示：打开前聚焦左侧输入框，关闭后焦点按 restoreFocus 恢复。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'Focus demo: focus the left input before opening; restoreFocus restores focus after closing.' : 'focus 目标演示：打开前聚焦左侧输入框，关闭后焦点按 restoreFocus 恢复。' }}</p>
   </div>
 </template>
 

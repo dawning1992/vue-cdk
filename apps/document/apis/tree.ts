@@ -3,10 +3,11 @@ import type {ApiGroup} from '../api';
 /** tree 模块 API 分组：组件、指令、树控制与类型。 */
 export const apiGroups: readonly ApiGroup[] = [
   {
-    title: '组件',
+    title: '组件', titleEn: 'Components',
     rows: [
       {
         name: 'VTree',
+        descriptionEn: 'Root tree component with role=tree. Accepts a DataSource, Emitter, Ref, or array and exactly one hierarchy source: treeControl, levelAccessor for flat data, or childrenAccessor for nested data. Exposes node expansion operations.',
         signature:
           'component VTree<T, K>：dataSource / treeControl? / levelAccessor? / childrenAccessor? / trackBy? / expansionKey? / tag?',
         description:
@@ -14,12 +15,14 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: '#node 插槽',
+        descriptionEn: 'Node template scope corresponding to Angular cdkTreeNodeDef. Render VTreeNode or VNestedTreeNode inside it; use v-if for conditional templates.',
         signature: 'VTreeNodeContext<T> = {node: T; level: number; index: number; count: number}',
         description:
           '节点模板作用域插槽（对应 Angular 的 *cdkTreeNodeDef）；插槽内编写 VTreeNode / VNestedTreeNode 与节点内容，条件模板用 v-if 实现（对应 Angular 的 when 谓词）。',
       },
       {
         name: 'VTreeNode',
+        descriptionEn: 'Flat tree item corresponding to cdk-tree-node. Provides treeitem ARIA attributes and roving tabindex; expandable state is inferred with treeControl and must be supplied when using accessors.',
         signature:
           'component VTreeNode<T>：node / isExpandable? / isExpanded? / isDisabled? / typeaheadLabel? / tag?；emits activation(node) / expandedChange(boolean)',
         description:
@@ -27,6 +30,7 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'VNestedTreeNode',
+        descriptionEn: 'Nested tree item corresponding to cdk-nested-tree-node. Renders descendants recursively when expanded and removes them when collapsed.',
         signature: 'component VNestedTreeNode<T>：props / emits 同 VTreeNode',
         description:
           '嵌套树节点（对应 cdk-nested-tree-node）：节点内容后自动渲染展开的子节点（无需 Angular 的 cdkTreeNodeOutlet）；子节点仅在展开时渲染，继续复用 #node 插槽递归。',
@@ -34,16 +38,18 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '指令',
+    title: '指令', titleEn: 'Directives',
     rows: [
       {
         name: 'vTreeNodeToggle',
+        descriptionEn: 'Toggles expansion on click, Enter, or Space, stopping propagation and focusing the node. Bind true to recursively toggle descendants; attach it to a button.',
         signature: 'directive vTreeNodeToggle<boolean | undefined>',
         description:
           '展开/收起指令（对应 cdkTreeNodeToggle）：点击与 Enter/Space 触发并 stopPropagation；绑定值为 true 时递归切换子树；切换后自动聚焦节点。建议挂在按钮上。',
       },
       {
         name: 'vTreeNodePadding',
+        descriptionEn: 'Adds indentation based on level, 40px by default. A number overrides level; a CSS length sets indentation. RTL uses paddingRight.',
         signature:
           "directive vTreeNodePadding<number | string | {level?: number; indent?: number | string}>",
         description:
@@ -51,6 +57,7 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'TreeNodePaddingValue',
+        descriptionEn: 'Binding value for vTreeNodePadding: a number overrides level, a CSS length sets indentation, and an object can set both.',
         signature: 'type TreeNodePaddingValue = number | string | {level?: number | null; indent?: number | string}',
         description:
           'vTreeNodePadding 的绑定值：数字覆盖层级、带单位字符串覆盖缩进（缺省 px）、对象可同时指定 level 与 indent。',
@@ -58,39 +65,45 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '树控制',
+    title: '树控制', titleEn: 'Tree controls',
     rows: [
       {
         name: 'TreeControl',
+        descriptionEn: 'Tree control contract for node data, expansion state, descendant queries, expansion operations, hierarchy lookup, and child access.',
         signature: 'interface TreeControl<T, K = T>',
         description:
           '树控制接口：dataNodes / expansionModel / isExpanded / getDescendants / toggle / expand / collapse / expandAll / collapseAll / toggleDescendants / expandDescendants / collapseDescendants / getLevel / isExpandable / getChildren。',
       },
       {
         name: 'BaseTreeControl',
+        descriptionEn: 'Base tree control that stores expansion state in SelectionModel and provides node and subtree operations. trackBy supplies stable node identity.',
         signature: 'abstract class BaseTreeControl<T, K = T> implements TreeControl<T, K>',
         description:
           '树控制基类：基于 SelectionModel 维护展开状态，提供单节点与子树的展开/收起操作；trackBy 提供稳定标识（对应 Angular 的 BaseTreeControl）。',
       },
       {
         name: 'FlatTreeControl',
+        descriptionEn: 'Controls flat trees using getLevel and isExpandable. Descendants are found by scanning levels; assign dataNodes before use.',
         signature: 'class FlatTreeControl<T, K = T> extends BaseTreeControl<T, K>',
         description:
           '扁平树控制：构造参数 getLevel / isExpandable（可带 {trackBy} 选项）；getDescendants 按层级扫描扁平数组，expandAll 展开全部节点。使用前须为 dataNodes 赋值。',
       },
       {
         name: 'FlatTreeControlOptions',
+        descriptionEn: 'Optional FlatTreeControl settings. trackBy provides stable node identity to preserve expansion across object reference changes.',
         signature: 'interface FlatTreeControlOptions<T, K> { trackBy?: (dataNode: T) => K }',
         description: 'FlatTreeControl 可选配置：trackBy 为节点稳定标识函数，用于跨引用变化保持展开状态。',
       },
       {
         name: 'NestedTreeControl',
+        descriptionEn: 'Controls nested trees using getChildren, which may return an array or Emitter. Descendant lookup is recursive; asynchronous children are collected after emission.',
         signature: 'class NestedTreeControl<T, K = T> extends BaseTreeControl<T, K>',
         description:
           '嵌套树控制：构造参数 getChildren（返回数组或 Emitter 流，可带 {isExpandable, trackBy} 选项）；getDescendants 递归收集后代；异步子节点仅在派发后参与同步收集。',
       },
       {
         name: 'NestedTreeControlOptions',
+        descriptionEn: 'Optional NestedTreeControl settings. isExpandable determines expandability when supplied; trackBy provides stable node identity.',
         signature: 'interface NestedTreeControlOptions<T, K> { isExpandable?: (dataNode: T) => boolean; trackBy?: (dataNode: T) => K }',
         description:
           'NestedTreeControl 可选配置：isExpandable 判断节点是否可展开（不提供时按后代数量推断）；trackBy 为节点稳定标识函数。',
@@ -98,22 +111,25 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '无障碍与基础设施',
+    title: '无障碍与基础设施', titleEn: 'Accessibility and infrastructure',
     rows: [
       {
         name: 'TreeKeyManager',
+        descriptionEn: 'Keyboard navigation for trees: arrows, left/right expansion and parent/child focus, Home/End, Enter/Space, sibling expansion, typeahead, and RTL-aware direction. Items may be an array or Ref.',
         signature: 'class TreeKeyManager<T extends TreeKeyManagerItem>（vue-cdk/a11y）',
         description:
           '树形键盘导航管理器：方向键、左右键展开/收起与聚焦子/父节点、Home/End、Enter/Space 激活、`*` 同级展开、typeahead、RTL 交换左右键；条目源支持数组或 Ref。',
       },
       {
         name: 'SelectionModel',
+        descriptionEn: 'Selection utilities for selecting, deselecting, toggling, querying, clearing, and batching changes. selected is stored in shallowRef and is reactively trackable.',
         signature: 'class SelectionModel<T>（vue-cdk/collections）',
         description:
           '选择模型：select / deselect / toggle / isSelected / clear / changed（Emitter）/ compareWith / bulk；内部 shallowRef 存储，读取 selected 可被响应式追踪。',
       },
       {
         name: 'VTreePublicApi',
+        descriptionEn: 'Methods exposed on the VTree template ref for expansion operations and the viewChange stream.',
         signature: 'interface VTreePublicApi<T>',
         description:
           'VTree 模板 ref 暴露的方法集合：isExpanded / toggle / expand / collapse / toggleDescendants / expandDescendants / collapseDescendants / expandAll / collapseAll / viewChange。',
@@ -121,33 +137,38 @@ export const apiGroups: readonly ApiGroup[] = [
     ],
   },
   {
-    title: '上下文、注入与工具',
+    title: '上下文、注入与工具', titleEn: 'Context, injection, and utilities',
     rows: [
       {
         name: 'VCDK_TREE_CONTEXT',
+        descriptionEn: 'Injection key for the context VTree provides to descendant node components and directives.',
         signature: 'const VCDK_TREE_CONTEXT: InjectionKey<VTreeContext<any, any>>',
         description: '树上下文注入键，VTree 通过 provide 提供给后代节点组件与指令。',
       },
       {
         name: 'VTreeContext',
+        descriptionEn: 'Context provided by VTree to node components and directives, including hierarchy access, expansion operations, node registration, focus management, slot rendering, and view changes.',
         signature: 'interface VTreeContext<T = any, K = any>',
         description:
           'VTree 提供给后代节点/指令的上下文，是节点组件与指令访问树能力的唯一通道：treeControl 树控制实例（使用 accessors 时为 null）；getExpansionKey/getLevel/getParentData/getSetSize/getPositionInSet/isExpanded/isLeafNode 读取节点信息；expand/collapse/toggle/toggleDescendants/expandDescendants/collapseDescendants 操作展开；getDirectChildren 获取直接子节点源；getNode/registerNode/unregisterNode 维护节点注册表；focusNode/keyManager 键盘导航；nodeSlot 为 #node 插槽渲染函数；viewChange 为视图区间流。',
       },
       {
         name: 'VTreeNodeContext',
+        descriptionEn: 'Scope for the #node slot: node is the item, level is zero-based, index is its sibling position, and count is the number of siblings.',
         signature: 'interface VTreeNodeContext<T> { node: T; level: number; index: number; count: number }',
         description:
           '#node 作用域插槽的上下文（对应 Angular CdkTreeNodeOutletContext）：node 为节点数据、level 为节点层级（0 起）、index 为节点在兄弟节点中的索引、count 为兄弟节点总数。',
       },
       {
         name: 'VTreeNodePublicApi',
+        descriptionEn: 'Public API shared by VTreeNode and VNestedTreeNode and used by TreeKeyManager. Includes node state, hierarchy queries, activation, expansion, and focus operations.',
         signature: 'interface VTreeNodePublicApi<T = any, K = any>',
         description:
           '树节点的公共 API（VTreeNode/VNestedTreeNode 均暴露，同时作为 TreeKeyManagerItem 的实现载体）：data/tree/element/isDisabled/isExpandable/isExpanded/level 只读属性；getLabel/getParent/getChildren 查询；activate/collapse/expand/focus/unfocus/makeFocusable 操作；_setActiveItem/_focusItem 内部供键盘管理器调用。',
       },
       {
         name: 'useVTreeNode',
+        descriptionEn: 'Shared setup logic for tree nodes: injects tree context, manages focus and expansion, and registers the node. Custom node components can reuse it for matching keyboard and ARIA behavior.',
         signature:
           'useVTreeNode(props: {node; isExpandable; isExpanded?; isDisabled; typeaheadLabel?}, emit, type: "flat" | "nested"): { tree; api; rootEl; tabindex; level; isExpandable; isExpanded }',
         description:
@@ -155,46 +176,54 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'findParentTreeNode',
+        descriptionEn: 'Finds the nearest registered tree node by walking up the DOM; returns null when none is found. Used by padding and toggle directives.',
         signature: 'findParentTreeNode(el: HTMLElement): VTreeNodePublicApi | null',
         description: '沿 DOM 向上查找最近的已注册树节点实例；找不到返回 null，供 padding/toggle 指令使用。',
       },
       {
         name: 'registerTreeNodeElement',
+        descriptionEn: 'Registers a node root element with its node instance when the component mounts.',
         signature: 'registerTreeNodeElement(el: HTMLElement, node: VTreeNodePublicApi): void',
         description: '注册节点根元素到节点实例注册表（组件挂载时调用）。',
       },
       {
         name: 'unregisterTreeNodeElement',
+        descriptionEn: 'Removes a node root element from the registry when the component unmounts.',
         signature: 'unregisterTreeNodeElement(el: HTMLElement): void',
         description: '注销节点根元素（组件卸载时调用）。',
       },
     ],
   },
   {
-    title: '错误函数',
+    title: '错误函数', titleEn: 'Error factories',
     rows: [
       {
         name: 'getTreeNoValidDataSourceError',
+        descriptionEn: 'Creates the error thrown when no valid data source is provided.',
         signature: 'getTreeNoValidDataSourceError(): Error',
         description: '未提供合法数据源时抛出的错误工厂。',
       },
       {
         name: 'getTreeMultipleDefaultNodeDefsError',
+        descriptionEn: 'Creates the error thrown when multiple default node templates without predicates are defined.',
         signature: 'getTreeMultipleDefaultNodeDefsError(): Error',
         description: '存在多个无谓词的默认节点模板时抛出的错误工厂。',
       },
       {
         name: 'getTreeMissingMatchingNodeDefError',
+        descriptionEn: 'Creates the error thrown when no node template matches the current item.',
         signature: 'getTreeMissingMatchingNodeDefError(): Error',
         description: '找不到匹配的节点模板时抛出的错误工厂。',
       },
       {
         name: 'getTreeControlMissingError',
+        descriptionEn: 'Creates the error thrown when no hierarchy source is provided.',
         signature: 'getTreeControlMissingError(): Error',
         description: '缺少 treeControl / levelAccessor / childrenAccessor 任一层级来源时抛出的错误工厂。',
       },
       {
         name: 'getMultipleTreeControlsError',
+        descriptionEn: 'Creates the error thrown when multiple hierarchy sources are provided at once.',
         signature: 'getMultipleTreeControlsError(): Error',
         description: '同时提供多个层级来源（treeControl / levelAccessor / childrenAccessor）时抛出的错误工厂。',
       },

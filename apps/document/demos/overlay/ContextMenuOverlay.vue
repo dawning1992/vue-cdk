@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {onBeforeUnmount, ref} from 'vue';
+import {onBeforeUnmount, ref, watch} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {ListKeyManager} from 'vue-cdk/a11y';
 import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
 import {ComponentPortal} from 'vue-cdk/portal';
@@ -13,16 +14,31 @@ interface MenuItem {
 }
 
 const overlay = useOverlay();
+const {locale} = useLocale();
 const lastPosition = ref('—');
 let overlayRef: OverlayRef | null = null;
 let keydownUnsubscribe: (() => void) | undefined;
 
-const items = ref<MenuItem[]>([
-  {label: '复制', getLabel: () => '复制', action: () => alert('复制')},
-  {label: '粘贴', getLabel: () => '粘贴', action: () => undefined},
-  {label: '剪切', getLabel: () => '剪切', action: () => undefined},
-  {label: '删除', getLabel: () => '删除', action: () => undefined},
-]);
+function createItems(): MenuItem[] {
+  return locale.value === 'en-US'
+    ? [
+        {label: 'Copy', getLabel: () => 'Copy', action: () => alert('Copy')},
+        {label: 'Paste', getLabel: () => 'Paste', action: () => undefined},
+        {label: 'Cut', getLabel: () => 'Cut', action: () => undefined},
+        {label: 'Delete', getLabel: () => 'Delete', action: () => undefined},
+      ]
+    : [
+        {label: '复制', getLabel: () => '复制', action: () => alert('复制')},
+        {label: '粘贴', getLabel: () => '粘贴', action: () => undefined},
+        {label: '剪切', getLabel: () => '剪切', action: () => undefined},
+        {label: '删除', getLabel: () => '删除', action: () => undefined},
+      ];
+}
+
+const items = ref<MenuItem[]>(createItems());
+watch(locale, () => {
+  items.value = createItems();
+});
 
 /** 菜单键盘管理器：换行 + Home/End；每次打开时复位高亮。 */
 const manager = new ListKeyManager(items).withWrap().withHomeAndEnd();
@@ -99,9 +115,9 @@ onBeforeUnmount(() => {
   <div class="wrap">
     <div class="context-stage" @contextmenu="onContextMenu">
       <p class="hint">
-        在此区域右键打开菜单（macOS 触控板：双指点按，或 Control + 点击）
+        {{ locale === 'en-US' ? 'Right-click here to open the menu (macOS trackpad: two-finger click or Control + click)' : '在此区域右键打开菜单（macOS 触控板：双指点按，或 Control + 点击）' }}
       </p>
-      <p class="hint">上次打开位置：{{ lastPosition }}</p>
+      <p class="hint">{{ locale === 'en-US' ? 'Last opened at: ' : '上次打开位置：' }}{{ lastPosition }}</p>
     </div>
   </div>
 </template>

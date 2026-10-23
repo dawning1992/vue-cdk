@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   type ConnectedPosition,
   type FlexibleConnectedPositionStrategy,
@@ -24,6 +25,7 @@ const viewportMargin = ref(8);
 const overlayRef = shallowRef<OverlayRef | null>(null);
 const strategy = shallowRef<FlexibleConnectedPositionStrategy | null>(null);
 const positionInfo = ref('');
+const {locale} = useLocale();
 
 /** 候选位置按优先级排列：下方展开 → 上方展开 → 右侧居中。 */
 const positions: ConnectedPosition[] = [
@@ -71,7 +73,7 @@ function togglePanel(): void {
   strategy.value.positionChanges.subscribe(change => {
     const pair = change.connectionPair;
     positionInfo.value =
-      `origin ${pair.originX}/${pair.originY} → overlay ${pair.overlayX}/${pair.overlayY}`;
+      `${locale.value === 'en-US' ? 'origin' : 'origin'} ${pair.originX}/${pair.originY} → overlay ${pair.overlayX}/${pair.overlayY}`;
   });
 
   ref.attach(new ComponentPortal(ConnectedTooltipContent, {props: {onClose: close}}));
@@ -89,15 +91,15 @@ onBeforeUnmount(() => {
     <div class="options">
       <label class="check">
         <input v-model="lockPosition" type="checkbox" @change="applyOptions" />
-        锁定位置
+        {{ locale === 'en-US' ? 'Lock position' : '锁定位置' }}
       </label>
       <label class="check">
         <input v-model="push" type="checkbox" @change="applyOptions" />
-        push 回屏
+        {{ locale === 'en-US' ? 'Push into viewport' : 'push 回屏' }}
       </label>
       <label class="check">
         <input v-model="flexibleDimensions" type="checkbox" @change="applyOptions" />
-        flexible 尺寸
+        {{ locale === 'en-US' ? 'Flexible dimensions' : 'flexible 尺寸' }}
       </label>
       <label class="check">
         <input v-model="growAfterOpen" type="checkbox" @change="applyOptions" />
@@ -124,12 +126,12 @@ onBeforeUnmount(() => {
 
     <div class="stage">
       <button ref="anchor" type="button" class="doc-btn primary" @click="togglePanel">
-        打开连接面板
+        {{ locale === 'en-US' ? 'Open connected panel' : '打开连接面板' }}
       </button>
     </div>
 
-    <div class="doc-output">{{ positionInfo || '打开面板后查看当前位置选择结果' }}</div>
-    <p class="hint">调整开关与偏移后，面板会实时重算位置；把浏览器窗口缩小即可观察翻转。</p>
+    <div class="doc-output">{{ positionInfo || (locale === 'en-US' ? 'Open the panel to inspect the selected position' : '打开面板后查看当前位置选择结果') }}</div>
+    <p class="hint">{{ locale === 'en-US' ? 'Position is recalculated as options and offsets change; shrink the browser window to observe flipping.' : '调整开关与偏移后，面板会实时重算位置；把浏览器窗口缩小即可观察翻转。' }}</p>
   </div>
 </template>
 

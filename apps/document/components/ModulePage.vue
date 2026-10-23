@@ -5,6 +5,10 @@ import type {ApiGroup} from '../api';
 import {buildAnchorIndex, globalAnchorMap, scrollToAnchor, type AnchorTarget} from '../apis/anchors';
 import ApiTable from './ApiTable.vue';
 import DocTabs from './DocTabs.vue';
+import {useLocale} from '../composables/useLocale';
+import {docModules} from '../config';
+
+const {messages, locale} = useLocale();
 
 const props = defineProps<{
   /** 模块英文名。 */
@@ -13,12 +17,19 @@ const props = defineProps<{
   zhName: string;
   /** 模块介绍，展示在示例 tab 顶部。 */
   intro: string;
+  /** 模块英文介绍；缺失时保留中文，不把中文内容伪装成英文。 */
+  introEn?: string;
   /** API 文档 tab 的分组表格数据。 */
   apiGroups: readonly ApiGroup[];
 }>();
 
 const route = useRoute();
 const router = useRouter();
+
+const localizedIntro = computed(() => {
+  if (locale.value !== 'en-US') return props.intro;
+  return props.introEn ?? docModules.find(module => module.name === props.moduleName)?.summaryEn ?? props.intro;
+});
 
 /** 当前页锚点索引：分组导航数据与「别名 → 行锚点」映射。 */
 const anchorIndex = computed(() => buildAnchorIndex(props.apiGroups));
@@ -64,9 +75,9 @@ onMounted(() => {
     <header class="module-head">
       <h2>
         {{ props.moduleName }}
-        <span class="zh-name">{{ props.zhName }}</span>
+        <span v-if="locale === 'zh-CN'" class="zh-name">{{ props.zhName }}</span>
       </h2>
-      <p>{{ props.intro }}</p>
+      <p>{{ localizedIntro }}</p>
     </header>
 
     <DocTabs v-model="activeTab" />
@@ -87,23 +98,23 @@ onMounted(() => {
       </div>
 
       <!-- 右侧 API 索引：sticky 固定，点击分组标题或条目平滑滚动到对应锚点。 -->
-      <nav class="api-nav" aria-label="API 索引">
-        <p class="api-nav-title">API 索引</p>
+      <nav class="api-nav" :aria-label="messages.apiIndex">
+        <p class="api-nav-title">{{ messages.apiIndex }}</p>
         <div v-for="group in anchorIndex.groups" :key="`nav-${group.anchor}`" class="api-nav-group">
           <a
             class="api-nav-group-title"
             href="#"
-            :aria-label="`跳转到分组「${group.title}」`"
+            :aria-label="messages.jumpToGroup(group.title)"
             @click.prevent="scrollToId(group.anchor)"
           >
-            {{ group.title }}
+            {{ locale === 'en-US' ? group.titleEn ?? group.title : group.title }}
           </a>
           <ul>
             <li v-for="item in group.items" :key="item.anchor">
               <a
                 class="api-nav-item"
                 href="#"
-                :aria-label="`跳转到 ${item.label}`"
+                :aria-label="messages.jumpToItem(item.label)"
                 @click.prevent="scrollToId(item.anchor)"
               >
                 {{ item.label }}

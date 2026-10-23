@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {computed} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   normalizeDialogContent,
   useDialogContainerCore,
@@ -15,6 +16,7 @@ const props = defineProps<{
   content: DialogContent;
   onContainerReady?: (instance: DialogContainerInstance) => void;
 }>();
+const {locale} = useLocale();
 
 // 复用默认容器的焦点陷阱 / ARIA 状态 / 数据注入 / 焦点恢复行为。
 const {containerEl} = useDialogContainerCore(props);
@@ -31,8 +33,8 @@ function setContainerElement(el: unknown): void {
 <template>
   <div :ref="setContainerElement" class="custom-container" tabindex="-1">
     <header class="custom-container-header">
-      <span class="custom-container-title">自定义容器（复用 useDialogContainerCore）</span>
-      <button class="custom-container-close" aria-label="关闭" @click="props.dialogRef.close()">
+      <span class="custom-container-title">{{ locale === 'en-US' ? 'Custom container (reusing useDialogContainerCore)' : '自定义容器（复用 useDialogContainerCore）' }}</span>
+      <button class="custom-container-close" :aria-label="locale === 'en-US' ? 'Close' : '关闭'" @click="props.dialogRef.close()">
         ×
       </button>
     </header>

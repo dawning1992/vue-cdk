@@ -134,7 +134,7 @@ async function openConfirm() {
 | `vue-cdk/observers` | observers | DOM 内容观察：共享 `MutationObserver` 的 `ContentObserver`、`useObserveContent()` 与 `vCdkObserveContent` | — |
 | `vue-cdk/overlay` | overlay | 浮层面板：命令式 `useOverlay()` + 声明式 `VConnectedOverlay` / `VOverlayOrigin` | `vue-cdk/overlay/style.css` |
 | `vue-cdk/platform` | platform | 平台能力检测与事件工具：`Platform` 服务（浏览器/引擎识别 + `usePlatform` 注入）、`getSupportedInputTypes`、Shadow DOM / Popover / scroll-behavior 检测 | — |
-| `vue-cdk/portal` | portal | 可编程内容挂载：`Portal` 系列 + `VPortal` / `VPortalOutlet`，overlay/dialog 基于它构建 | — |
+| `vue-cdk/portal` | portal | 可编程内容挂载：`Portal` 系列、`TemplateRef` 模板源与 `VPortal` / `VPortalOutlet`，overlay/dialog 基于它构建 | — |
 | `vue-cdk/scrolling` | scrolling | 滚动能力：滚动分发、容器与视口测量，以及固定尺寸/不定高度虚拟滚动（`VVirtualScrollViewport` / `VVirtualFor`） | `vue-cdk/scrolling/style.css` |
 | `vue-cdk/stepper` | stepper | 无样式多步骤流程：线性校验、键盘导航、步骤状态与通用表单适配契约 | — |
 | `vue-cdk/text-field` | text-field | 文本字段：textarea 自动伸缩、浏览器自动填充监控，以及 Composition API / 指令 / Sass 入口 | `vue-cdk/text-field/style.css` |
@@ -880,14 +880,16 @@ outlet.detach();
 outlet.attach(new DomPortal(document.querySelector('#movable')!)); // detach 恢复原位置
 ```
 
+### 显式模板引用
 
-显式模板引用（完整 SFC）：
+通过 `TemplateRef` 的组件引用获取 `TemplateRefHandle<C>`，再交给 `TemplatePortal` 挂载：
 
 ```vue
 <script setup lang="ts">
 import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {TemplateRef, TemplatePortal, type TemplateRefHandle} from 'vue-cdk/portal';
 import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
+
 const tpl = shallowRef<TemplateRefHandle<{msg: string}> | null>(null);
 const count = ref(0);
 const overlay = useOverlay();
@@ -899,7 +901,10 @@ function open() {
   panel.attach(new TemplatePortal<{msg: string}>(tpl.value, {msg: '你好'}));
 }
 /** 关闭内容但保留浮层引用以便重开。 */
-function close() { panel?.detach(); }
+function close() {
+  panel?.detach();
+}
+
 onBeforeUnmount(() => panel?.dispose());
 </script>
 <template>
@@ -911,9 +916,15 @@ onBeforeUnmount(() => panel?.dispose());
 </template>
 ```
 
-TemplateRef 自身不渲染内容；Vue 裸 `<template ref="tpl">` 不支持此契约。
-来源卸载自动卸载内容，之后句柄失效。仅保证应用级上下文，不保证局部 provide/inject。
-更多上下文、重挂载与清理约定见 [模板引用指南](src/portal/TEMPLATE_REF.md)。
+`TemplateRef` 自身不渲染内容，Vue 裸 `<template ref="tpl">` 不会产生模板句柄。组件引用在 setup 阶段为空，应在 `onMounted` 或挂载后的事件中检查非空再使用。
+
+- 插槽接收传入的上下文，并保留父级响应式状态与事件闭包；需要修改上下文时使用响应式对象，普通对象的直接修改不会触发更新。
+- `detach()` 卸载内容；再次挂载会重新创建内容组件，其局部状态随之重置。来源仍有效时可重用句柄。
+- 来源卸载会自动卸载内容，之后句柄永久失效，再次挂载会抛错；调用方仍须 `dispose()` 自建浮层或出口以释放容器等资源。
+- 自动继承来源应用的 `appContext`，不保证继承来源组件的局部 `provide/inject`。
+- 原有 `new TemplatePortal(render, context?, appContext?)` 渲染函数构造方式继续支持；`dialog.open()` 当前不直接接受模板句柄或 `TemplatePortal`。
+
+更多上下文、重挂载与清理约定见仓库中的[模板引用指南](https://github.com/dawning1992/vue-cdk/blob/main/packages/cdk/src/portal/TEMPLATE_REF.md)（中文）。
 
 ## scrolling 模块
 
@@ -1292,8 +1303,12 @@ pnpm build          # 构建库（多入口 ESM/CJS + .d.ts + CSS）
 pnpm build:document # 构建文档站静态产物（apps/document/dist）
 pnpm typecheck      # 全仓类型检查（vue-tsc）
 pnpm test           # 运行全仓单元测试（Vitest + jsdom）
-pnpm --filter vue-cdk publish # 发布到 npm（prepublishOnly 自动执行 typecheck + test + build）
+pnpm --filter vue-cdk exec playwright install chromium # 首次运行浏览器测试前安装 Chromium
+pnpm --filter vue-cdk test:browser # 真实浏览器测试（Playwright Chromium）
+pnpm --filter vue-cdk publish # 发布到 npm
 ```
+
+浏览器测试使用 Playwright Chromium 验证真实布局与 CSS animation 行为，首次运行前需安装浏览器。发布前会自动执行类型检查、单元测试、浏览器测试、构建及版本一致性校验。
 
 新增模块约定：在 `src/` 下创建独立目录并提供 `index.ts` 入口，同时在
 `package.json` 的 `exports` 与 `vite.config.ts` 的多入口配置中登记；

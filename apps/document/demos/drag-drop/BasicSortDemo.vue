@@ -2,8 +2,11 @@
 import {ref} from 'vue';
 import {moveItemInArray, VDrag, VDropList} from 'vue-cdk/drag-drop';
 import type {VDragDrop} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
 
-const items = ref(['零', '一', '二', '三', '四']);
+const {locale} = useLocale();
+
+const items = ref(['0', '1', '2', '3', '4']);
 
 /** 排序完成后按事件索引重排数据数组。 */
 function onDrop(event: VDragDrop<string>): void {
@@ -18,7 +21,7 @@ function onDrop(event: VDragDrop<string>): void {
       {{ item }}
     </VDrag>
   </VDropList>
-  <p class="hint">顺序：{{ items.join(' → ') }}</p>
+  <p class="hint">{{ locale === 'en-US' ? 'Order: ' : '顺序：' }}{{ items.join(' → ') }}</p>
 </template>
 
 <style scoped>

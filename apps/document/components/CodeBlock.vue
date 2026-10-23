@@ -10,8 +10,10 @@ const props = withDefaults(
     lang?: string;
     /** 展示在代码块顶部的文件名，如 DeclarativeOverlay.vue。 */
     filename?: string;
+    /** 是否展示代码块内的文件名栏；多文件标签已展示文件名时可关闭。 */
+    showFilename?: boolean;
   }>(),
-  {lang: 'vue', filename: ''},
+  {lang: 'vue', filename: '', showFilename: true},
 );
 
 const highlighted = ref('');
@@ -110,8 +112,9 @@ onMounted(() => {
 
 <template>
   <div class="code-block">
-    <div class="code-head">
-      <span class="filename">{{ filename || '源码' }}</span>
+    <div v-if="showFilename || true" class="code-head">
+      <span v-if="showFilename" class="filename">{{ filename || '源码' }}</span>
+      <span v-else class="filename-spacer" aria-hidden="true" />
       <button class="copy-btn" type="button" @click="copyCode">
         {{ copied ? '已复制' : '复制' }}
       </button>
@@ -144,6 +147,10 @@ onMounted(() => {
   color: #9db1c7;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 12px;
+}
+
+.filename-spacer {
+  flex: 1;
 }
 
 .copy-btn {

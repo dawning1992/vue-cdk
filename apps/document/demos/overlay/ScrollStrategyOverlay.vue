@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {computed, onBeforeUnmount, ref, shallowRef, watch} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   isElementScrolledOutsideView,
   type OverlayRef,
@@ -18,17 +19,23 @@ const box = ref<HTMLElement | null>(null);
 const strategyName = ref<StrategyName>('close');
 const open = ref(false);
 const overlayRef = shallowRef<OverlayRef | null>(null);
-const notice = ref('打开面板后滚动列表内容或页面，观察当前策略的行为。');
+const {locale} = useLocale();
+const notice = ref(locale.value === 'en-US' ? 'Scroll the list or page after opening to observe the current strategy.' : '打开面板后滚动列表内容或页面，观察当前策略的行为。');
 let unsubscribeVisibility: (() => void) | undefined;
+
+watch(locale, value => {
+  if (!open.value) {
+    notice.value = value === 'en-US'
+      ? 'Scroll the list or page after opening to observe the current strategy.'
+      : '打开面板后滚动列表内容或页面，观察当前策略的行为。';
+  }
+});
 /** 面板是否因锚点滚出可视区域被自动关闭（滚回后可自动恢复）。 */
 let autoClosed = false;
 
-const strategyLabels: Record<StrategyName, string> = {
-  close: 'close：任何滚动都立即关闭',
-  block: 'block：锁定页面滚动',
-  reposition: 'reposition：随滚动重新定位',
-  noop: 'noop：不处理滚动',
-};
+const strategyLabels = computed<Record<StrategyName, string>>(() => locale.value === 'en-US'
+  ? {close: 'close: close on any scroll', block: 'block: lock page scrolling', reposition: 'reposition: reposition on scroll', noop: 'noop: ignore scrolling'}
+  : {close: 'close：任何滚动都立即关闭', block: 'block：锁定页面滚动', reposition: 'reposition：随滚动重新定位', noop: 'noop：不处理滚动'});
 
 /** 按选择创建对应的滚动策略实例。 */
 function buildStrategy(name: StrategyName): ScrollStrategy {
@@ -54,14 +61,14 @@ function detachPanel(): void {
 function close(): void {
   autoClosed = false;
   detachPanel();
-  notice.value = '面板已关闭。';
+  notice.value = locale.value === 'en-US' ? 'Panel closed.' : '面板已关闭。';
 }
 
 /** 锚点滚出可视区域时关闭，并标记可在滚回后恢复。 */
 function closeForVisibility(): void {
   detachPanel();
   autoClosed = true;
-  notice.value = '锚点行已滚出列表可视区域，面板已关闭，滚回后将自动恢复。';
+  notice.value = locale.value === 'en-US' ? 'The anchor row left the list viewport; the panel closed and will restore when it returns.' : '锚点行已滚出列表可视区域，面板已关闭，滚回后将自动恢复。';
 }
 
 /**
@@ -85,7 +92,7 @@ function subscribeAnchorVisibility(): void {
       }
     } else if (autoClosed && !open.value) {
       openPanel();
-      notice.value = '锚点行已回到列表可视区域，面板已恢复。';
+      notice.value = locale.value === 'en-US' ? 'The anchor row returned to the list viewport; the panel was restored.' : '锚点行已回到列表可视区域，面板已恢复。';
     }
   });
 }
@@ -112,13 +119,15 @@ function openPanel(): void {
   overlayRef.value = ref;
 
   ref.attach(new ComponentPortal(ScrollStrategyContent, {
-    props: {label: strategyLabels[strategyName.value]},
+    props: {label: strategyLabels.value[strategyName.value]},
   }));
   open.value = true;
   if (strategyName.value !== 'close' && !unsubscribeVisibility) {
     subscribeAnchorVisibility();
   }
-  notice.value = `已打开，策略「${strategyName.value}」生效：${strategyLabels[strategyName.value]}。`;
+  notice.value = locale.value === 'en-US'
+    ? `Opened; strategy "${strategyName.value}" is active: ${strategyLabels.value[strategyName.value]}.`
+    : `已打开，策略「${strategyName.value}」生效：${strategyLabels.value[strategyName.value]}。`;
 }
 
 function togglePanel(): void {
@@ -133,7 +142,7 @@ function togglePanel(): void {
 function onStrategyChange(): void {
   if (open.value) {
     close();
-    notice.value = '策略已切换，面板已关闭；重新打开即可应用新策略。';
+    notice.value = locale.value === 'en-US' ? 'Strategy changed; the panel closed. Reopen it to apply the new strategy.' : '策略已切换，面板已关闭；重新打开即可应用新策略。';
   }
 }
 
@@ -154,22 +163,23 @@ onBeforeUnmount(() => {
         </option>
       </select>
       <button type="button" class="doc-btn primary" @click="togglePanel">
-        {{ open ? '关闭面板' : '打开面板' }}
+        {{ open ? (locale === 'en-US' ? 'Close panel' : '关闭面板') : (locale === 'en-US' ? 'Open panel' : '打开面板') }}
       </button>
     </div>
 
     <div ref="box" class="box" v-scrollable>
-      <p class="line">可滚动列表行 1</p>
+      <p class="line">{{ locale === 'en-US' ? 'Scrollable list row 1' : '可滚动列表行 1' }}</p>
       <!-- 面板锚定在列表内容中的这一行：滚动列表时锚点行会随内容移动。 -->
-      <p ref="anchor" class="line anchor-line">可滚动列表行 2（面板锚点）</p>
-      <p v-for="n in 38" :key="n" class="line">可滚动列表行 {{ n + 2 }}</p>
+      <p ref="anchor" class="line anchor-line">{{ locale === 'en-US' ? 'Scrollable list row 2 (panel anchor)' : '可滚动列表行 2（面板锚点）' }}</p>
+      <p v-for="n in 38" :key="n" class="line">{{ locale === 'en-US' ? `Scrollable list row ${n + 2}` : `可滚动列表行 ${n + 2}` }}</p>
     </div>
 
     <div class="doc-output">{{ notice }}</div>
     <p class="hint">
-      面板以 inline popover 插入到锚点行之后（DOM 位于列表内），锚点行滚出列表可视区域后自动关闭面板。
-      close：滚动列表或页面立即关闭；block：锁定页面滚动但列表仍可滚；reposition：面板随锚点行滚动重新定位；
-      noop：面板停在原地。
+      {{ locale === 'en-US'
+        ? 'The panel uses an inline popover inserted after the anchor row (inside the list DOM), and closes when the anchor leaves the list viewport. close closes on list or page scroll; block locks page scrolling while the list can still scroll; reposition follows the anchor; noop leaves the panel in place.'
+        : '面板以 inline popover 插入到锚点行之后（DOM 位于列表内），锚点行滚出列表可视区域后自动关闭面板。close：滚动列表或页面立即关闭；block：锁定页面滚动但列表仍可滚；reposition：面板随锚点行滚动重新定位；noop：面板停在原地。'
+      }}
     </p>
   </div>
 </template>

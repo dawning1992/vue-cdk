@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {OverlayContainer, createOverlayRef, type OverlayRef, useOverlay} from 'vue-cdk/overlay';
 import {ComponentPortal} from 'vue-cdk/portal';
 import OverlayContainerContent from './OverlayContainerContent.vue';
@@ -10,6 +11,7 @@ const overlayRef = shallowRef<OverlayRef | null>(null);
 const open = ref(false);
 const status = ref('');
 const log = ref('');
+const {locale} = useLocale();
 
 /** 模板中的自定义 div 作为容器宿主；实例延迟到首次打开时创建（setup 阶段 ref 尚未挂载）。 */
 let container: OverlayContainer | null = null;
@@ -28,9 +30,9 @@ function refreshStatus(): void {
     return;
   }
   status.value =
-    `容器元素：自定义 div（class="${region.className}"）` +
-    `· 父节点：${region.parentElement?.tagName.toLowerCase() ?? '—'}` +
-    `· 已挂载浮层：${overlayRef.value?.hasAttached() ? '是' : '否'}`;
+    locale.value === 'en-US'
+      ? `Container: custom div (class="${region.className}") · parent: ${region.parentElement?.tagName.toLowerCase() ?? '—'} · overlay attached: ${overlayRef.value?.hasAttached() ? 'yes' : 'no'}`
+      : `容器元素：自定义 div（class="${region.className}"）· 父节点：${region.parentElement?.tagName.toLowerCase() ?? '—'}· 已挂载浮层：${overlayRef.value?.hasAttached() ? '是' : '否'}`;
 }
 
 function closeOverlay(): void {
@@ -38,7 +40,7 @@ function closeOverlay(): void {
   overlayRef.value = null;
   open.value = false;
   refreshStatus();
-  log.value = '已关闭（detach）';
+  log.value = locale.value === 'en-US' ? 'Closed (detach)' : '已关闭（detach）';
 }
 
 /** 打开浮层：container 选项传入自定义容器，浮层 host 挂载进区域而不是全局容器。 */
@@ -66,7 +68,7 @@ function openOverlay(): void {
 
   ref.attach(new ComponentPortal(OverlayContainerContent, {props: {onClose: closeOverlay}}));
   refreshStatus();
-  log.value = '已打开（attach）：浮层 host 挂载到自定义 div';
+  log.value = locale.value === 'en-US' ? 'Opened (attach): overlay host mounted in the custom div' : '已打开（attach）：浮层 host 挂载到自定义 div';
 }
 
 /** 释放容器：dispose 只解除引用，调用方提供的 div 保留在页面中，可再次打开复用。 */
@@ -75,7 +77,7 @@ function releaseContainer(): void {
   container?.dispose();
   container = null;
   refreshStatus();
-  log.value = '已释放容器（dispose）：自定义 div 仍保留在页面中';
+  log.value = locale.value === 'en-US' ? 'Container disposed: the custom div remains on the page' : '已释放容器（dispose）：自定义 div 仍保留在页面中';
 }
 
 onBeforeUnmount(() => {
@@ -88,15 +90,15 @@ onBeforeUnmount(() => {
   <div class="wrap">
     <div class="actions">
       <button type="button" class="doc-btn primary" :disabled="open" @click="openOverlay">
-        打开浮层
+        {{ locale === 'en-US' ? 'Open overlay' : '打开浮层' }}
       </button>
       <button type="button" class="doc-btn" @click="releaseContainer">
-        释放容器（dispose）
+        {{ locale === 'en-US' ? 'Dispose container' : '释放容器（dispose）' }}
       </button>
     </div>
     <div ref="regionRef" class="overlay-region">
       <span class="region-tip">
-        {{ open ? '浮层已挂载到本区域，点击区域遮罩或关闭按钮可关闭' : '自定义 div 容器区域：浮层将在这里打开' }}
+        {{ open ? (locale === 'en-US' ? 'Overlay is mounted here; click the backdrop or close button to close' : '浮层已挂载到本区域，点击区域遮罩或关闭按钮可关闭') : (locale === 'en-US' ? 'Custom div container region: the overlay opens here' : '自定义 div 容器区域：浮层将在这里打开') }}
       </span>
     </div>
     <p class="status">{{ status || '—' }}</p>

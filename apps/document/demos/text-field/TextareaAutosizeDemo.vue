@@ -1,16 +1,22 @@
 <script setup lang="ts">
 import {nextTick, ref} from 'vue';
 import {useTextareaAutosize} from 'vue-cdk/text-field';
+import {useLocale} from '../../composables/useLocale';
 
+const {locale} = useLocale();
 const textarea = ref<HTMLTextAreaElement | null>(null);
-const content = ref('输入更多内容，textarea 会自动增高。');
+const content = ref(locale.value === 'en-US'
+  ? 'Add more text and the textarea will grow automatically.'
+  : '输入更多内容，textarea 会自动增高。');
 const enabled = ref(true);
 const minRows = ref(2);
 const maxRows = ref(8);
 const autosize = useTextareaAutosize(textarea, {enabled, minRows, maxRows});
 
 async function fillLines() {
-  content.value = Array.from({length: 12}, (_, index) => `第 ${index + 1} 行内容`).join('\n');
+  content.value = locale.value === 'en-US'
+    ? Array.from({length: 12}, (_, index) => `Line ${index + 1}`).join('\n')
+    : Array.from({length: 12}, (_, index) => `第 ${index + 1} 行内容`).join('\n');
   await nextTick();
   autosize.resizeToFitContent(true);
 }
@@ -22,19 +28,19 @@ async function fillLines() {
       ref="textarea"
       v-model="content"
       class="demo-textarea"
-      placeholder="请输入多行内容"
-      aria-label="自动伸缩文本框"
+      :placeholder="locale === 'en-US' ? 'Enter multiple lines' : '请输入多行内容'"
+      :aria-label="locale === 'en-US' ? 'Autosizing textarea' : '自动伸缩文本框'"
     />
     <div class="controls">
-      <label><input v-model="enabled" type="checkbox" /> 启用自动伸缩</label>
-      <label>最小行数 <input v-model.number="minRows" type="number" min="1" max="6" /></label>
-      <label>最大行数 <input v-model.number="maxRows" type="number" min="2" max="12" /></label>
+      <label><input v-model="enabled" type="checkbox" /> {{ locale === 'en-US' ? 'Enable autosizing' : '启用自动伸缩' }}</label>
+      <label>{{ locale === 'en-US' ? 'Minimum rows' : '最小行数' }} <input v-model.number="minRows" type="number" min="1" max="6" /></label>
+      <label>{{ locale === 'en-US' ? 'Maximum rows' : '最大行数' }} <input v-model.number="maxRows" type="number" min="2" max="12" /></label>
     </div>
     <div class="controls">
-      <button type="button" @click="fillLines">填入 12 行</button>
-      <button type="button" @click="content = ''">清空</button>
-      <button type="button" @click="autosize.resizeToFitContent(true)">强制重算</button>
-      <button type="button" @click="autosize.reset()">恢复初始高度</button>
+      <button type="button" @click="fillLines">{{ locale === 'en-US' ? 'Fill 12 lines' : '填入 12 行' }}</button>
+      <button type="button" @click="content = ''">{{ locale === 'en-US' ? 'Clear' : '清空' }}</button>
+      <button type="button" @click="autosize.resizeToFitContent(true)">{{ locale === 'en-US' ? 'Force recalculate' : '强制重算' }}</button>
+      <button type="button" @click="autosize.reset()">{{ locale === 'en-US' ? 'Restore initial height' : '恢复初始高度' }}</button>
     </div>
   </div>
 </template>

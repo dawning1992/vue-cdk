@@ -1,26 +1,28 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue';
 import {useAutofill} from 'vue-cdk/text-field';
+import {useLocale} from '../../composables/useLocale';
 
+const {locale} = useLocale();
 const usernameInput = ref<HTMLInputElement | null>(null);
 const passwordInput = ref<HTMLInputElement | null>(null);
-const events = ref<string[]>([]);
+const events = ref<Array<{field: 'username' | 'password'; isAutofilled: boolean}>>([]);
 const submitted = ref(false);
 
 const username = useAutofill(usernameInput, {
   onAutofill(event) {
-    record('用户名', event.isAutofilled);
+    record('username', event.isAutofilled);
   },
 });
 const password = useAutofill(passwordInput, {
   onAutofill(event) {
-    record('密码', event.isAutofilled);
+    record('password', event.isAutofilled);
   },
 });
 const hasAutofilledField = computed(() => username.isAutofilled.value || password.isAutofilled.value);
 
-function record(field: string, isAutofilled: boolean) {
-  events.value.unshift(`${field}：${isAutofilled ? '检测到自动填充' : '自动填充状态结束'}`);
+function record(field: 'username' | 'password', isAutofilled: boolean) {
+  events.value.unshift({field, isAutofilled});
 }
 
 // 仅用于文档演示探针状态；生产环境由浏览器的 :-webkit-autofill 自动触发同名动画。
@@ -35,52 +37,55 @@ function simulate(animationName: string) {
   <div class="demo-stack">
     <form autocomplete="on" class="login-form" @submit.prevent="submitted = true">
       <label>
-        用户名
+        {{ locale === 'en-US' ? 'Username' : '用户名' }}
         <span class="field-row">
           <input
             ref="usernameInput"
             name="username"
             type="text"
             autocomplete="username"
-            placeholder="选择浏览器保存的账号"
+            :placeholder="locale === 'en-US' ? 'Choose a browser-saved username' : '选择浏览器保存的账号'"
           />
           <span class="state" :class="{active: username.isAutofilled.value}">
-            {{ username.isAutofilled.value ? '已自动填充' : '未自动填充' }}
+            {{ locale === 'en-US' ? (username.isAutofilled.value ? 'Autofilled' : 'Not autofilled') : (username.isAutofilled.value ? '已自动填充' : '未自动填充') }}
           </span>
         </span>
       </label>
       <label>
-        密码
+        {{ locale === 'en-US' ? 'Password' : '密码' }}
         <span class="field-row">
           <input
             ref="passwordInput"
             name="password"
             type="password"
             autocomplete="current-password"
-            placeholder="浏览器保存的密码"
+            :placeholder="locale === 'en-US' ? 'Browser-saved password' : '浏览器保存的密码'"
           />
           <span class="state" :class="{active: password.isAutofilled.value}">
-            {{ password.isAutofilled.value ? '已自动填充' : '未自动填充' }}
+            {{ locale === 'en-US' ? (password.isAutofilled.value ? 'Autofilled' : 'Not autofilled') : (password.isAutofilled.value ? '已自动填充' : '未自动填充') }}
           </span>
         </span>
       </label>
-      <button type="submit">登录（仅演示表单识别）</button>
+      <button type="submit">{{ locale === 'en-US' ? 'Sign in (form recognition demo only)' : '登录（仅演示表单识别）' }}</button>
     </form>
 
-    <p v-if="submitted" class="result">演示页面不会发送账号或密码。</p>
-    <p>整体状态：<strong>{{ hasAutofilledField ? '存在自动填充字段' : '没有自动填充字段' }}</strong></p>
+    <p v-if="submitted" class="result">{{ locale === 'en-US' ? 'This demo does not send the username or password.' : '演示页面不会发送账号或密码。' }}</p>
+    <p>{{ locale === 'en-US' ? 'Overall status:' : '整体状态：' }}<strong>{{ locale === 'en-US' ? (hasAutofilledField ? 'At least one field is autofilled' : 'No fields are autofilled') : (hasAutofilledField ? '存在自动填充字段' : '没有自动填充字段') }}</strong></p>
     <div class="controls">
-      <button type="button" @click="simulate('cdk-text-field-autofill-start')">模拟探针开始</button>
-      <button type="button" @click="simulate('cdk-text-field-autofill-end')">模拟探针结束</button>
+      <button type="button" @click="simulate('cdk-text-field-autofill-start')">{{ locale === 'en-US' ? 'Simulate probe start' : '模拟探针开始' }}</button>
+      <button type="button" @click="simulate('cdk-text-field-autofill-end')">{{ locale === 'en-US' ? 'Simulate probe end' : '模拟探针结束' }}</button>
     </div>
     <ol class="instructions">
-      <li>在 Chromium/WebKit 的密码管理器中为当前文档站域名保存一组账号密码。</li>
-      <li>刷新本页，或聚焦用户名输入框并选择已保存的账号。</li>
-      <li>浏览器真正应用自动填充后，字段右侧状态会自动更新。</li>
+      <li>{{ locale === 'en-US' ? 'Save credentials for this documentation site domain in a Chromium/WebKit password manager.' : '在 Chromium/WebKit 的密码管理器中为当前文档站域名保存一组账号密码。' }}</li>
+      <li>{{ locale === 'en-US' ? 'Refresh this page, or focus the username field and choose the saved account.' : '刷新本页，或聚焦用户名输入框并选择已保存的账号。' }}</li>
+      <li>{{ locale === 'en-US' ? 'The field status updates when the browser applies autofill.' : '浏览器真正应用自动填充后，字段右侧状态会自动更新。' }}</li>
     </ol>
-    <p class="note">浏览器不会因为页面存在示例就自动生成凭据；模拟按钮只用于无已保存凭据时验证 CDK 监控链路。</p>
+    <p class="note">{{ locale === 'en-US' ? 'Browsers do not generate credentials just because this demo exists. Use the simulation buttons to verify the CDK monitoring path when no credentials are saved.' : '浏览器不会因为页面存在示例就自动生成凭据；模拟按钮只用于无已保存凭据时验证 CDK 监控链路。' }}</p>
     <ul v-if="events.length">
-      <li v-for="(entry, index) in events" :key="`${entry}-${index}`">{{ entry }}</li>
+      <li v-for="(entry, index) in events" :key="`${entry.field}-${entry.isAutofilled}-${index}`">
+        {{ locale === 'en-US' ? (entry.field === 'username' ? 'Username' : 'Password') : (entry.field === 'username' ? '用户名' : '密码') }}:
+        {{ locale === 'en-US' ? (entry.isAutofilled ? 'autofill detected' : 'autofill ended') : (entry.isAutofilled ? '检测到自动填充' : '自动填充状态结束') }}
+      </li>
     </ul>
   </div>
 </template>

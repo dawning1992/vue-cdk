@@ -2,11 +2,15 @@
 import {getCurrentInstance, onBeforeUnmount, ref} from 'vue';
 import {ComponentPortal, DomPortalOutlet} from 'vue-cdk/portal';
 import UserCard from './UserCard.vue';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
+const t = (zh: string, en: string) => locale.value === 'en-US' ? en : zh;
 
 const outletEl = ref<HTMLElement | null>(null);
 const instanceInfo = ref('');
 const mounted = ref(false);
-const name = ref('小明');
+const name = ref(locale.value === 'en-US' ? 'Alex' : '小明');
 const level = ref(7);
 let outlet: DomPortalOutlet | null = null;
 
@@ -23,14 +27,14 @@ function mountCard(): void {
     new ComponentPortal(UserCard, {props: () => ({name: name.value, level: level.value})}),
   );
   mounted.value = true;
-  instanceInfo.value = `attach 返回实例：${typeof instance === 'object' ? 'ComponentPublicInstance' : instance}`;
+  instanceInfo.value = t(`attach 返回实例：${typeof instance === 'object' ? 'ComponentPublicInstance' : instance}`, `attach returned: ${typeof instance === 'object' ? 'ComponentPublicInstance' : instance}`);
 }
 
 /** 卸载内容但保留出口，可再次挂载。 */
 function unmountCard(): void {
   outlet?.detach();
   mounted.value = false;
-  instanceInfo.value = '已 detach，出口保留，可再次挂载';
+  instanceInfo.value = t('已 detach，出口保留，可再次挂载', 'Detached; outlet remains available for another attachment');
 }
 
 onBeforeUnmount(() => {
@@ -42,20 +46,20 @@ onBeforeUnmount(() => {
 <template>
   <div class="wrap column">
     <div class="controls">
-      <label>姓名 <input v-model="name" aria-label="用户名" /></label>
-      <label>等级 <input v-model.number="level" type="number" min="1" aria-label="用户等级" /></label>
+      <label>{{ t('姓名', 'Name') }} <input v-model="name" :aria-label="t('用户名', 'User name')" /></label>
+      <label>{{ t('等级', 'Level') }} <input v-model.number="level" type="number" min="1" :aria-label="t('用户等级', 'User level')" /></label>
     </div>
-    <p class="result">修改姓名或等级会更新已挂载的组件；卸载后再次挂载使用最新值。</p>
+    <p class="result">{{ t('修改姓名或等级会更新已挂载的组件；卸载后再次挂载使用最新值。', 'Changing the name or level updates the mounted component; remounting uses the latest values.') }}</p>
     <div class="controls">
       <button type="button" class="doc-btn primary" :disabled="mounted" @click="mountCard">
-        挂载组件 Portal
+        {{ t('挂载组件 Portal', 'Attach component portal') }}
       </button>
       <button type="button" class="doc-btn" :disabled="!mounted" @click="unmountCard">
-        卸载（detach）
+        {{ t('卸载（detach）', 'Detach') }}
       </button>
     </div>
     <div ref="outletEl" class="portal-outlet">
-      <p v-if="!mounted" class="placeholder">出口空闲：点击「挂载组件 Portal」</p>
+      <p v-if="!mounted" class="placeholder">{{ t('出口空闲：点击「挂载组件 Portal」', 'Outlet is idle: click “Attach component portal”') }}</p>
     </div>
     <p class="result">{{ instanceInfo || '—' }}</p>
   </div>

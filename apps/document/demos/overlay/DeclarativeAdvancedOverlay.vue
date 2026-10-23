@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   type ConnectedOverlayPositionChange,
   type ConnectedPosition,
@@ -11,6 +12,7 @@ const openRef = ref(false);
 const matchWidth = ref(false);
 const popoverMode = ref<'global' | 'inline' | 'none'>('global');
 const events = ref<string[]>([]);
+const {locale} = useLocale();
 
 const pointOpen = ref(false);
 const point = ref<{x: number; y: number} | null>(null);
@@ -30,7 +32,7 @@ function log(event: string): void {
 function onPositionChange(change: unknown): void {
   const changeInfo = change as ConnectedOverlayPositionChange;
   log(
-    `positionChange：${changeInfo.connectionPair.originX}/${changeInfo.connectionPair.originY} → ${changeInfo.connectionPair.overlayX}/${changeInfo.connectionPair.overlayY}`,
+    `${locale.value === 'en-US' ? 'positionChange: ' : 'positionChange：'}${changeInfo.connectionPair.originX}/${changeInfo.connectionPair.originY} → ${changeInfo.connectionPair.overlayX}/${changeInfo.connectionPair.overlayY}`,
   );
 }
 
@@ -38,7 +40,7 @@ function onPositionChange(change: unknown): void {
 function openAtPoint(event: MouseEvent): void {
   point.value = {x: event.clientX, y: event.clientY};
   pointOpen.value = true;
-  log(`坐标点定位：(${point.value.x}, ${point.value.y})`);
+  log(locale.value === 'en-US' ? `Point origin: (${point.value.x}, ${point.value.y})` : `坐标点定位：(${point.value.x}, ${point.value.y})`);
 }
 </script>
 
@@ -47,21 +49,21 @@ function openAtPoint(event: MouseEvent): void {
     <div class="controls">
       <label class="check">
         <input v-model="matchWidth" type="checkbox" />
-        matchWidth（面板宽度跟随锚点）
+        {{ locale === 'en-US' ? 'matchWidth (panel follows anchor width)' : 'matchWidth（面板宽度跟随锚点）' }}
       </label>
       <label class="field">
         usePopover
         <select v-model="popoverMode" class="doc-input">
-          <option value="global">global（全局容器）</option>
-          <option value="inline">inline（锚点旁插入）</option>
-          <option value="none">禁用 Popover</option>
+          <option value="global">{{ locale === 'en-US' ? 'global (global container)' : 'global（全局容器）' }}</option>
+          <option value="inline">{{ locale === 'en-US' ? 'inline (insert beside anchor)' : 'inline（锚点旁插入）' }}</option>
+          <option value="none">{{ locale === 'en-US' ? 'Disable Popover' : '禁用 Popover' }}</option>
         </select>
       </label>
     </div>
 
     <div class="stage">
       <button ref="anchorEl" type="button" class="doc-btn primary" @click="openRef = !openRef">
-        元素 ref 作为 origin
+        {{ locale === 'en-US' ? 'Element ref as origin' : '元素 ref 作为 origin' }}
       </button>
       <VConnectedOverlay
         :open="openRef"
@@ -71,19 +73,19 @@ function openAtPoint(event: MouseEvent): void {
         :use-popover="popoverMode === 'none' ? null : popoverMode"
         transform-origin-selector=".adv-panel-title"
         @position-change="onPositionChange"
-        @attach="log('attach 事件')"
-        @detach="log('detach 事件')"
+        @attach="log(locale === 'en-US' ? 'attach event' : 'attach 事件')"
+        @detach="log(locale === 'en-US' ? 'detach event' : 'detach 事件')"
         @update:open="openRef = $event"
       >
         <div class="adv-panel">
-          <p class="adv-panel-title">标题带 transform-origin 锚点</p>
-          <p class="adv-panel-body">origin 直接传入元素 ref；matchWidth 让面板与按钮等宽。</p>
+          <p class="adv-panel-title">{{ locale === 'en-US' ? 'Title with transform-origin anchor' : '标题带 transform-origin 锚点' }}</p>
+          <p class="adv-panel-body">{{ locale === 'en-US' ? 'Pass the element ref directly as origin; matchWidth makes the panel as wide as the button.' : 'origin 直接传入元素 ref；matchWidth 让面板与按钮等宽。' }}</p>
         </div>
       </VConnectedOverlay>
     </div>
 
     <div class="stage clickable" @click="openAtPoint">
-      <p class="stage-tip">点击此区域任意位置：以点击坐标作为 origin 打开浮层</p>
+      <p class="stage-tip">{{ locale === 'en-US' ? 'Click anywhere here to open an overlay at the click point' : '点击此区域任意位置：以点击坐标作为 origin 打开浮层' }}</p>
       <VConnectedOverlay
         :open="pointOpen"
         :origin="point"
@@ -92,13 +94,13 @@ function openAtPoint(event: MouseEvent): void {
         @update:open="pointOpen = $event"
       >
         <div class="adv-panel small">
-          <p class="adv-panel-title">坐标点 origin</p>
-          <p class="adv-panel-body">Point 使用视口坐标；usePopover="inline" 时插入到锚点旁。</p>
+          <p class="adv-panel-title">{{ locale === 'en-US' ? 'Point origin' : '坐标点 origin' }}</p>
+          <p class="adv-panel-body">{{ locale === 'en-US' ? 'Point uses viewport coordinates; usePopover="inline" inserts it beside the anchor.' : 'Point 使用视口坐标；usePopover="inline" 时插入到锚点旁。' }}</p>
         </div>
       </VConnectedOverlay>
     </div>
 
-    <div class="doc-output">{{ events.join('\n') || '交互后查看 positionChange / attach / detach 事件' }}</div>
+    <div class="doc-output">{{ events.join('\n') || (locale === 'en-US' ? 'Interact to inspect positionChange / attach / detach events' : '交互后查看 positionChange / attach / detach 事件') }}</div>
   </div>
 </template>
 

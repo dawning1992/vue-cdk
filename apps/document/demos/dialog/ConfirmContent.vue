@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useDialogData, useDialogRef} from 'vue-cdk/dialog';
+import {useLocale} from '../../composables/useLocale';
 
 interface ConfirmData {
   title: string;
@@ -8,6 +9,7 @@ interface ConfirmData {
 
 const data = useDialogData<ConfirmData>();
 const dialogRef = useDialogRef<string>();
+const {locale} = useLocale();
 </script>
 
 <template>
@@ -15,9 +17,9 @@ const dialogRef = useDialogRef<string>();
     <h3>{{ data.title }}</h3>
     <p>{{ data.message }}</p>
     <div class="actions">
-      <button type="button" class="doc-btn" @click="dialogRef.close('取消')">取消</button>
-      <button type="button" class="doc-btn primary" @click="dialogRef.close('确定')">
-        确定
+      <button type="button" class="doc-btn" @click="dialogRef.close(locale === 'en-US' ? 'Cancel' : '取消')">{{ locale === 'en-US' ? 'Cancel' : '取消' }}</button>
+      <button type="button" class="doc-btn primary" @click="dialogRef.close(locale === 'en-US' ? 'Confirm' : '确定')">
+        {{ locale === 'en-US' ? 'Confirm' : '确定' }}
       </button>
     </div>
   </div>

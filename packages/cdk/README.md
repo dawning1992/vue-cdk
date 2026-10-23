@@ -134,7 +134,7 @@ For a complete `MyDialog.vue` example, see [dialog](#dialog).
 | `vue-cdk/observers` | observers | DOM content observation: `ContentObserver`, `useObserveContent()` and `vCdkObserveContent` sharing `MutationObserver` | — |
 | `vue-cdk/overlay` | overlay | Overlay panel: imperative `useOverlay()` + declarative `VConnectedOverlay` / `VOverlayOrigin` | `vue-cdk/overlay/style.css` |
 | `vue-cdk/platform` | platform | Platform capability detection and event tools: `Platform` service (browser/engine identification + `usePlatform` injection), `getSupportedInputTypes`, Shadow DOM / Popover / scroll-behavior detection | — |
-| `vue-cdk/portal` | portal | Programmable content mounting: `Portal` series + `VPortal` / `VPortalOutlet`, overlay/dialog is built based on it | — |
+| `vue-cdk/portal` | portal | Programmable content mounting: `Portal` classes, `TemplateRef` template sources, and `VPortal` / `VPortalOutlet`; the foundation for overlay/dialog | — |
 | `vue-cdk/scrolling` | scrolling | Scroll capabilities: scroll distribution, container and viewport measurement, and fixed size/variable height virtual scrolling (`VVirtualScrollViewport` / `VVirtualFor`) | `vue-cdk/scrolling/style.css` |
 | `vue-cdk/stepper` | stepper | Styleless multi-step process: linear validation, keyboard navigation, step status and universal form adaptation contract | — |
 | `vue-cdk/text-field` | text-field | Text field: textarea auto-scaling, browser auto-fill monitoring, and Composition API/command/Sass entry | `vue-cdk/text-field/style.css` |
@@ -843,14 +843,16 @@ outlet.detach();
 outlet.attach(new DomPortal(document.querySelector('#movable')!));
 ```
 
+### Explicit template references
 
-显式模板引用（完整 SFC）：
+Use a component ref to obtain a `TemplateRefHandle<C>` from `TemplateRef`, then mount it with `TemplatePortal`:
 
 ```vue
 <script setup lang="ts">
 import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {TemplateRef, TemplatePortal, type TemplateRefHandle} from 'vue-cdk/portal';
 import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
+
 const tpl = shallowRef<TemplateRefHandle<{msg: string}> | null>(null);
 const count = ref(0);
 const overlay = useOverlay();
@@ -859,24 +861,33 @@ let panel: OverlayRef | null = null;
 function open() {
   if (!tpl.value || panel?.hasAttached()) return;
   panel ??= overlay.create();
-  panel.attach(new TemplatePortal<{msg: string}>(tpl.value, {msg: '你好'}));
+  panel.attach(new TemplatePortal<{msg: string}>(tpl.value, {msg: 'Hello'}));
 }
 /** 关闭内容但保留浮层引用以便重开。 */
-function close() { panel?.detach(); }
+function close() {
+  panel?.detach();
+}
+
 onBeforeUnmount(() => panel?.dispose());
 </script>
 <template>
-  <button @click="open">打开</button>
+  <button @click="open">Open</button>
   <TemplateRef ref="tpl" v-slot="{msg}">
-    <button @click="count++">{{ msg }}：{{ count }}</button>
-    <button @click="close">关闭</button>
+    <button @click="count++">{{ msg }}: {{ count }}</button>
+    <button @click="close">Close</button>
   </TemplateRef>
 </template>
 ```
 
-TemplateRef 自身不渲染内容；Vue 裸 `<template ref="tpl">` 不支持此契约。
-来源卸载自动卸载内容，之后句柄失效。仅保证应用级上下文，不保证局部 provide/inject。
-更多上下文、重挂载与清理约定见 [模板引用指南](src/portal/TEMPLATE_REF.md)。
+`TemplateRef` renders no content itself. A bare Vue `<template ref="tpl">` does not produce a template handle. The component ref is null during setup; check it in `onMounted` or an event after mounting before use.
+
+- The slot receives the supplied context and retains the parent’s reactive state and event closures. Use a reactive object for mutable context; mutating a plain object does not trigger updates.
+- `detach()` unmounts the content. Reattaching creates new content component instances and resets their local state. The handle can be reused while its source remains mounted.
+- Unmounting the source automatically unmounts its content and permanently invalidates the handle; attaching it again throws. Callers must still `dispose()` overlays or outlets they create to release containers and other resources.
+- The source application’s `appContext` is inherited. Inheritance of the source component’s local `provide/inject` is not guaranteed.
+- The existing `new TemplatePortal(render, context?, appContext?)` render-function constructor remains supported. `dialog.open()` currently does not accept a template handle or `TemplatePortal` directly.
+
+See the repository’s [template reference guide](https://github.com/dawning1992/vue-cdk/blob/main/packages/cdk/src/portal/TEMPLATE_REF.md) (Chinese) for context, reattachment, and cleanup details.
 
 ## scrolling
 
@@ -1253,8 +1264,12 @@ pnpm build
 pnpm build:document
 pnpm typecheck
 pnpm test
+pnpm --filter vue-cdk exec playwright install chromium
+pnpm --filter vue-cdk test:browser
 pnpm --filter vue-cdk publish
 ```
+
+Browser tests use Playwright Chromium for real layout and CSS animation checks. Install Chromium before the first run. Publishing automatically runs type checks, unit tests, browser tests, the build, and version consistency validation.
 
 New module convention: Create an independent directory under `src/` and provide the `index.ts` entrance, and at the same time
 `package.json` is registered in the multi-entry configuration of `exports` and `vite.config.ts`;

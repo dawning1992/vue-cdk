@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {useAutofill} from 'vue-cdk/text-field';
+import {useLocale} from '../../composables/useLocale';
 
+const {locale} = useLocale();
 const input = ref<HTMLInputElement | null>(null);
 const {isAutofilled} = useAutofill(input);
 
@@ -22,9 +24,9 @@ function toggleProbe() {
       class="custom-autofill"
       name="username"
       autocomplete="username"
-      placeholder="自动填充时显示自定义配色"
+      :placeholder="locale === 'en-US' ? 'Custom colors appear when autofilled' : '自动填充时显示自定义配色'"
     />
-    <button type="button" @click="toggleProbe">切换 CDK 状态类</button>
+    <button type="button" @click="toggleProbe">{{ locale === 'en-US' ? 'Toggle CDK state class' : '切换 CDK 状态类' }}</button>
     <code>.cdk-text-field-autofilled = {{ isAutofilled }}</code>
   </div>
 </template>

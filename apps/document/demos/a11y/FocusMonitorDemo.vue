@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {onBeforeUnmount, ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   focusMonitor,
   inputModalityDetector,
@@ -8,6 +9,7 @@ import {
 } from 'vue-cdk/a11y';
 
 const log = ref<string[]>([]);
+const {locale} = useLocale();
 const inputA = ref<HTMLInputElement | null>(null);
 const inputB = ref<HTMLInputElement | null>(null);
 const modality = ref<InputModality>(inputModalityDetector.mostRecentModality);
@@ -15,7 +17,7 @@ const stopLog = ref('');
 
 /** 记录最近一次焦点来源，并在页内展示。 */
 function record(origin: FocusOrigin, label: string): void {
-  log.value.unshift(`${label} 焦点来源：${origin ?? 'program'}`);
+  log.value.unshift(locale.value === 'en-US' ? `${label} focus origin: ${origin ?? 'program'}` : `${label} 焦点来源：${origin ?? 'program'}`);
   if (log.value.length > 5) {
     log.value.pop();
   }
@@ -30,7 +32,7 @@ function focusVia(origin: 'keyboard' | 'mouse' | 'touch' | 'program'): void {
 /** 停止监视指定元素：之后聚焦不再派发来源事件。 */
 function stopMonitoring(): void {
   focusMonitor.stopMonitoring(inputB);
-  stopLog.value = '已 stopMonitoring(inputB)，其聚焦事件不再记录';
+  stopLog.value = locale.value === 'en-US' ? 'stopMonitoring(inputB) called; focus events on this input are no longer recorded.' : '已 stopMonitoring(inputB)，其聚焦事件不再记录';
 }
 
 // 订阅输入方式检测器：键盘 / 鼠标 / 触摸切换实时展示。
@@ -43,18 +45,18 @@ onBeforeUnmount(() => unsubscribeModality());
 
 <template>
   <div class="wrap">
-    <div class="modality">最近输入方式：{{ modality ?? '（未知）' }}</div>
+    <div class="modality">{{ locale === 'en-US' ? 'Most recent input modality: ' : '最近输入方式：' }}{{ modality ?? (locale === 'en-US' ? '(unknown)' : '（未知）') }}</div>
     <input
-      v-focus-monitor="(origin: FocusOrigin) => record(origin, '输入框 A')"
+      v-focus-monitor="(origin: FocusOrigin) => record(origin, locale === 'en-US' ? 'Input A' : '输入框 A')"
       ref="inputA"
       class="doc-input"
-      placeholder="输入框 A"
+      :placeholder="locale === 'en-US' ? 'Input A' : '输入框 A'"
     />
     <input
-      v-focus-monitor="(origin: FocusOrigin) => record(origin, '输入框 B')"
+      v-focus-monitor="(origin: FocusOrigin) => record(origin, locale === 'en-US' ? 'Input B' : '输入框 B')"
       ref="inputB"
       class="doc-input"
-      placeholder="输入框 B"
+      :placeholder="locale === 'en-US' ? 'Input B' : '输入框 B'"
     />
     <div class="buttons">
       <button type="button" class="doc-btn" @click="focusVia('keyboard')">focusVia keyboard</button>
@@ -65,13 +67,13 @@ onBeforeUnmount(() => unsubscribeModality());
     </div>
     <!-- .subtree：子元素聚焦也算父元素聚焦。 -->
     <div
-      v-focus-monitor.subtree="(origin: FocusOrigin) => record(origin, '区域')"
+      v-focus-monitor.subtree="(origin: FocusOrigin) => record(origin, locale === 'en-US' ? 'Region' : '区域')"
       class="zone"
     >
-      <button type="button" class="doc-btn">区域内按钮</button>
+      <button type="button" class="doc-btn">{{ locale === 'en-US' ? 'Button inside region' : '区域内按钮' }}</button>
     </div>
-    <div class="doc-output">{{ log.join('\n') || '（聚焦任意输入框查看来源）' }}</div>
-    <p class="hint">{{ stopLog || '聚焦元素会自动附带 vcdk-focused / vcdk-*-focused 标记类。' }}</p>
+    <div class="doc-output">{{ log.join('\n') || (locale === 'en-US' ? 'Focus either input to see its origin.' : '（聚焦任意输入框查看来源）') }}</div>
+    <p class="hint">{{ stopLog || (locale === 'en-US' ? 'Focused elements receive vcdk-focused / vcdk-*-focused marker classes.' : '聚焦元素会自动附带 vcdk-focused / vcdk-*-focused 标记类。') }}</p>
   </div>
 </template>
 

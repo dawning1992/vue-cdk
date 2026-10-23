@@ -31,11 +31,14 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
     module-name="overlay"
     zh-name="浮层"
     intro="浮层面板体系：命令式 useOverlay() 与声明式 VConnectedOverlay / VOverlayOrigin 两种用法；连接定位自动选优（翻转、flexible、push、锁定）、四种滚动策略、backdrop、键盘与外部点击分发器，结构样式自动注入。"
+    intro-en="Overlay panels can be created imperatively with useOverlay() or declaratively with VConnectedOverlay / VOverlayOrigin. Connected positioning selects and flips candidates, supports flexible sizing, viewport push, and position locking; four scroll strategies, backdrops, keyboard and outside-click dispatchers, and automatic structural styles are also included."
     :api-groups="apiGroups"
   >
     <DemoCard
       title="声明式浮层（VConnectedOverlay）"
+      title-en="Declarative overlay (VConnectedOverlay)"
       description="通过 VOverlayOrigin 声明锚点，VConnectedOverlay 使用标准下拉位置常量打开菜单；点击外部区域自动关闭。"
+      description-en="Declare an anchor with VOverlayOrigin; VConnectedOverlay opens a menu with standard dropdown positions and closes on outside clicks."
       :source="DeclarativeOverlaySource"
       filename="DeclarativeOverlay.vue"
     >
@@ -44,7 +47,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="命令式浮层（useOverlay）"
+      title-en="Imperative overlay (useOverlay)"
       description="在 setup 中调用 useOverlay()，通过 GlobalPositionStrategy 全局居中创建浮层；渲染函数内容可访问调用方应用上下文。"
+      description-en="Call useOverlay() in setup to create a globally centered overlay with GlobalPositionStrategy; render-function content can access the caller's app context."
       :source="ImperativeOverlaySource"
       filename="ImperativeOverlay.vue"
     >
@@ -53,7 +58,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="自定义 OverlayContainer"
+      title-en="Custom OverlayContainer"
       description="在模板中放置自定义 div 作为容器，通过 createOverlayRef 的 container 选项（OverlayContainer 实例或 HTMLElement）挂载浮层；面板被限制在区域内渲染，dispose 不会移除调用方元素。"
+      description-en="Use a template div as a custom container and mount through createOverlayRef's container option; the panel stays within the region and dispose does not remove the caller-owned element."
       :source="OverlayContainerOverlaySource"
       filename="OverlayContainerOverlay.vue"
     >
@@ -62,7 +69,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="命令式连接定位"
+      title-en="Imperative connected positioning"
       description="useOverlay().position().flexibleConnectedTo() 绑定锚点元素；候选位置自动选优，开关实时控制锁定、push、flexible 尺寸与偏移。"
+      description-en="Bind an anchor with useOverlay().position().flexibleConnectedTo(); candidate positions are chosen automatically while controls change locking, push, flexible dimensions, and offsets."
       :source="ConnectedTooltipOverlaySource"
       filename="ConnectedTooltipOverlay.vue"
     >
@@ -71,7 +80,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="滚动策略对比"
+      title-en="Scroll strategy comparison"
       description="同一浮层切换 close / block / reposition / noop 四种滚动策略，面板以 inline popover 插入锚点行后（DOM 位于列表内）；滚动列表内容与页面观察不同行为，锚点行滚出列表可视区域时自动关闭面板。"
+      description-en="Switch one overlay among close, block, reposition, and noop. The panel is inserted after the anchor row as an inline popover; scroll the list or page to compare behavior, and observe automatic closing when the anchor leaves the list viewport."
       :source="ScrollStrategyOverlaySource"
       filename="ScrollStrategyOverlay.vue"
     >
@@ -80,7 +91,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="遮罩与事件流"
+      title-en="Backdrop and event streams"
       description="hasBackdrop 遮罩配合 backdropClick / keydownEvents / outsidePointerEvents 事件流；演示 updateSize / updatePosition / addPanelClass / removePanelClass / dispose 动态控制。"
+      description-en="Combine a hasBackdrop backdrop with backdropClick, keydownEvents, and outsidePointerEvents; the demo also exercises updateSize, updatePosition, panel classes, and dispose."
       :source="BackdropEventsOverlaySource"
       filename="BackdropEventsOverlay.vue"
     >
@@ -89,7 +102,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="声明式高级用法"
+      title-en="Advanced declarative usage"
       description="origin 支持元素 ref 与坐标点；matchWidth、transformOriginSelector、usePopover 模式（global / inline / 禁用）与 positionChange / attach / detach 事件。"
+      description-en="origin accepts an element ref or point; the demo covers matchWidth, transformOriginSelector, global/inline/disabled usePopover modes, and positionChange/attach/detach events."
       :source="DeclarativeAdvancedOverlaySource"
       filename="DeclarativeAdvancedOverlay.vue"
     >
@@ -98,7 +113,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="右键菜单（命令式 + 坐标原点）"
+      title-en="Context menu (imperative + point origin)"
       description="以鼠标坐标（Point）为 origin 的上下文菜单：右键任意位置打开，贴近视口边缘时自动 push 回屏；打开后 ↑/↓/Home/End 导航、Enter 激活，ESC / 外部点击 / 再次右键关闭。"
+      description-en="A context menu uses the mouse Point as its origin: right-click anywhere to open, with automatic viewport push near edges; navigate with arrows/Home/End, activate with Enter, and close with Escape, outside clicks, or another right-click."
       :source="ContextMenuOverlaySource"
       filename="ContextMenuOverlay.vue"
     >
@@ -107,7 +124,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="多层堆叠"
+      title-en="Stacking multiple overlays"
       description="两个触发按钮共享同一 origin：先开第一层再开第二层不会误关第一层；键盘事件只命中栈顶 overlay，点击外部时两层同时收到 outsideClick。"
+      description-en="Two trigger buttons share one origin: opening the second layer does not close the first; keyboard events target the top overlay, and outside clicks reach both layers."
       :source="StackingOverlaySource"
       filename="StackingOverlay.vue"
     >
@@ -116,7 +135,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="RTL 方向镜像"
+      title-en="RTL direction mirroring"
       description="切换文本方向：RTL 下 start 对齐右边缘，下拉菜单的连接点与 transform-origin 全部镜像；方向键导航行为保持不变。"
+      description-en="Switch text direction: in RTL, start aligns to the right edge and connection points plus transform-origin mirror, while arrow-key navigation stays the same."
       :source="RtlOverlaySource"
       filename="RtlOverlay.vue"
     >
@@ -125,7 +146,9 @@ import PopoverPositionsOverlaySource from '../demos/overlay/PopoverPositionsOver
 
     <DemoCard
       title="Popover 插入位置"
+      title-en="Popover insertion positions"
       description="use-popover 支持 global（容器）、inline（紧随触发元素）、parent（自定义父元素）三种 DOM 插入位置；浏览器不支持 Popover API 时自动降级为容器渲染。"
+      description-en="use-popover supports global (container), inline (immediately after the trigger), and parent (custom parent) insertion; unsupported browsers fall back to container rendering."
       :source="PopoverPositionsOverlaySource"
       filename="PopoverPositionsOverlay.vue"
     >

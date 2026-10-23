@@ -1,5 +1,21 @@
 # 未发布
 
+### portal
+
+| Commit | Type | Description |
+| -- | -- | -- |
+| [ea40673](https://github.com/dawning1992/vue-cdk/commit/ea40673) | feat | 新增显式模板源组件 `TemplateRef` 与 `TemplateRefHandle<C>` 类型契约，支持通过组件 ref 获取句柄并传入 `new TemplatePortal(tpl.value, context)`；保留原有渲染函数构造方式 |
+| [ea40673](https://github.com/dawning1992/vue-cdk/commit/ea40673) | fix | `VPortal` 与 `TemplateRef` 共用插槽捕获逻辑；来源卸载时自动卸载内容并使句柄失效，出口卸载时取消来源订阅；修复挂载失败后 Portal 宿主状态未回滚的问题 |
+
+`TemplateRef` 支持作用域插槽上下文、父级响应式状态和事件，继承应用级上下文；不保证来源组件局部 `provide/inject` 的继承。Vue 裸 `<template ref="tpl">` 不产生模板句柄。
+
+### overlay
+
+| Commit | Type | Description |
+| -- | -- | -- |
+| [ea40673](https://github.com/dawning1992/vue-cdk/commit/ea40673) | fix | 模板来源卸载时执行完整浮层卸载流程，清理遮罩、滚动策略和事件分发；内容挂载失败时恢复浮层状态，允许修正后重试 |
+
+
 # 0.1.0-beta.7 (2026-10-22)
 
 ### dialog

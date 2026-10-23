@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {FlatTreeControl, VTree, VTreeNode, vTreeNodePadding} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface FileNode {
   name: string;
@@ -56,7 +59,7 @@ function collapseAll(): void {
       <button type="button" class="doc-btn primary" @click="expandAll">expandAll()</button>
       <button type="button" class="doc-btn" @click="collapseAll">collapseAll()</button>
     </div>
-    <p class="hint">已展开 {{ expandedCount }} / {{ nodes.length }} 个节点；也可用方向键 + 左右键操作。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'Expanded ' : '已展开 ' }}{{ expandedCount }} / {{ nodes.length }} {{ locale === 'en-US' ? 'nodes; arrow keys are also supported.' : '个节点；也可用方向键 + 左右键操作。' }}</p>
   </div>
 </template>
 

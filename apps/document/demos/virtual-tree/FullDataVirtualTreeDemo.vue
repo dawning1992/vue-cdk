@@ -2,6 +2,9 @@
 import {ref} from 'vue';
 import {VVirtualScrollTree, type VVirtualScrollTreePublicApi} from 'vue-cdk/virtual-tree';
 import {VTreeNode, vTreeNodePadding, vTreeNodeToggle} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Food {
   id: string;
@@ -16,7 +19,7 @@ function buildTree(depth: number, width: number, prefix = ''): Food[] {
     const id = prefix ? `${prefix}-${i}` : `${i}`;
     nodes.push({
       id,
-      name: `${prefix ? `${prefix} / ` : ''}节点 ${i}`,
+      name: `${prefix ? `${prefix} / ` : ''}${locale.value === 'en-US' ? 'Node' : '节点'} ${i}`,
       children: depth > 1 ? buildTree(depth - 1, width, id) : undefined,
     });
   }
@@ -32,9 +35,9 @@ const firstVisible = ref(0);
 <template>
   <div class="wrap">
     <div class="toolbar">
-      <button type="button" class="doc-btn primary" @click="treeRef?.expandAll()">一键展开</button>
-      <button type="button" class="doc-btn" @click="treeRef?.collapseAll()">一键折叠</button>
-      <span class="info">首个可见行：#{{ firstVisible + 1 }}，全部节点：781</span>
+      <button type="button" class="doc-btn primary" @click="treeRef?.expandAll()">{{ locale === 'en-US' ? 'Expand all' : '一键展开' }}</button>
+      <button type="button" class="doc-btn" @click="treeRef?.collapseAll()">{{ locale === 'en-US' ? 'Collapse all' : '一键折叠' }}</button>
+      <span class="info">{{ locale === 'en-US' ? 'First visible row: #' : '首个可见行：#' }}{{ firstVisible + 1 }}{{ locale === 'en-US' ? '; total nodes: 781' : '，全部节点：781' }}</span>
     </div>
     <VVirtualScrollTree
       ref="treeRef"
@@ -49,7 +52,7 @@ const firstVisible = ref(0);
             type="button"
             v-tree-node-toggle
             class="vt-toggle"
-            :aria-label="`切换 ${node.name}`"
+            :aria-label="locale === 'en-US' ? `Toggle ${node.name}` : `切换 ${node.name}`"
           >
             <span class="vt-arrow" :class="{open: isExpanded}">▸</span>
           </button>
@@ -57,7 +60,7 @@ const firstVisible = ref(0);
         </VTreeNode>
       </template>
     </VVirtualScrollTree>
-    <p class="hint">全量模式：数据源一次性提供全部节点，展开/折叠即时过滤；781 个节点只渲染视口附近的行。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'Full-data mode: all nodes are provided at once and expansion filters the visible list immediately. Only rows near the viewport are rendered for all 781 nodes.' : '全量模式：数据源一次性提供全部节点，展开/折叠即时过滤；781 个节点只渲染视口附近的行。' }}</p>
   </div>
 </template>
 

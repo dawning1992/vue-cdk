@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {computed} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   createPlatform,
   getSupportedInputTypes,
@@ -9,6 +10,7 @@ import {
 
 // 组合式入口：优先取注入实例，未注入时回退全局单例。
 const instance = usePlatform();
+const {locale} = useLocale();
 
 const flags = computed(() => [
   {name: 'isBrowser', value: instance.isBrowser},
@@ -42,20 +44,20 @@ const customEdge = createPlatform({
     </div>
 
     <div class="section">
-      <h4>支持的 input type（{{ inputTypes.length }} 项）</h4>
+      <h4>{{ locale === 'en-US' ? `Supported input types (${inputTypes.length})` : `支持的 input type（${inputTypes.length} 项）` }}</h4>
       <div class="chips">
         <code v-for="type in inputTypes" :key="type" class="chip">{{ type }}</code>
       </div>
     </div>
 
     <div class="section">
-      <h4>测试环境与自定义 UA</h4>
+      <h4>{{ locale === 'en-US' ? 'Test environment and custom user agent' : '测试环境与自定义 UA' }}</h4>
       <div class="doc-output">
         isTestEnvironment() = {{ testEnvironment }}
-        createPlatform(EdgeHTML UA) → EDGE = {{ customEdge.EDGE }}，WEBKIT = {{ customEdge.WEBKIT }}
+        createPlatform(EdgeHTML UA) → EDGE = {{ customEdge.EDGE }}, WEBKIT = {{ customEdge.WEBKIT }}
       </div>
       <p class="hint">
-        Platform 各标志为构造时快照；usePlatform 在组件链未 provide 时回退全局单例。
+        {{ locale === 'en-US' ? 'Platform flags are snapshots taken at construction; usePlatform falls back to the global singleton when no instance is provided in the component chain.' : 'Platform 各标志为构造时快照；usePlatform 在组件链未 provide 时回退全局单例。' }}
       </p>
     </div>
   </div>

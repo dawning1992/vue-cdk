@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import {computed} from 'vue';
 import {Breakpoints, useBreakpoints} from 'vue-cdk/layout';
+import {useLocale} from '../../composables/useLocale';
 
 // effectScope 会在组件卸载时自动退订，无需手工移除 matchMedia 监听。
 const {matches: isHandset, breakpoints} = useBreakpoints(Breakpoints.Handset);
 const {matches: isWide} = useBreakpoints([Breakpoints.Large, Breakpoints.XLarge]);
-const mode = computed(() => (isHandset.value ? '移动端' : isWide.value ? '宽屏桌面' : '常规屏幕'));
+const {locale} = useLocale();
+const mode = computed(() => locale.value === 'en-US'
+  ? (isHandset.value ? 'Handset' : isWide.value ? 'Wide desktop' : 'Standard screen')
+  : (isHandset.value ? '移动端' : isWide.value ? '宽屏桌面' : '常规屏幕'));
 </script>
 
 <template>
   <div class="layout-demo" :class="{compact: isHandset}">
-    <aside>导航</aside>
+    <aside>{{ locale === 'en-US' ? 'Navigation' : '导航' }}</aside>
     <main>
-      <strong>当前模式：{{ mode }}</strong>
-      <p>拖动浏览器宽度，布局和状态会随媒体查询实时更新。</p>
+      <strong>{{ locale === 'en-US' ? 'Current mode: ' : '当前模式：' }}{{ mode }}</strong>
+      <p>{{ locale === 'en-US' ? 'Resize the browser to update the layout and state from media queries.' : '拖动浏览器宽度，布局和状态会随媒体查询实时更新。' }}</p>
       <code>Handset = {{ isHandset }} · Large/XLarge = {{ isWide }}</code>
       <details>
-        <summary>逐项状态</summary>
+        <summary>{{ locale === 'en-US' ? 'Per-query state' : '逐项状态' }}</summary>
         <pre>{{ JSON.stringify(breakpoints, null, 2) }}</pre>
       </details>
     </main>

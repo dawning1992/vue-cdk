@@ -2,6 +2,9 @@
 import {ref} from 'vue';
 import {VVirtualScrollTree, type PageInfo, type VVirtualScrollTreePublicApi} from 'vue-cdk/virtual-tree';
 import {VTreeNode, vTreeNodePadding} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Task {
   id: string;
@@ -16,7 +19,7 @@ const logs = ref<string[]>([]);
 async function loadChildren(parent: Task | null, page: PageInfo): Promise<{children: Task[]; hasMore: boolean}> {
   await new Promise(resolve => setTimeout(resolve, 300));
   if (page.page >= 3 && Math.random() < 0.4) {
-    throw new Error('模拟网络抖动：加载失败');
+    throw new Error(locale.value === 'en-US' ? 'Simulated network error: load failed' : '模拟网络抖动：加载失败');
   }
   const total = 120;
   const start = page.offset;
@@ -24,14 +27,14 @@ async function loadChildren(parent: Task | null, page: PageInfo): Promise<{child
   const prefix = parent === null ? 'root' : parent.id;
   const children = Array.from({length: count}, (_, i) => ({
     id: `${prefix}-${start + i}`,
-    name: `${parent === null ? '任务组' : '任务'} ${start + i + 1}`,
+    name: `${locale.value === 'en-US' ? (parent === null ? 'Task group' : 'Task') : (parent === null ? '任务组' : '任务')} ${start + i + 1}`,
     status: ((start + i) % 3 === 0 ? 'done' : 'todo') as Task['status'],
   }));
   return {children, hasMore: start + count < total};
 }
 
 function onError(parent: Task | null, error: Error): void {
-  logs.value.unshift(`${parent === null ? '根层级' : `「${parent.name}」`}：${error.message}`);
+  logs.value.unshift(locale.value === 'en-US' ? `${parent === null ? 'Root level' : parent.name}: ${error.message}` : `${parent === null ? '根层级' : `「${parent.name}」`}：${error.message}`);
   if (logs.value.length > 3) {
     logs.value.pop();
   }
@@ -45,9 +48,9 @@ function retryLast(parent: Task | null): void {
 <template>
   <div class="wrap">
     <div class="toolbar">
-      <button type="button" class="doc-btn" @click="treeRef?.expandAll()">加载并展开全部</button>
-      <button type="button" class="doc-btn" @click="treeRef?.collapseAll()">全部折叠</button>
-      <span class="info">节点模板完全自定义：状态徽标、加载动画与错误重试按钮。</span>
+      <button type="button" class="doc-btn" @click="treeRef?.expandAll()">{{ locale === 'en-US' ? 'Load and expand all' : '加载并展开全部' }}</button>
+      <button type="button" class="doc-btn" @click="treeRef?.collapseAll()">{{ locale === 'en-US' ? 'Collapse all' : '全部折叠' }}</button>
+      <span class="info">{{ locale === 'en-US' ? 'Fully custom node template with status badges, loading indicators, and error retry controls.' : '节点模板完全自定义：状态徽标、加载动画与错误重试按钮。' }}</span>
     </div>
     <VVirtualScrollTree
       ref="treeRef"
@@ -74,15 +77,15 @@ function retryLast(parent: Task | null): void {
           >
             {{ isExpanded ? '−' : '+' }}
           </button>
-          <span v-if="isLoading" class="vt-spinner" aria-label="加载中" />
+          <span v-if="isLoading" class="vt-spinner" :aria-label="locale === 'en-US' ? 'Loading' : '加载中'" />
           <button v-if="isError" type="button" class="vt-retry" @click="retryLast(node)">
-            重试
+            {{ locale === 'en-US' ? 'Retry' : '重试' }}
           </button>
         </VTreeNode>
       </template>
     </VVirtualScrollTree>
-    <pre class="vt-log">{{ logs.join('\n') || '暂无错误日志' }}</pre>
-    <p class="hint">插槽上下文扩展了 isLoading / hasMore / isError / isExpanded / isExpandable，可自由渲染加载与错误状态；retry(parent) 可重试失败层。</p>
+    <pre class="vt-log">{{ logs.join('\n') || (locale === 'en-US' ? 'No errors yet' : '暂无错误日志') }}</pre>
+    <p class="hint">{{ locale === 'en-US' ? 'The slot context exposes isLoading / hasMore / isError / isExpanded / isExpandable for custom loading and error states; retry(parent) retries a failed level.' : '插槽上下文扩展了 isLoading / hasMore / isError / isExpanded / isExpandable，可自由渲染加载与错误状态；retry(parent) 可重试失败层。' }}</p>
   </div>
 </template>
 

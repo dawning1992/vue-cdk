@@ -2,20 +2,28 @@
 import {computed, onBeforeUnmount, ref, watch} from 'vue';
 import {ActiveDescendantKeyManager, type Highlightable} from 'vue-cdk/a11y';
 import {VConnectedOverlay, VOverlayOrigin} from 'vue-cdk/overlay';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 /** 自动补全选项：id 供 aria-activedescendant 引用，active 由管理器样式回调维护。 */
 interface CityOption extends Highlightable {
   id: string;
   label: string;
+  labelZh: string;
+  labelEn: string;
   active: boolean;
   getLabel(): string;
 }
 
 /** 构造城市选项；高亮通过 setActiveStyles / setInactiveStyles 切换。 */
-function makeCity(id: string, label: string): CityOption {
+function makeCity(id: string, labelZh: string, labelEn: string): CityOption {
+  const label = locale.value === 'en-US' ? labelEn : labelZh;
   return {
     id,
     label,
+    labelZh,
+    labelEn,
     active: false,
     getLabel: () => label,
     setActiveStyles() {
@@ -31,17 +39,23 @@ const open = ref(false);
 const query = ref('');
 
 const cities = ref<CityOption[]>([
-  makeCity('beijing', '北京'),
-  makeCity('shanghai', '上海'),
-  makeCity('guangzhou', '广州'),
-  makeCity('shenzhen', '深圳'),
-  makeCity('hangzhou', '杭州'),
-  makeCity('nanjing', '南京'),
-  makeCity('chengdu', '成都'),
-  makeCity('wuhan', '武汉'),
-  makeCity('xian', '西安'),
-  makeCity('suzhou', '苏州'),
+  makeCity('beijing', '北京', 'Beijing'),
+  makeCity('shanghai', '上海', 'Shanghai'),
+  makeCity('guangzhou', '广州', 'Guangzhou'),
+  makeCity('shenzhen', '深圳', 'Shenzhen'),
+  makeCity('hangzhou', '杭州', 'Hangzhou'),
+  makeCity('nanjing', '南京', 'Nanjing'),
+  makeCity('chengdu', '成都', 'Chengdu'),
+  makeCity('wuhan', '武汉', 'Wuhan'),
+  makeCity('xian', '西安', "Xi'an"),
+  makeCity('suzhou', '苏州', 'Suzhou'),
 ]);
+
+watch(locale, value => {
+  cities.value.forEach(city => {
+    city.label = value === 'en-US' ? city.labelEn : city.labelZh;
+  });
+});
 
 const listboxId = 'doc-autocomplete-listbox';
 
@@ -111,15 +125,15 @@ onBeforeUnmount(() => manager.destroy());
 <template>
   <div class="wrap">
     <p class="hint">
-      输入关键字过滤城市列表；<code>match-width</code> 让面板宽度与输入框一致，
-      <code>ActiveDescendantKeyManager</code> 驱动 <code>aria-activedescendant</code>，
-      支持 ↑/↓/Home/End 选择、Enter 确认、ESC 关闭。
+      {{ locale === 'en-US' ? 'Filter the city list by typing. ' : '输入关键字过滤城市列表；' }}<code>match-width</code>{{ locale === 'en-US' ? ' keeps the panel as wide as the input; ' : ' 让面板宽度与输入框一致，' }}
+      <code>ActiveDescendantKeyManager</code>{{ locale === 'en-US' ? ' drives ' : ' 驱动 ' }}<code>aria-activedescendant</code>{{ locale === 'en-US' ? '' : '，' }}
+      {{ locale === 'en-US' ? ' supports ↑/↓/Home/End selection, Enter to choose, and Escape to close.' : ' 支持 ↑/↓/Home/End 选择、Enter 确认、ESC 关闭。' }}
     </p>
     <VOverlayOrigin>
       <input
         v-model="query"
         class="doc-input"
-        placeholder="输入城市名，如「京」"
+        :placeholder="locale === 'en-US' ? 'Enter a city name, e.g. Beijing' : '输入城市名，如「京」'"
         role="combobox"
         aria-autocomplete="list"
         :aria-expanded="open"
@@ -147,7 +161,7 @@ onBeforeUnmount(() => manager.destroy());
           >
             {{ city.label }}
           </li>
-          <li v-if="filtered.length === 0" class="empty">无匹配结果</li>
+          <li v-if="filtered.length === 0" class="empty">{{ locale === 'en-US' ? 'No matching results' : '无匹配结果' }}</li>
         </ul>
       </VConnectedOverlay>
     </VOverlayOrigin>

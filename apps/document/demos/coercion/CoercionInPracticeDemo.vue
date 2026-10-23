@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {computed, ref} from 'vue';
 import {coerceArray, coerceCssPixelValue, coerceElement} from 'vue-cdk/coercion';
+import {useLocale} from '../../composables/useLocale';
+const {locale} = useLocale();
 
 // 场景一：尺寸归一 —— number | string 统一为合法 CSS 值。
 const widthMode = ref<'number' | 'percent' | 'empty'>('number');
@@ -13,28 +15,28 @@ const widthStyle = computed(() => ({
 // 场景二：props 归一 —— string | string[] 统一为数组渲染标签。
 const tagMode = ref<'single' | 'array'>('single');
 const tags = computed(() =>
-  coerceArray(tagMode.value === 'single' ? '单一标签' : ['标签一', '标签二', '标签三']),
+  coerceArray(tagMode.value === 'single' ? (locale.value === 'en-US' ? 'Single tag' : '单一标签') : (locale.value === 'en-US' ? ['Tag one', 'Tag two', 'Tag three'] : ['标签一', '标签二', '标签三'])),
 );
 
 // 场景三：元素归一 —— 模板 ref 交给组合式函数前先解析。
 const box = ref<HTMLElement | null>(null);
-const elementState = ref('尚未解析');
+const elementState = ref(locale.value === 'en-US' ? 'Not resolved yet' : '尚未解析');
 const elementError = ref('');
 
 function parseElement(): void {
   elementError.value = '';
   try {
     const el = coerceElement(box);
-    elementState.value = `已解析：<${el.tagName.toLowerCase()}>`;
+    elementState.value = locale.value === 'en-US' ? `Resolved: <${el.tagName.toLowerCase()}>` : `已解析：<${el.tagName.toLowerCase()}>`;
   } catch (error) {
-    elementState.value = '解析失败';
+    elementState.value = locale.value === 'en-US' ? 'Resolution failed' : '解析失败';
     elementError.value = (error as Error).message;
   }
 }
 
 function clearElement(): void {
   box.value = null;
-  elementState.value = 'ref 已清空（指向 null）';
+  elementState.value = locale.value === 'en-US' ? 'ref cleared (points to null)' : 'ref 已清空（指向 null）';
   elementError.value = '';
 }
 
@@ -50,20 +52,20 @@ function parseEmpty(): void {
 <template>
   <div class="wrap">
     <div class="row">
-      <p class="label">coerceCssPixelValue：尺寸输入归一</p>
+      <p class="label">{{ locale === 'en-US' ? 'coerceCssPixelValue: normalize size input' : 'coerceCssPixelValue：尺寸输入归一' }}</p>
       <select v-model="widthMode" class="doc-input">
-        <option value="number">数字 140</option>
-        <option value="percent">字符串 '50%'</option>
-        <option value="empty">null（清空样式）</option>
+        <option value="number">{{ locale === 'en-US' ? 'Number 140' : '数字 140' }}</option>
+        <option value="percent">{{ locale === 'en-US' ? "String '50%'" : "字符串 '50%'" }}</option>
+        <option value="empty">{{ locale === 'en-US' ? 'null (clear style)' : 'null（清空样式）' }}</option>
       </select>
-      <div class="size-box" :style="widthStyle">宽度 {{ widthStyle.width || '（空）' }}</div>
+      <div class="size-box" :style="widthStyle">{{ locale === 'en-US' ? 'Width ' : '宽度 ' }}{{ widthStyle.width || (locale === 'en-US' ? '(empty)' : '（空）') }}</div>
     </div>
 
     <div class="row">
-      <p class="label">coerceArray：string | string[] props 归一</p>
+      <p class="label">coerceArray: {{ locale === 'en-US' ? 'normalize string | string[] props' : 'string | string[] props 归一' }}</p>
       <select v-model="tagMode" class="doc-input">
-        <option value="single">传入字符串</option>
-        <option value="array">传入数组</option>
+        <option value="single">{{ locale === 'en-US' ? 'Pass a string' : '传入字符串' }}</option>
+        <option value="array">{{ locale === 'en-US' ? 'Pass an array' : '传入数组' }}</option>
       </select>
       <div class="tags">
         <span v-for="tag in tags" :key="tag" class="tag">{{ tag }}</span>
@@ -71,13 +73,13 @@ function parseEmpty(): void {
     </div>
 
     <div class="row">
-      <p class="label">coerceElement：模板 ref 归一</p>
+      <p class="label">coerceElement: {{ locale === 'en-US' ? 'normalize template ref' : '模板 ref 归一' }}</p>
       <div class="buttons">
-        <button type="button" class="doc-btn" @click="parseElement">解析当前 ref</button>
-        <button type="button" class="doc-btn" @click="clearElement">清空 ref</button>
-        <button type="button" class="doc-btn" @click="parseEmpty">解析空 ref</button>
+        <button type="button" class="doc-btn" @click="parseElement">{{ locale === 'en-US' ? 'Resolve current ref' : '解析当前 ref' }}</button>
+        <button type="button" class="doc-btn" @click="clearElement">{{ locale === 'en-US' ? 'Clear ref' : '清空 ref' }}</button>
+        <button type="button" class="doc-btn" @click="parseEmpty">{{ locale === 'en-US' ? 'Resolve empty ref' : '解析空 ref' }}</button>
       </div>
-      <div ref="box" class="target">ref 目标元素</div>
+      <div ref="box" class="target">{{ locale === 'en-US' ? 'ref target element' : 'ref 目标元素' }}</div>
       <p class="state">{{ elementState }}</p>
       <p v-if="elementError" class="error">{{ elementError }}</p>
     </div>

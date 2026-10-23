@@ -2,8 +2,11 @@
 import {ref} from 'vue';
 import {moveItemInArray, VDrag, VDropList, vDragHandle} from 'vue-cdk/drag-drop';
 import type {VDragDrop} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
 
-const items = ref(['甲', '乙', '丙', '丁']);
+const {locale} = useLocale();
+
+const items = ref(['A', 'B', 'C', 'D']);
 const handleDisabled = ref(false);
 
 function onDrop(event: VDragDrop<string>): void {
@@ -14,12 +17,12 @@ function onDrop(event: VDragDrop<string>): void {
 <template>
   <label class="toggle">
     <input v-model="handleDisabled" type="checkbox" />
-    禁用所有手柄
+    {{ locale === 'en-US' ? 'Disable all handles' : '禁用所有手柄' }}
   </label>
   <VDropList :data="items" class="handle-list" @dropped="onDrop">
     <VDrag v-for="item in items" :key="item" :data="item" class="handle-item">
       <span class="text">{{ item }}</span>
-      <span v-drag-handle="{disabled: handleDisabled}" class="handle">⠿ 拖我</span>
+      <span v-drag-handle="{disabled: handleDisabled}" class="handle">⠿ {{ locale === 'en-US' ? 'Drag' : '拖我' }}</span>
     </VDrag>
   </VDropList>
 </template>

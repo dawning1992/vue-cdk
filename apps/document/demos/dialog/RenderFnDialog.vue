@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {h, ref} from 'vue';
 import {useDialog, type DialogRef} from 'vue-cdk/dialog';
+import {useLocale} from '../../composables/useLocale';
 
 const dialog = useDialog();
 const result = ref('');
+const {locale} = useLocale();
 
 /** 专门演示兼容的渲染函数 API，因此保留 h()；上下文含 $implicit 与 dialogRef。 */
 function openRenderFn(): void {
@@ -13,11 +15,11 @@ function openRenderFn(): void {
         'div',
         {style: {padding: '22px 26px', minWidth: '320px'}},
         [
-          h('h3', {style: {margin: '0 0 8px', fontSize: '16px'}}, '渲染函数内容'),
+          h('h3', {style: {margin: '0 0 8px', fontSize: '16px'}}, locale.value === 'en-US' ? 'Render-function content' : '渲染函数内容'),
           h(
             'p',
             {style: {margin: '0 0 18px', color: '#6b7280', fontSize: '13px'}},
-            `$implicit（data）：${(ctx.$implicit as {name: string}).name}`,
+            `${locale.value === 'en-US' ? '$implicit (data): ' : '$implicit（data）：'}${(ctx.$implicit as {name: string}).name}`,
           ),
           h(
             'div',
@@ -27,9 +29,9 @@ function openRenderFn(): void {
                 'button',
                 {
                   class: 'doc-btn primary',
-                  onClick: () => (ctx.dialogRef as DialogRef).close('已关闭'),
+                  onClick: () => (ctx.dialogRef as DialogRef).close(locale.value === 'en-US' ? 'Closed' : '已关闭'),
                 },
-                '关闭并返回',
+                locale.value === 'en-US' ? 'Close and return' : '关闭并返回',
               ),
             ],
           ),
@@ -41,7 +43,7 @@ function openRenderFn(): void {
     },
   );
   dialogRef.closed.subscribe(value => {
-    result.value = String(value ?? '未返回结果');
+    result.value = String(value ?? (locale.value === 'en-US' ? 'No result' : '未返回结果'));
   });
 }
 </script>
@@ -49,9 +51,9 @@ function openRenderFn(): void {
 <template>
   <div class="wrap">
     <button type="button" class="doc-btn primary" @click="openRenderFn">
-      打开渲染函数对话框
+      {{ locale === 'en-US' ? 'Open render-function dialog' : '打开渲染函数对话框' }}
     </button>
-    <span class="result">最近结果：{{ result || '—' }}</span>
+    <span class="result">{{ locale === 'en-US' ? 'Latest result: ' : '最近结果：' }}{{ result || '—' }}</span>
   </div>
 </template>
 

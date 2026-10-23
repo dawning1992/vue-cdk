@@ -3,8 +3,10 @@ import {useRoute} from 'vue-router';
 // 页头展示 CDK 库版本：通过 workspace 符号链接读取 vue-cdk 包的真实版本。
 import pkg from '../node_modules/vue-cdk/package.json';
 import {docModules, type DocModule} from '../config';
+import {useLocale} from '../composables/useLocale';
 
 const route = useRoute();
+const {locale, messages, setLocale} = useLocale();
 
 /** 菜单激活判断：概览精确匹配根路径，模块页按路径前缀匹配。 */
 function isActive(module: DocModule): boolean {
@@ -17,15 +19,19 @@ function isActive(module: DocModule): boolean {
     <header class="doc-header">
       <router-link to="/" class="brand">
         <span class="brand-name">Vue CDK</span>
-        <span class="brand-tag">文档</span>
+      <span class="brand-tag">{{ messages.document }}</span>
       </router-link>
       <span class="version">v{{ pkg.version }}</span>
-      <span class="header-desc">Vue 3 组件开发工具包</span>
+      <span class="header-desc">{{ messages.description }}</span>
+      <div class="locale-switcher" role="group" :aria-label="messages.language">
+        <button type="button" :class="{active: locale === 'zh-CN'}" @click="setLocale('zh-CN')">中文</button>
+        <button type="button" :class="{active: locale === 'en-US'}" @click="setLocale('en-US')">English</button>
+      </div>
     </header>
 
     <div class="doc-body">
       <aside class="doc-sidebar">
-        <nav aria-label="模块导航">
+        <nav :aria-label="messages.navigation">
           <router-link
             v-for="module in docModules"
             :key="module.path"
@@ -33,9 +39,8 @@ function isActive(module: DocModule): boolean {
             class="menu-item"
             :class="{active: isActive(module)}"
           >
-            <!-- 菜单两行显示：第一行英文模块名，第二行中文名。 -->
-            <span class="menu-en">{{ module.name }}</span>
-            <span class="menu-zh">{{ module.label }}</span>
+            <span class="menu-en">{{ locale === 'zh-CN' ? module.name : module.labelEn }}</span>
+            <span class="menu-zh">{{ locale === 'zh-CN' ? module.label : module.name }}</span>
           </router-link>
         </nav>
       </aside>
@@ -102,6 +107,30 @@ function isActive(module: DocModule): boolean {
   margin-left: auto;
   font-size: 13px;
   color: var(--doc-muted);
+}
+
+.locale-switcher {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--doc-border);
+  border-radius: 7px;
+  background: var(--doc-card);
+}
+
+.locale-switcher button {
+  border: 0;
+  border-radius: 5px;
+  padding: 4px 8px;
+  color: var(--doc-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.locale-switcher button.active {
+  color: var(--doc-primary);
+  background: var(--doc-primary-soft);
+  font-weight: 600;
 }
 
 .doc-body {

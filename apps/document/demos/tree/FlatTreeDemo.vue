@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {VTree, VTreeNode, vTreeNodeToggle, vTreeNodePadding} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Food {
   name: string;
@@ -21,7 +24,7 @@ const items = ref<Food[]>([
 const log = ref<string[]>([]);
 
 function onExpandedChange(name: string, expanded: boolean): void {
-  log.value.unshift(`${name}：${expanded ? '展开' : '收起'}`);
+  log.value.unshift(locale.value === 'en-US' ? `${name}: ${expanded ? 'expanded' : 'collapsed'}` : `${name}：${expanded ? '展开' : '收起'}`);
   if (log.value.length > 5) {
     log.value.pop();
   }
@@ -46,7 +49,7 @@ function onExpandedChange(name: string, expanded: boolean): void {
             type="button"
             v-tree-node-toggle
             class="toggle"
-            :aria-label="`切换 ${node.name}`"
+            :aria-label="locale === 'en-US' ? `Toggle ${node.name}` : `切换 ${node.name}`"
           >
             <span class="arrow">▸</span>
           </button>
@@ -54,7 +57,7 @@ function onExpandedChange(name: string, expanded: boolean): void {
         </VTreeNode>
       </template>
     </VTree>
-    <div class="doc-output">{{ log.join('\n') || '点击箭头展开/收起节点' }}</div>
+    <div class="doc-output">{{ log.join('\n') || (locale === 'en-US' ? 'Click an arrow to expand or collapse a node' : '点击箭头展开/收起节点') }}</div>
   </div>
 </template>
 

@@ -17,11 +17,14 @@ import PassiveRtlPlatformDemoSource from '../demos/platform/PassiveRtlPlatformDe
     module-name="platform"
     zh-name="平台"
     intro="平台能力检测与事件工具：Platform 服务（浏览器/引擎识别、usePlatform 注入）、支持的 input type、测试环境检测、Shadow DOM / Popover / scroll-behavior 检测，SSR 环境下可安全调用。"
+    intro-en="Platform detection and event utilities: browser and engine identification, usePlatform injection, supported input types, test-environment detection, and Shadow DOM, Popover, and scroll-behavior checks. Safe to call during SSR."
     :api-groups="apiGroups"
   >
     <DemoCard
       title="Platform 服务：浏览器识别与输入类型"
+      title-en="Platform service: browser detection and input types"
       description="usePlatform() 读取当前平台标志；getSupportedInputTypes 列出支持的 input type；createPlatform 注入自定义 UA 验证检测结果。"
+      description-en="Read platform flags with usePlatform(), list supported input types with getSupportedInputTypes(), and verify detection using a custom user agent passed to createPlatform()."
       :source="PlatformInfoDemoSource"
       filename="PlatformInfoDemo.vue"
     >
@@ -30,7 +33,9 @@ import PassiveRtlPlatformDemoSource from '../demos/platform/PassiveRtlPlatformDe
 
     <DemoCard
       title="能力检测与修饰键演示"
+      title-en="Capability detection and modifier keys"
       description="运行环境检测并输出各项能力；聚焦输入框后按键，验证 hasModifierKey 与 getEventTarget 的行为。"
+      description-en="Run environment capability checks and inspect their results. Focus the input and press keys to see how hasModifierKey and getEventTarget behave."
       :source="PlatformDemoSource"
       filename="PlatformDemo.vue"
     >
@@ -39,7 +44,9 @@ import PassiveRtlPlatformDemoSource from '../demos/platform/PassiveRtlPlatformDe
 
     <DemoCard
       title="Shadow DOM 事件穿透"
+      title-en="Events across Shadow DOM boundaries"
       description="动态挂载 shadow root，演示 getEventTargetPierceShadowDom / getFocusedElementPierceShadowDom / getShadowRoot / supportsShadowDom 的穿透行为。"
+      description-en="Mount a shadow root dynamically and inspect how getEventTargetPierceShadowDom, getFocusedElementPierceShadowDom, getShadowRoot, and supportsShadowDom work across its boundary."
       :source="ShadowDomPlatformDemoSource"
       filename="ShadowDomPlatformDemo.vue"
     >
@@ -48,7 +55,9 @@ import PassiveRtlPlatformDemoSource from '../demos/platform/PassiveRtlPlatformDe
 
     <DemoCard
       title="被动监听与 RTL 滚动轴"
+      title-en="Passive listeners and RTL scroll axes"
       description="supportsPassiveEventListeners 与 normalizePassiveListenerOptions 实际用于 addEventListener；getRtlScrollAxisType 与 supportsScrollBehavior 输出检测结果。"
+      description-en="Use supportsPassiveEventListeners and normalizePassiveListenerOptions with addEventListener, then inspect getRtlScrollAxisType and supportsScrollBehavior results."
       :source="PassiveRtlPlatformDemoSource"
       filename="PassiveRtlPlatformDemo.vue"
     >

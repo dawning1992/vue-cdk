@@ -1,11 +1,14 @@
 <script setup lang="ts">
+import {useLocale} from '../../composables/useLocale';
+
 defineProps<{label: string}>();
+const {locale} = useLocale();
 </script>
 
 <template>
   <div class="strategy-panel">
-    <strong>当前策略：{{ label }}</strong>
-    <p>现在滚动列表内容（锚点行）或页面观察行为变化。</p>
+    <strong>{{ locale === 'en-US' ? 'Current strategy: ' : '当前策略：' }}{{ label }}</strong>
+    <p>{{ locale === 'en-US' ? 'Scroll the list content (the anchor row) or the page to observe the behavior.' : '现在滚动列表内容（锚点行）或页面观察行为变化。' }}</p>
   </div>
 </template>
 

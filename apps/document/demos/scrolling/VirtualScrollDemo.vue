@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {VVirtualFor, VVirtualScrollViewport} from 'vue-cdk/scrolling';
+import {useLocale} from '../../composables/useLocale';
 
-const items = ref(Array.from({length: 1000}, (_, i) => `条目 ${i + 1}`));
+const items = ref(Array.from({length: 1000}, (_, i) => `Item ${i + 1}`));
 const firstVisible = ref(0);
 const appendOnly = ref(false);
 const offset = ref(0);
+const {locale} = useLocale();
+if (locale.value !== 'en-US') {
+  items.value = items.value.map((_, index) => `条目 ${index + 1}`);
+}
 const scrollTarget = ref<{
   scrollToIndex(index: number, behavior?: ScrollBehavior): void;
   scrollToOffset(offset: number, behavior?: ScrollBehavior): void;
@@ -31,17 +36,17 @@ function scrollToOffset(): void {
 <template>
   <div class="wrap">
     <div class="toolbar">
-      <button type="button" class="doc-btn primary" @click="jumpToRandom">随机跳转索引</button>
+      <button type="button" class="doc-btn primary" @click="jumpToRandom">{{ locale === 'en-US' ? 'Jump to random index' : '随机跳转索引' }}</button>
       <label class="field">
         scrollToOffset
         <input v-model.number="offset" class="doc-input" type="number" placeholder="px" />
-        <button type="button" class="doc-btn" @click="scrollToOffset">滚动</button>
+        <button type="button" class="doc-btn" @click="scrollToOffset">{{ locale === 'en-US' ? 'Scroll' : '滚动' }}</button>
       </label>
       <label class="check">
         <input v-model="appendOnly" type="checkbox" />
-        appendOnly（只增不减）
+        {{ locale === 'en-US' ? 'appendOnly (only add rendered items)' : 'appendOnly（只增不减）' }}
       </label>
-      <span class="info">首个可见项：#{{ firstVisible + 1 }}（共 {{ items.length }} 条）</span>
+      <span class="info">{{ locale === 'en-US' ? 'First visible item:' : '首个可见项：' }} #{{ firstVisible + 1 }} ({{ locale === 'en-US' ? `${items.length} total` : `共 ${items.length} 条` }})</span>
     </div>
     <VVirtualScrollViewport
       ref="scrollTarget"
@@ -50,11 +55,11 @@ function scrollToOffset(): void {
       style="height: 240px; border: 1px solid var(--doc-border); border-radius: 8px"
       @scrolled-index-change="firstVisible = $event"
     >
-      <VVirtualFor :of="items" :track-by="trackBy" v-slot="{item, index}">
-        <div class="row" :class="{even: index % 2 === 0}">{{ index + 1 }}. {{ item }}</div>
+      <VVirtualFor :of="items" :track-by="trackBy" v-slot="{index}">
+        <div class="row" :class="{even: index % 2 === 0}">{{ locale === 'en-US' ? 'Item' : '条目' }} {{ index + 1 }}</div>
       </VVirtualFor>
     </VVirtualScrollViewport>
-    <p class="hint">1000 条数据仅渲染视口附近的条目；随机跳转演示 scrollToIndex，像素偏移演示 scrollToOffset。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'Only items near the viewport are rendered from 1,000 records. Random jumps demonstrate scrollToIndex; pixel offsets demonstrate scrollToOffset.' : '1000 条数据仅渲染视口附近的条目；随机跳转演示 scrollToIndex，像素偏移演示 scrollToOffset。' }}</p>
   </div>
 </template>
 

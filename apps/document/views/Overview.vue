@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import CodeBlock from '../components/CodeBlock.vue';
 import {docModules} from '../config';
+import {useLocale} from '../composables/useLocale';
+
+const {locale, messages} = useLocale();
 
 const installCode = `npm install vue-cdk`;
 
@@ -45,9 +48,9 @@ import {Emitter} from 'vue-cdk/emitter';`;
 <template>
   <div class="overview">
     <header class="head">
-      <h2>Vue CDK 概览</h2>
+      <h2>{{ locale === 'zh-CN' ? 'Vue CDK 概览' : 'Vue CDK overview' }}</h2>
       <p>
-        Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 Angular CDK
+        {{ locale === 'zh-CN' ? 'Vue 3 组件开发工具包（Component Dev Kit），设计模式借鉴 Angular CDK' : 'Vue 3 Component Development Kit inspired by Angular CDK patterns.' }}
       </p>
     </header>
 
@@ -59,25 +62,25 @@ import {Emitter} from 'vue-cdk/emitter';`;
         class="card"
       >
         <span class="card-en">{{ module.name }}</span>
-        <span class="card-zh">{{ module.label }}</span>
-        <p>{{ module.summary }}</p>
+        <span class="card-zh">{{ locale === 'zh-CN' ? module.label : module.name }}</span>
+        <p>{{ locale === 'zh-CN' ? module.summary : module.summaryEn }}</p>
       </router-link>
     </section>
 
     <section class="block">
-      <h3>安装</h3>
-      <CodeBlock :code="installCode" lang="bash" filename="终端" />
-      <p class="note">需要 Vue 3.3+（仅使用 Composition API）。</p>
+      <h3>{{ messages.install }}</h3>
+      <CodeBlock :code="installCode" lang="bash" :filename="messages.terminal" />
+      <p class="note">{{ messages.vueRequirement }}</p>
     </section>
 
     <section class="block">
-      <h3>子路径导入</h3>
-      <p>每个模块通过独立子路径消费，类型声明与结构样式随模块产物一并提供。</p>
+      <h3>{{ messages.subpath }}</h3>
+      <p>{{ messages.subpathDescription }}</p>
       <CodeBlock :code="subpathCode" lang="ts" filename="imports.ts" />
     </section>
 
     <section class="block">
-      <h3>快速开始（声明式下拉菜单）</h3>
+      <h3>{{ messages.quickStart }}</h3>
       <CodeBlock :code="quickStartCode" lang="vue" filename="Dropdown.vue" />
     </section>
   </div>

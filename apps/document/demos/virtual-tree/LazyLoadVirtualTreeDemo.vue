@@ -2,6 +2,9 @@
 import {ref} from 'vue';
 import {VVirtualScrollTree, type PageInfo} from 'vue-cdk/virtual-tree';
 import {VTreeNode, vTreeNodePadding, vTreeNodeToggle} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface FileNode {
   id: string;
@@ -19,13 +22,13 @@ async function loadChildren(parent: FileNode | null, page: PageInfo): Promise<{c
   const prefix = parent === null ? 'root' : parent.id;
   const children = Array.from({length: count}, (_, i) => ({
     id: `${prefix}-${start + i}`,
-    name: `${parent === null ? '根节点' : '子节点'} ${start + i + 1}`,
+    name: `${locale.value === 'en-US' ? (parent === null ? 'Root node' : 'Child node') : (parent === null ? '根节点' : '子节点')} ${start + i + 1}`,
   }));
   return {children, hasMore: start + count < total};
 }
 
 function onLoadMore(parent: FileNode | null, page: PageInfo): void {
-  log.value.unshift(`加载 ${parent === null ? '根层级' : `「${parent.name}」`} 第 ${page.page + 1} 页`);
+  log.value.unshift(locale.value === 'en-US' ? `Loaded page ${page.page + 1} for ${parent === null ? 'root level' : parent.name}` : `加载 ${parent === null ? '根层级' : `「${parent.name}」`} 第 ${page.page + 1} 页`);
   if (log.value.length > 5) {
     log.value.pop();
   }
@@ -35,7 +38,7 @@ function onLoadMore(parent: FileNode | null, page: PageInfo): void {
 <template>
   <div class="wrap">
     <div class="toolbar">
-      <span class="info">展开根节点后，滚动到其子节点末尾会继续加载该层下一页；第二层及以上按各自的父节点独立触发。</span>
+      <span class="info">{{ locale === 'en-US' ? 'Expand a root node, then scroll to the end of its children to load the next page. Deeper levels load independently for each parent.' : '展开根节点后，滚动到其子节点末尾会继续加载该层下一页；第二层及以上按各自的父节点独立触发。' }}</span>
     </div>
     <VVirtualScrollTree
       ref="treeRef"
@@ -51,17 +54,17 @@ function onLoadMore(parent: FileNode | null, page: PageInfo): void {
             type="button"
             v-tree-node-toggle
             class="vt-toggle"
-            :aria-label="`切换 ${node.name}`"
+            :aria-label="locale === 'en-US' ? `Toggle ${node.name}` : `切换 ${node.name}`"
           >
             <span class="vt-arrow" :class="{open: isExpanded}">▸</span>
           </button>
           <span v-tree-node-padding class="vt-label">{{ node.name }}</span>
-          <span v-if="isLoading" class="vt-loading">加载中…</span>
+          <span v-if="isLoading" class="vt-loading">{{ locale === 'en-US' ? 'Loading…' : '加载中…' }}</span>
         </VTreeNode>
       </template>
     </VVirtualScrollTree>
-    <pre class="vt-log">{{ log.join('\n') || '暂无加载记录' }}</pre>
-    <p class="hint">懒加载模式：每层（含根层）独立分页；滚动接近某个父节点最后一个已加载子节点时才请求该父节点下一页，加载完成后自动缓存。</p>
+    <pre class="vt-log">{{ log.join('\n') || (locale === 'en-US' ? 'No load events yet' : '暂无加载记录') }}</pre>
+    <p class="hint">{{ locale === 'en-US' ? 'Lazy mode paginates each level, including the root, independently. A parent’s next page is requested only when scrolling near its last loaded child, and results are cached.' : '懒加载模式：每层（含根层）独立分页；滚动接近某个父节点最后一个已加载子节点时才请求该父节点下一页，加载完成后自动缓存。' }}</p>
   </div>
 </template>
 

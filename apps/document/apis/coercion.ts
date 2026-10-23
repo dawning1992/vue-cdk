@@ -3,41 +3,50 @@ import type {ApiGroup} from '../api';
 /** coercion 模块 API 分组：工具函数与类型。 */
 export const apiGroups: readonly ApiGroup[] = [
   {
-    title: '转换函数',
+    title: '转换函数', titleEn: 'Coercion functions',
     rows: [
       {
         name: 'coerceArray',
         signature: 'coerceArray<T>(value: T | T[] | null | undefined): T[]',
         description:
           '把单个值或数组统一为数组：数组原样返回，单个值包装为单元素数组，null/undefined 返回空数组。适用于把「单个或列表」输入归一为列表的场景。',
+        descriptionEn:
+          'Normalizes a single value or array to an array: arrays are returned unchanged, single values are wrapped, and null/undefined return an empty array. Useful for inputs that accept either one item or a list.',
       },
       {
         name: 'coerceCssPixelValue',
         signature: 'coerceCssPixelValue(value: number | string | null | undefined): string',
         description:
           '把数字或字符串转换为合法 CSS 尺寸：数字追加 px 单位，字符串原样返回，空值返回空串（便于清空内联样式）。',
+        descriptionEn:
+          'Converts a number or string to a CSS size: numbers receive a px suffix, strings are returned unchanged, and empty values return an empty string for clearing inline styles.',
       },
       {
         name: 'coerceElement',
         signature: 'coerceElement<T extends HTMLElement>(value: T | Ref<T | null | undefined>): T',
         description:
           '把元素或其响应式引用（ref）归一为元素；ref 当前为空时抛出异常，避免后续逻辑在无效元素上静默失败。',
+        descriptionEn:
+          'Normalizes an element or its reactive ref to an element. Throws when the ref is currently empty so later logic does not silently operate on an invalid element.',
       },
       {
         name: 'coerceNumberProperty',
         signature: 'coerceNumberProperty(value: unknown, fallback = 0): number',
         description:
           '把输入值强制转换为数字：null/undefined/空串与无法解析的值返回兜底值（默认 0）。适用于把用户输入或外部数据归一为数字的边界场景。',
+        descriptionEn:
+          'Coerces an input to a number: null/undefined, empty strings, and unparsable values return the fallback (0 by default). Useful for normalizing user input or external data at numeric boundaries.',
       },
     ],
   },
   {
-    title: '类型',
+    title: '类型', titleEn: 'Types',
     rows: [
       {
         name: 'ElementOrRef',
         signature: 'type ElementOrRef<T extends HTMLElement = HTMLElement> = T | Ref<T | null | undefined>',
         description: '元素或其 ref 的联合类型，用于把命令式与声明式调用归一为同一入参形态。',
+        descriptionEn: 'Union type for an element or its ref, allowing imperative and declarative calls to share one input shape.',
       },
     ],
   },

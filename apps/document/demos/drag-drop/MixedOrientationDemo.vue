@@ -2,8 +2,11 @@
 import {ref} from 'vue';
 import {moveItemInArray, VDrag, VDropList} from 'vue-cdk/drag-drop';
 import type {VDragDrop} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
 
-const items = ref(Array.from({length: 8}, (_, i) => `卡片 ${i + 1}`));
+const {locale} = useLocale();
+
+const items = ref(Array.from({length: 8}, (_, i) => `Card ${i + 1}`));
 
 function onDrop(event: VDragDrop<string>): void {
   moveItemInArray(items.value, event.previousIndex, event.currentIndex);
@@ -11,7 +14,7 @@ function onDrop(event: VDragDrop<string>): void {
 </script>
 
 <template>
-  <p class="hint">orientation="mixed"：flex-wrap 换行网格，条目通过 DOM 重排。</p>
+  <p class="hint">{{ locale === 'en-US' ? 'orientation="mixed": wrapping flex grid; items are reordered in the DOM.' : 'orientation="mixed"：flex-wrap 换行网格，条目通过 DOM 重排。' }}</p>
   <VDropList :data="items" orientation="mixed" class="grid" @dropped="onDrop">
     <VDrag v-for="item in items" :key="item" :data="item" class="card">
       {{ item }}

@@ -1,23 +1,29 @@
 <script setup lang="ts">
-import {onBeforeUnmount, ref, shallowRef} from 'vue';
+import {onBeforeUnmount, ref, shallowRef, watch} from 'vue';
 import {ListKeyManager, type ListKeyManagerOption} from 'vue-cdk/a11y';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Item extends ListKeyManagerOption {
   id: string;
   label: string;
+  labelZh: string;
+  labelEn: string;
 }
 
-function makeItem(id: string, label: string, disabled = false): Item {
-  return {id, label, disabled, getLabel: () => label};
+function makeItem(id: string, labelZh: string, labelEn: string, disabled = false): Item {
+  const item: Item = {id, label: locale.value === 'en-US' ? labelEn : labelZh, labelZh, labelEn, disabled, getLabel: () => item.label};
+  return item;
 }
 
 const items = ref<Item[]>([
-  makeItem('1', '首页'),
-  makeItem('2', '文档'),
-  makeItem('3', '示例', true),
-  makeItem('4', '下载'),
-  makeItem('5', '关于'),
-  makeItem('6', '设置'),
+  makeItem('1', '首页', 'Home'),
+  makeItem('2', '文档', 'Docs'),
+  makeItem('3', '示例', 'Demos', true),
+  makeItem('4', '下载', 'Downloads'),
+  makeItem('5', '关于', 'About'),
+  makeItem('6', '设置', 'Settings'),
 ]);
 
 const wrap = ref(true);
@@ -45,6 +51,12 @@ function createManager(): ListKeyManager<Item> {
 
 const manager = shallowRef(createManager());
 
+watch(locale, value => {
+  items.value.forEach(item => {
+    item.label = value === 'en-US' ? item.labelEn : item.labelZh;
+  });
+});
+
 function rebuild(): void {
   manager.value.destroy();
   manager.value = createManager();
@@ -62,7 +74,7 @@ onBeforeUnmount(() => manager.value.destroy());
     <div class="options">
       <label class="check">
         <input v-model="wrap" type="checkbox" @change="rebuild" />
-        withWrap（循环）
+        {{ locale === 'en-US' ? 'withWrap (loop)' : 'withWrap（循环）' }}
       </label>
       <label class="check">
         <input v-model="homeEnd" type="checkbox" @change="rebuild" />
@@ -74,16 +86,16 @@ onBeforeUnmount(() => manager.value.destroy());
       </label>
       <label class="check">
         <input v-model="typeahead" type="checkbox" @change="rebuild" />
-        withTypeAhead（字母定位）
+        {{ locale === 'en-US' ? 'withTypeAhead (typeahead)' : 'withTypeAhead（字母定位）' }}
       </label>
       <label class="check">
         <input v-model="vertical" type="checkbox" @change="rebuild" />
-        垂直方向键
+        {{ locale === 'en-US' ? 'Vertical arrow keys' : '垂直方向键' }}
       </label>
       <label class="field">
-        水平方向键
+        {{ locale === 'en-US' ? 'Horizontal arrow keys' : '水平方向键' }}
         <select v-model="horizontal" class="doc-input" @change="rebuild">
-          <option value="off">关闭</option>
+          <option value="off">{{ locale === 'en-US' ? 'Off' : '关闭' }}</option>
           <option value="ltr">LTR</option>
           <option value="rtl">RTL</option>
         </select>
@@ -105,11 +117,11 @@ onBeforeUnmount(() => manager.value.destroy());
         </li>
       </ul>
       <div class="doc-output">
-        {{ manager.activeItem ? `活动项：${manager.activeItem.label}` : '尚未激活' }}
+        {{ manager.activeItem ? (locale === 'en-US' ? `Active item: ${manager.activeItem.label}` : `活动项：${manager.activeItem.label}`) : (locale === 'en-US' ? 'No active item' : '尚未激活') }}
       </div>
     </div>
     <p class="hint">
-      点击列表后使用方向键导航；Home/End、PageUp/PageDown 与字母快速定位按开关生效，禁用项自动跳过。
+      {{ locale === 'en-US' ? 'Focus the list and navigate with arrow keys. Home/End, PageUp/PageDown, and typeahead follow the toggles; disabled items are skipped.' : '点击列表后使用方向键导航；Home/End、PageUp/PageDown 与字母快速定位按开关生效，禁用项自动跳过。' }}
     </p>
   </div>
 </template>

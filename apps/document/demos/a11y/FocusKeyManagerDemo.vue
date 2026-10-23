@@ -1,16 +1,24 @@
 <script setup lang="ts">
-import {onBeforeUnmount, ref} from 'vue';
+import {onBeforeUnmount, ref, watch} from 'vue';
 import {FocusKeyManager, type FocusableOption} from 'vue-cdk/a11y';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Item extends FocusableOption {
   id: string;
   label: string;
+  labelZh: string;
+  labelEn: string;
 }
 
-function makeItem(id: string, label: string, disabled = false): Item {
+function makeItem(id: string, labelZh: string, labelEn: string, disabled = false): Item {
+  const label = locale.value === 'en-US' ? labelEn : labelZh;
   return {
     id,
     label,
+    labelZh,
+    labelEn,
     disabled,
     getLabel: () => label,
     // 活动项变化时由 FocusKeyManager 调用，把真实焦点移到对应 DOM 元素。
@@ -19,21 +27,30 @@ function makeItem(id: string, label: string, disabled = false): Item {
 }
 
 const items = ref<Item[]>([
-  makeItem('home', '首页'),
-  makeItem('docs', '文档'),
-  makeItem('demo', '示例', true),
-  makeItem('about', '关于'),
+  makeItem('home', '首页', 'Home'),
+  makeItem('docs', '文档', 'Docs'),
+  makeItem('demo', '示例', 'Demos', true),
+  makeItem('about', '关于', 'About'),
 ]);
 
 const manager = new FocusKeyManager(items).withWrap().withHomeAndEnd();
-const log = ref('准备就绪：点击列表后用方向键导航。');
+const log = ref(locale.value === 'en-US' ? 'Ready: focus the list and navigate with the arrow keys.' : '准备就绪：点击列表后用方向键导航。');
+
+watch(locale, value => {
+  items.value.forEach(item => {
+    item.label = value === 'en-US' ? item.labelEn : item.labelZh;
+  });
+  log.value = value === 'en-US' ? 'Ready: focus the list and navigate with the arrow keys.' : '准备就绪：点击列表后用方向键导航。';
+});
 
 manager.change.subscribe(index => {
   const item = index >= 0 ? items.value[index] : null;
-  log.value = item ? `change：活动项切换为「${item.label}」（已调用 focus()）` : 'change：无活动项';
+  log.value = locale.value === 'en-US'
+    ? (item ? `change: active item is ${item.label} (focus() called)` : 'change: no active item')
+    : (item ? `change：活动项切换为「${item.label}」（已调用 focus()）` : 'change：无活动项');
 });
 manager.tabOut.subscribe(() => {
-  log.value = 'tabOut：按 Tab 焦点已移出列表';
+  log.value = locale.value === 'en-US' ? 'tabOut: focus moved out of the list with Tab.' : 'tabOut：按 Tab 焦点已移出列表';
 });
 
 function onKeydown(event: KeyboardEvent): void {
@@ -63,7 +80,7 @@ onBeforeUnmount(() => manager.destroy());
     </ul>
     <div class="doc-output">{{ log }}</div>
     <p class="hint">
-      与 ListKeyManager 的差别：活动项变化时自动调用条目的 focus()，真实移动焦点；Tab 触发 tabOut。
+      {{ locale === 'en-US' ? 'Unlike ListKeyManager, this manager calls focus() on the active item to move real focus; pressing Tab emits tabOut.' : '与 ListKeyManager 的差别：活动项变化时自动调用条目的 focus()，真实移动焦点；Tab 触发 tabOut。' }}
     </p>
   </div>
 </template>

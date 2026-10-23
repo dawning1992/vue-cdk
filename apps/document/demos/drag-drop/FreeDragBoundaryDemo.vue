@@ -2,6 +2,9 @@
 import {ref} from 'vue';
 import {VDrag} from 'vue-cdk/drag-drop';
 import type {VDragEnd} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 const position = ref({x: 0, y: 0});
 
@@ -12,11 +15,11 @@ function onEnd(event: VDragEnd): void {
 
 <template>
   <p class="hint">
-    自由拖拽（无容器）+ boundary 约束。位移：{{ position.x }}px / {{ position.y }}px
+    {{ locale === 'en-US' ? 'Free drag (no container), constrained by boundary. Distance: ' : '自由拖拽（无容器）+ boundary 约束。位移：' }}{{ position.x }}px / {{ position.y }}px
   </p>
   <div class="arena">
     <VDrag boundary-element=".arena" :free-drag-position="{x: 20, y: 20}" class="token" @ended="onEnd">
-      拖动我
+      {{ locale === 'en-US' ? 'Drag me' : '拖动我' }}
     </VDrag>
   </div>
 </template>

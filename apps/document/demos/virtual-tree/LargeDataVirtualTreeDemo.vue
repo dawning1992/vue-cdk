@@ -2,6 +2,9 @@
 import {ref} from 'vue';
 import {VVirtualScrollTree} from 'vue-cdk/virtual-tree';
 import {VTreeNode, vTreeNodePadding, vTreeNodeToggle} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface Row {
   id: number;
@@ -13,11 +16,11 @@ interface Row {
 const data = ref<Row[]>(
   Array.from({length: 100000}, (_, i) => ({
     id: i,
-    name: `行 ${i + 1}`,
+    name: `${locale.value === 'en-US' ? 'Row' : '行'} ${i + 1}`,
     children: [
-      {id: i * 10 + 1, name: `行 ${i + 1} 子 1`},
-      {id: i * 10 + 2, name: `行 ${i + 1} 子 2`},
-      {id: i * 10 + 3, name: `行 ${i + 1} 子 3`},
+      {id: i * 10 + 1, name: `${locale.value === 'en-US' ? 'Row' : '行'} ${i + 1} ${locale.value === 'en-US' ? 'child' : '子'} 1`},
+      {id: i * 10 + 2, name: `${locale.value === 'en-US' ? 'Row' : '行'} ${i + 1} ${locale.value === 'en-US' ? 'child' : '子'} 2`},
+      {id: i * 10 + 3, name: `${locale.value === 'en-US' ? 'Row' : '行'} ${i + 1} ${locale.value === 'en-US' ? 'child' : '子'} 3`},
     ],
   })),
 );
@@ -35,7 +38,7 @@ function onScrolledIndexChange(index: number): void {
 <template>
   <div class="wrap">
     <div class="toolbar">
-      <span class="info">数据总量：{{ data.length }} 行（含子节点共 40 万行）；当前实际渲染行数：{{ rendered }}</span>
+      <span class="info">{{ locale === 'en-US' ? 'Root rows: ' : '数据总量：' }}{{ data.length }}{{ locale === 'en-US' ? '; 400,000 rows including children; currently rendered: ' : ' 行（含子节点共 40 万行）；当前实际渲染行数：' }}{{ rendered }}</span>
     </div>
     <VVirtualScrollTree
       :data="data"
@@ -49,7 +52,7 @@ function onScrolledIndexChange(index: number): void {
             type="button"
             v-tree-node-toggle
             class="vt-toggle"
-            :aria-label="`切换 ${node.name}`"
+            :aria-label="locale === 'en-US' ? `Toggle ${node.name}` : `切换 ${node.name}`"
           >
             <span class="vt-arrow" :class="{open: isExpanded}">▸</span>
           </button>
@@ -57,7 +60,7 @@ function onScrolledIndexChange(index: number): void {
         </VTreeNode>
       </template>
     </VVirtualScrollTree>
-    <p class="hint">40 万节点（含子级）场景：固定行高虚拟滚动保证 DOM 行数始终在视口 + 缓冲量级，滚动流畅。</p>
+    <p class="hint">{{ locale === 'en-US' ? '400,000 nodes including children: fixed-height virtual scrolling keeps the DOM near the viewport and buffer size for smooth scrolling.' : '40 万节点（含子级）场景：固定行高虚拟滚动保证 DOM 行数始终在视口 + 缓冲量级，滚动流畅。' }}</p>
   </div>
 </template>
 

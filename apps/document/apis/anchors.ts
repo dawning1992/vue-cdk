@@ -96,6 +96,7 @@ export function buildAnchorIndex(groups: readonly ApiGroup[]): AnchorIndex {
   const taken = new Set<string>();
   const anchorGroups: ApiAnchorGroup[] = groups.map(group => ({
     title: group.title,
+    titleEn: group.titleEn,
     anchor: uniqueAnchor(slugify(group.title), taken),
     items: group.rows.map(row => ({
       label: row.name,

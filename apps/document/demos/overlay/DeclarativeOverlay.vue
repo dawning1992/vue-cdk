@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import {ref} from 'vue';
+import {computed, ref, watch} from 'vue';
+import {useLocale} from '../../composables/useLocale';
 import {
   STANDARD_DROPDOWN_BELOW_POSITIONS,
   VConnectedOverlay,
@@ -7,8 +8,13 @@ import {
 } from 'vue-cdk/overlay';
 
 const open = ref(false);
-const selected = ref('请选择');
-const items = ['选项 A', '选项 B', '选项 C'];
+const {locale} = useLocale();
+const selected = ref(locale.value === 'en-US' ? 'Select an option' : '请选择');
+const items = computed(() => locale.value === 'en-US' ? ['Option A', 'Option B', 'Option C'] : ['选项 A', '选项 B', '选项 C']);
+
+watch(locale, value => {
+  selected.value = value === 'en-US' ? 'Select an option' : '请选择';
+});
 
 /** 选择菜单项后更新按钮文案并关闭浮层。 */
 function choose(item: string): void {
@@ -33,7 +39,7 @@ function choose(item: string): void {
         </ul>
       </VConnectedOverlay>
     </VOverlayOrigin>
-    <span class="hint">点击按钮开合菜单；点击外部区域自动关闭。</span>
+    <span class="hint">{{ locale === 'en-US' ? 'Toggle the menu with the button; clicking outside closes it.' : '点击按钮开合菜单；点击外部区域自动关闭。' }}</span>
   </div>
 </template>
 

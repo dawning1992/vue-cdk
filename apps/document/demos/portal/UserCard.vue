@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import {inject} from 'vue';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 /**
  * 被 Portal 挂载的组件内容（.vue 单文件组件）。
@@ -18,13 +21,13 @@ withDefaults(
   {level: 1},
 );
 
-const appName = inject<string>('vue-cdk-doc-app', '未知应用');
+const appName = inject<string>('vue-cdk-doc-app', locale.value === 'en-US' ? 'Unknown app' : '未知应用');
 </script>
 
 <template>
   <div class="portal-card">
-    <p class="card-title">你好，{{ name }}</p>
-    <p class="card-meta">Lv.{{ level }} · 应用级 provide：{{ appName }}</p>
+    <p class="card-title">{{ locale === 'en-US' ? 'Hello, ' : '你好，' }}{{ name }}</p>
+    <p class="card-meta">Lv.{{ level }} · {{ locale === 'en-US' ? 'app-level provide:' : '应用级 provide：' }}{{ appName }}</p>
   </div>
 </template>
 

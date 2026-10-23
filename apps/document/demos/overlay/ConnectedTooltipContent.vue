@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import {useLocale} from '../../composables/useLocale';
+
 defineProps<{onClose: () => void}>();
+const {locale} = useLocale();
 </script>
 
 <template>
   <div class="connected-panel">
-    <strong>连接定位面板</strong>
-    <p>候选位置放不下时自动翻转；开启 push 后回推回屏，开启 flexible 后可压缩尺寸。</p>
-    <button type="button" class="doc-btn primary" @click="onClose">关闭</button>
+    <strong>{{ locale === 'en-US' ? 'Connected positioning panel' : '连接定位面板' }}</strong>
+    <p>{{ locale === 'en-US' ? 'The candidate position flips when space is insufficient; push brings it back into the viewport, and flexible allows the panel to shrink.' : '候选位置放不下时自动翻转；开启 push 后回推回屏，开启 flexible 后可压缩尺寸。' }}</p>
+    <button type="button" class="doc-btn primary" @click="onClose">{{ locale === 'en-US' ? 'Close' : '关闭' }}</button>
   </div>
 </template>
 

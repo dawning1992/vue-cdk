@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {VVirtualFor, VVirtualScrollViewport} from 'vue-cdk/scrolling';
+import {useLocale} from '../../composables/useLocale';
 
-const items = ref(Array.from({length: 200}, (_, i) => `卡片 ${i + 1}`));
+const items = ref(Array.from({length: 200}, (_, i) => `Card ${i + 1}`));
 const dir = ref<'ltr' | 'rtl'>('ltr');
+const {locale} = useLocale();
+if (locale.value !== 'en-US') {
+  items.value = items.value.map((_, index) => `卡片 ${index + 1}`);
+}
 const firstVisible = ref(0);
 const scrollTarget = ref<{
   scrollToIndex(index: number, behavior?: ScrollBehavior): void;
@@ -18,14 +23,14 @@ function jump(): void {
   <div class="wrap">
     <div class="toolbar">
       <label class="field">
-        方向
+        {{ locale === 'en-US' ? 'Direction' : '方向' }}
         <select v-model="dir" class="doc-input">
           <option value="ltr">LTR</option>
           <option value="rtl">RTL</option>
         </select>
       </label>
-      <button type="button" class="doc-btn primary" @click="jump">随机跳转索引</button>
-      <span class="info">首个可见项：#{{ firstVisible + 1 }}</span>
+      <button type="button" class="doc-btn primary" @click="jump">{{ locale === 'en-US' ? 'Jump to random index' : '随机跳转索引' }}</button>
+      <span class="info">{{ locale === 'en-US' ? 'First visible item:' : '首个可见项：' }} #{{ firstVisible + 1 }}</span>
     </div>
     <!-- 方向由最近的 dir 属性动态解析，切换后即时生效。 -->
     <div :dir="dir">
@@ -36,12 +41,12 @@ function jump(): void {
         style="height: 120px; border: 1px solid var(--doc-border); border-radius: 8px"
         @scrolled-index-change="firstVisible = $event"
       >
-        <VVirtualFor :of="items" v-slot="{item, index}">
-          <div class="card" :class="{even: index % 2 === 0}">{{ index + 1 }}. {{ item }}</div>
+        <VVirtualFor :of="items" v-slot="{index}">
+          <div class="card" :class="{even: index % 2 === 0}">{{ locale === 'en-US' ? 'Card' : '卡片' }} {{ index + 1 }}</div>
         </VVirtualFor>
       </VVirtualScrollViewport>
     </div>
-    <p class="hint">orientation="horizontal" 以宽度为 itemSize；RTL 下横向滚动轴方向自动反转。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'With orientation="horizontal", item width defines itemSize. The horizontal scroll axis reverses automatically in RTL.' : 'orientation="horizontal" 以宽度为 itemSize；RTL 下横向滚动轴方向自动反转。' }}</p>
   </div>
 </template>
 

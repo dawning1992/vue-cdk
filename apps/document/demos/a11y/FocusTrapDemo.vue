@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import {ref} from 'vue';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 const enabled = ref(true);
 const mounted = ref(true);
@@ -10,10 +13,10 @@ const mounted = ref(true);
     <div class="controls">
       <label class="toggle">
         <input v-model="enabled" type="checkbox" />
-        启用焦点陷阱
+        {{ locale === 'en-US' ? 'Enable focus trap' : '启用焦点陷阱' }}
       </label>
       <button type="button" class="doc-btn" @click="mounted = !mounted">
-        {{ mounted ? '卸载区域（观察焦点恢复）' : '重新挂载（观察捕获）' }}
+        {{ mounted ? (locale === 'en-US' ? 'Unmount region (observe focus restoration)' : '卸载区域（观察焦点恢复）') : (locale === 'en-US' ? 'Remount region (observe capture)' : '重新挂载（观察捕获）') }}
       </button>
     </div>
     <!-- autoCapture：挂载时捕获焦点、卸载时恢复；绑定值控制启停。 -->
@@ -23,12 +26,12 @@ const mounted = ref(true);
       class="trap-box"
       :class="{inert: !enabled}"
     >
-      <p class="tip">Tab 被限制在本区域内（包括首尾锚点）</p>
-      <input class="doc-input" placeholder="输入框 A" />
-      <input class="doc-input" placeholder="输入框 B" />
-      <button type="button" class="doc-btn">内部按钮</button>
+      <p class="tip">{{ locale === 'en-US' ? 'Tab focus stays within this region, including the boundary anchors.' : 'Tab 被限制在本区域内（包括首尾锚点）' }}</p>
+      <input class="doc-input" :placeholder="locale === 'en-US' ? 'Input A' : '输入框 A'" />
+      <input class="doc-input" :placeholder="locale === 'en-US' ? 'Input B' : '输入框 B'" />
+      <button type="button" class="doc-btn">{{ locale === 'en-US' ? 'Inner button' : '内部按钮' }}</button>
     </div>
-    <p v-else class="tip dim">区域已卸载：autoCapture 会把焦点恢复到卸载前的元素。</p>
+    <p v-else class="tip dim">{{ locale === 'en-US' ? 'The region is unmounted. autoCapture restores focus to the element that had focus before unmount.' : '区域已卸载：autoCapture 会把焦点恢复到卸载前的元素。' }}</p>
   </div>
 </template>
 

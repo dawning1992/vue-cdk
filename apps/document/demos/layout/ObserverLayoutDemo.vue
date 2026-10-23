@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import {onUnmounted, ref} from 'vue';
 import {BreakpointObserver} from 'vue-cdk/layout';
+import {useLocale} from '../../composables/useLocale';
 
 const observer = new BreakpointObserver();
-const state = ref('等待初始状态');
+const {locale} = useLocale();
+const state = ref(locale.value === 'en-US' ? 'Waiting for the initial state' : '等待初始状态');
 const subscription = observer.observe(['(orientation: portrait)', '(prefers-reduced-motion: reduce)'])
   .subscribe(value => {
     state.value = JSON.stringify(value, null, 2);
@@ -17,7 +19,7 @@ onUnmounted(() => {
 
 <template>
   <div>
-    <p class="hint">命令式 API 适合组件外服务；它保留 observe(...).subscribe(...) 调用形态。</p>
+    <p class="hint">{{ locale === 'en-US' ? 'The imperative API suits services outside components and retains the observe(...).subscribe(...) call shape.' : '命令式 API 适合组件外服务；它保留 observe(...).subscribe(...) 调用形态。' }}</p>
     <pre class="doc-output">{{ state }}</pre>
   </div>
 </template>

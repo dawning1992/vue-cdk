@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {VTree, VNestedTreeNode, vTreeNodeToggle} from 'vue-cdk/tree';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 interface TreeNode {
   name: string;
@@ -26,7 +29,7 @@ const roots = ref<TreeNode[]>([
 const log = ref<string[]>([]);
 
 function onExpandedChange(name: string, expanded: boolean): void {
-  log.value.unshift(`${name}：${expanded ? '展开（含子树递归）' : '收起'}`);
+  log.value.unshift(locale.value === 'en-US' ? `${name}: ${expanded ? 'expanded (including descendants)' : 'collapsed'}` : `${name}：${expanded ? '展开（含子树递归）' : '收起'}`);
   if (log.value.length > 5) {
     log.value.pop();
   }
@@ -55,9 +58,9 @@ function onExpandedChange(name: string, expanded: boolean): void {
       </template>
     </VTree>
     <p class="hint">
-      点击节点行切换（默认递归切换子树）；子节点自动渲染在节点内部，收起时从 DOM 移除。
+      {{ locale === 'en-US' ? 'Click a node row to toggle it (descendants are toggled recursively by default). Children render inside the node and are removed from the DOM when collapsed.' : '点击节点行切换（默认递归切换子树）；子节点自动渲染在节点内部，收起时从 DOM 移除。' }}
     </p>
-    <div class="doc-output">{{ log.join('\n') || '点击节点行体验展开/收起' }}</div>
+    <div class="doc-output">{{ log.join('\n') || (locale === 'en-US' ? 'Click a node row to try expanding and collapsing' : '点击节点行体验展开/收起') }}</div>
   </div>
 </template>
 

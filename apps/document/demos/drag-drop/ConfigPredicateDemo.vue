@@ -2,6 +2,9 @@
 import {ref} from 'vue';
 import {moveItemInArray, VDrag, VDropList} from 'vue-cdk/drag-drop';
 import type {VDragDrop, VDragPublicApi} from 'vue-cdk/drag-drop';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
 
 const items = ref(['A', 'B', 'C', 'D', 'E']);
 const disabled = ref(false);
@@ -23,11 +26,11 @@ function enterPredicate(drag: VDragPublicApi): boolean {
   <div class="controls">
     <label><input v-model="disabled" type="checkbox" /> disabled</label>
     <label><input v-model="sortingDisabled" type="checkbox" /> sortingDisabled</label>
-    <label><input v-model="onlyAllowA" type="checkbox" /> enterPredicate：只放行 A</label>
+    <label><input v-model="onlyAllowA" type="checkbox" /> {{ locale === 'en-US' ? 'enterPredicate: allow A only' : 'enterPredicate：只放行 A' }}</label>
     <label>
       lockAxis
       <select v-model="lockAxis">
-        <option :value="null">无</option>
+        <option :value="null">{{ locale === 'en-US' ? 'None' : '无' }}</option>
         <option value="x">x</option>
         <option value="y">y</option>
       </select>

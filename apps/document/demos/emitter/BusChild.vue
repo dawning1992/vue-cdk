@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import {onBeforeUnmount, ref} from 'vue';
 import type {Emitter} from 'vue-cdk/emitter';
+import {useLocale} from '../../composables/useLocale';
+
+const {locale} = useLocale();
+const t = (zh: string, en: string) => locale.value === 'en-US' ? en : zh;
 
 interface Payload {
   action: string;
@@ -23,8 +27,8 @@ onBeforeUnmount(() => unsubscribe());
 
 <template>
   <div class="bus-child">
-    <p class="label">子组件（接收父组件传入的 Emitter）</p>
-    <div class="doc-output mini">{{ received.join('\n') || '等待父组件发射事件…' }}</div>
+    <p class="label">{{ t('子组件（接收父组件传入的 Emitter）', 'Child component (receives Emitter from parent)') }}</p>
+    <div class="doc-output mini">{{ received.join('\n') || t('等待父组件发射事件…', 'Waiting for the parent to emit an event…') }}</div>
   </div>
 </template>
 

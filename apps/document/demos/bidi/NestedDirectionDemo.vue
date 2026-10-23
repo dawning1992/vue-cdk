@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {ref} from 'vue';
 import {VDir, type Direction} from 'vue-cdk/bidi';
+import {useLocale} from '../../composables/useLocale';
+const {locale} = useLocale();
 
 const outer = ref<Direction>('rtl');
 const changes = ref<string[]>([]);
@@ -8,12 +10,12 @@ const changes = ref<string[]>([]);
 
 <template>
   <div class="controls">
-    <button type="button" @click="outer = outer === 'rtl' ? 'ltr' : 'rtl'">切换外层</button>
-    <span>dirChange：{{ changes.join(' → ') || '尚未触发' }}</span>
+    <button type="button" @click="outer = outer === 'rtl' ? 'ltr' : 'rtl'">{{ locale === 'en-US' ? 'Toggle outer direction' : '切换外层' }}</button>
+    <span>dirChange: {{ changes.join(' → ') || (locale === 'en-US' ? 'Not triggered' : '尚未触发') }}</span>
   </div>
   <VDir :dir="outer" class="box" @dir-change="changes.push($event)">
-    外层 {{ outer }}
-    <VDir dir="ltr" class="box nested">内层固定 LTR，覆盖外层上下文</VDir>
+    {{ locale === 'en-US' ? 'Outer ' : '外层 ' }}{{ outer }}
+    <VDir dir="ltr" class="box nested">{{ locale === 'en-US' ? 'Inner fixed LTR, overriding the outer context' : '内层固定 LTR，覆盖外层上下文' }}</VDir>
   </VDir>
 </template>
 
