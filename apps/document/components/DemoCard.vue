@@ -22,7 +22,7 @@ const props = withDefaults(
     /** 主演示文件语言，默认 vue。 */
     lang?: string;
     /** 附带源码（如被演示引用的子组件），与主源码一起展开。 */
-    extraSources?: readonly {filename: string; code: string}[];
+    extraSources?: readonly {filename: string; code: string; lang?: string}[];
   }>(),
   {filename: '', lang: 'vue', extraSources: () => []},
 );
@@ -124,7 +124,11 @@ function expressionEnd(source: string, start: number): number {
 
 const sourceFiles = computed(() => [
   {filename: props.filename || '源码', code: localizeSource(props.source), lang: props.lang},
-  ...props.extraSources.map(file => ({...file, code: localizeSource(file.code), lang: 'vue'})),
+  ...props.extraSources.map(file => ({
+    ...file,
+    code: localizeSource(file.code),
+    lang: file.lang ?? 'vue',
+  })),
 ]);
 
 watch(sourceFiles, files => {

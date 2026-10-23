@@ -19,6 +19,17 @@ import DialogStackDemoSource from '../demos/dialog/DialogStackDemo.vue?raw';
 import CustomContainerDialog from '../demos/dialog/CustomContainerDialog.vue';
 import CustomContainerDialogSource from '../demos/dialog/CustomContainerDialog.vue?raw';
 import CustomContainerSource from '../demos/dialog/CustomContainer.vue?raw';
+import AppDialogDemo from '../demos/dialog/app-dialog/AppDialogDemo.vue';
+import AppDialogDemoSource from '../demos/dialog/app-dialog/AppDialogDemo.vue?raw';
+import UseAppDialogSource from '../demos/dialog/app-dialog/useAppDialog.ts?raw';
+import ConfirmDialogSource from '../demos/dialog/app-dialog/ConfirmDialog.vue?raw';
+import AppDialogTitleSource from '../demos/dialog/app-dialog/AppDialogTitle.vue?raw';
+import AppDialogContentSource from '../demos/dialog/app-dialog/AppDialogContent.vue?raw';
+import AppDialogActionsSource from '../demos/dialog/app-dialog/AppDialogActions.vue?raw';
+import DialogAnimationDemo from '../demos/dialog/DialogAnimationDemo.vue';
+import DialogAnimationDemoSource from '../demos/dialog/DialogAnimationDemo.vue?raw';
+import AnimatedConfirmDialogSource from '../demos/dialog/AnimatedConfirmDialog.vue?raw';
+import AnimatedAppDialogSource from '../demos/dialog/useAnimatedAppDialog.ts?raw';
 </script>
 
 <template>
@@ -108,6 +119,39 @@ import CustomContainerSource from '../demos/dialog/CustomContainer.vue?raw';
       :extra-sources="[{filename: 'CustomContainer.vue', code: CustomContainerSource}]"
     >
       <CustomContainerDialog />
+    </DemoCard>
+
+    <DemoCard
+      title="项目最佳实践：封装 AppDialog"
+      title-en="Project best practice: wrap AppDialog"
+      description="用 useAppDialog() 统一面板样式和尺寸默认值，调用方仍可覆盖配置；确认内容保持为独立 SFC，并用标题、正文、操作区组件组织布局。"
+      description-en="Use useAppDialog() to centralize panel styling and default dimensions while allowing per-call overrides. Keep confirmation content in an SFC and compose it from title, content, and actions components."
+      :source="AppDialogDemoSource"
+      filename="AppDialogDemo.vue"
+      :extra-sources="[
+        {filename: 'useAppDialog.ts', code: UseAppDialogSource, lang: 'ts'},
+        {filename: 'ConfirmDialog.vue', code: ConfirmDialogSource},
+        {filename: 'AppDialogTitle.vue', code: AppDialogTitleSource},
+        {filename: 'AppDialogContent.vue', code: AppDialogContentSource},
+        {filename: 'AppDialogActions.vue', code: AppDialogActionsSource},
+      ]"
+    >
+      <AppDialogDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="项目最佳实践：自定义弹窗动画"
+      title-en="Project best practice: custom dialog animation"
+      description="沿用 AppDialog 的项目级配置封装，只需额外传入点击事件或视口坐标。弹窗从起点淡入放大至屏幕中央，关闭时淡出缩小回到起点；ESC、遮罩、内容按钮及 closeAll 关闭路径均复用同一动画。"
+      description-en="Builds on the AppDialog project wrapper. Pass a click event or viewport point; the dialog expands from that origin and shrinks back when closed, including ESC, backdrop, content-button, and closeAll paths."
+      :source="DialogAnimationDemoSource"
+      filename="DialogAnimationDemo.vue"
+      :extra-sources="[
+        {filename: 'useAnimatedAppDialog.ts', code: AnimatedAppDialogSource, lang: 'ts'},
+        {filename: 'AnimatedConfirmDialog.vue', code: AnimatedConfirmDialogSource},
+      ]"
+    >
+      <DialogAnimationDemo />
     </DemoCard>
   </ModulePage>
 </template>

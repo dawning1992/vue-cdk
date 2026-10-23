@@ -113,6 +113,15 @@ code {
   overflow: hidden;
 }
 
+/* AppDialog 最佳实践示例：项目封装通过 panelClass 统一应用业务面板外观。 */
+.app-dialog-panel {
+  background: var(--doc-card);
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  box-shadow: 0 12px 40px rgba(31, 36, 48, 0.18);
+  overflow: hidden;
+}
+
 /* 焦点监视演示：来源标记类视觉反馈（文档示例专用）。 */
 .vcdk-focused {
   outline: 2px solid var(--doc-primary);
