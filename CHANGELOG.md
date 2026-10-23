@@ -1,9 +1,10 @@
-# 未发布
+# 0.1.0-beta.8 (2026-10-23)
 
 ### portal
 
 | Commit | Type | Description |
 | -- | -- | -- |
+| [3d6a069](https://github.com/dawning1992/vue-cdk/commit/3d6a069) | feat | `ComponentPortal` 的 `props` 支持普通对象、`reactive`、`ref`、`computed` 与 getter；响应式输入变化后自动更新挂载组件，卸载时停止依赖追踪 |
 | [ea40673](https://github.com/dawning1992/vue-cdk/commit/ea40673) | feat | 新增显式模板源组件 `TemplateRef` 与 `TemplateRefHandle<C>` 类型契约，支持通过组件 ref 获取句柄并传入 `new TemplatePortal(tpl.value, context)`；保留原有渲染函数构造方式 |
 | [ea40673](https://github.com/dawning1992/vue-cdk/commit/ea40673) | fix | `VPortal` 与 `TemplateRef` 共用插槽捕获逻辑；来源卸载时自动卸载内容并使句柄失效，出口卸载时取消来源订阅；修复挂载失败后 Portal 宿主状态未回滚的问题 |
 
