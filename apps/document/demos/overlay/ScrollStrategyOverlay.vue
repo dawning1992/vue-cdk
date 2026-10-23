@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {h, onBeforeUnmount, ref, shallowRef} from 'vue';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {
   isElementScrolledOutsideView,
   type OverlayRef,
@@ -7,6 +7,8 @@ import {
   useOverlay,
 } from 'vue-cdk/overlay';
 import {scrollDispatcher, vScrollable} from 'vue-cdk/scrolling';
+import {ComponentPortal} from 'vue-cdk/portal';
+import ScrollStrategyContent from './ScrollStrategyContent.vue';
 
 type StrategyName = 'close' | 'block' | 'reposition' | 'noop';
 
@@ -109,34 +111,9 @@ function openPanel(): void {
   });
   overlayRef.value = ref;
 
-  ref.attach(() =>
-    h(
-      'div',
-      {
-        class: 'strategy-panel',
-        style: {
-          padding: '14px 16px',
-          minWidth: '200px',
-          background: '#fff',
-          border: '1px solid #e3e6ee',
-          borderRadius: '10px',
-          boxShadow: '0 6px 20px rgba(31, 36, 48, 0.12)',
-        },
-      },
-      [
-        h(
-          'strong',
-          {style: {display: 'block', marginBottom: '4px', fontSize: '13px'}},
-          `当前策略：${strategyLabels[strategyName.value]}`,
-        ),
-        h(
-          'p',
-          {style: {margin: '0', color: '#6b7280', fontSize: '12px'}},
-          '现在滚动列表内容（锚点行）或页面观察行为变化。',
-        ),
-      ],
-    ),
-  );
+  ref.attach(new ComponentPortal(ScrollStrategyContent, {
+    props: {label: strategyLabels[strategyName.value]},
+  }));
   open.value = true;
   if (strategyName.value !== 'close' && !unsubscribeVisibility) {
     subscribeAnchorVisibility();

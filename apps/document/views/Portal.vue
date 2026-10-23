@@ -4,6 +4,8 @@ import ModulePage from '../components/ModulePage.vue';
 import {apiGroups} from '../apis/portal';
 import ComponentPortalDemo from '../demos/portal/ComponentPortalDemo.vue';
 import ComponentPortalDemoSource from '../demos/portal/ComponentPortalDemo.vue?raw';
+import ReactivePropsDemo from '../demos/portal/ReactivePropsDemo.vue';
+import ReactivePropsDemoSource from '../demos/portal/ReactivePropsDemo.vue?raw';
 import UserCardSource from '../demos/portal/UserCard.vue?raw';
 import DeclarativeTemplateDemo from '../demos/portal/DeclarativeTemplateDemo.vue';
 import DeclarativeTemplateDemoSource from '../demos/portal/DeclarativeTemplateDemo.vue?raw';
@@ -24,12 +26,22 @@ import OverlayPortalDemoSource from '../demos/portal/OverlayPortalDemo.vue?raw';
   >
     <DemoCard
       title="组件 Portal（ComponentPortal + DomPortalOutlet）"
-      description="命令式创建出口并挂载组件：挂载内容为独立 .vue 单文件组件，props 传入数据，appContext 提供 provide/inject 通道；attach 返回组件公共实例。"
+      description="命令式创建出口并挂载组件：挂载内容为独立 .vue 单文件组件，props 支持 reactive、ref/computed 和 getter，修改姓名或等级可更新已挂载内容；appContext 提供 provide/inject 通道；attach 返回组件公共实例。"
       :source="ComponentPortalDemoSource"
       filename="ComponentPortalDemo.vue"
       :extra-sources="[{filename: 'UserCard.vue', code: UserCardSource}]"
     >
       <ComponentPortalDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="响应式 props（reactive / ref / computed / getter）"
+      description="四种输入源直接传给 props：原地修改、整体替换、派生数据和组合输入均可更新已挂载组件。展开源码可查看完整用法与清理方式。"
+      :source="ReactivePropsDemoSource"
+      filename="ReactivePropsDemo.vue"
+      :extra-sources="[{filename: 'UserCard.vue', code: UserCardSource}]"
+    >
+      <ReactivePropsDemo />
     </DemoCard>
 
     <DemoCard

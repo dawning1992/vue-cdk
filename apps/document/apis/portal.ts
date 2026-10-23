@@ -36,8 +36,8 @@ export const apiGroups: readonly ApiGroup[] = [
       },
       {
         name: 'ComponentPortalOptions',
-        signature: 'interface ComponentPortalOptions { props?: Record<string, unknown> | null; appContext?: AppContext | null }',
-        description: '组件 Portal 构造选项：props 传给组件；appContext 提供 provide/inject 通道，缺省回退到出口上下文。',
+        signature: 'interface ComponentPortalOptions { props?: MaybeRefOrGetter<Record<string, unknown> | null | undefined>; appContext?: AppContext | null }',
+        description: '组件 Portal 构造选项：props 支持普通对象、reactive、ref/computed 和 getter；响应式更新在 nextTick 后可读，属性删除会恢复组件默认值。普通对象直接修改不触发更新，对象内 ref 不逐项解包，getter 应无副作用。detach/dispose 停止追踪，重新挂载读取最新值；appContext 提供 provide/inject 通道，缺省回退到出口上下文。',
       },
     ],
   },

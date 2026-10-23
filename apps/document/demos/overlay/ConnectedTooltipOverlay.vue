@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import {h, onBeforeUnmount, ref, shallowRef} from 'vue';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {
   type ConnectedPosition,
   type FlexibleConnectedPositionStrategy,
   type OverlayRef,
   useOverlay,
 } from 'vue-cdk/overlay';
+import {ComponentPortal} from 'vue-cdk/portal';
+import ConnectedTooltipContent from './ConnectedTooltipContent.vue';
 
 const overlay = useOverlay();
 const anchor = ref<HTMLElement | null>(null);
@@ -72,35 +74,7 @@ function togglePanel(): void {
       `origin ${pair.originX}/${pair.originY} → overlay ${pair.overlayX}/${pair.overlayY}`;
   });
 
-  ref.attach(() =>
-    h(
-      'div',
-      {
-        class: 'connected-panel',
-        style: {
-          padding: '16px 18px',
-          minWidth: '220px',
-          background: '#fff',
-          border: '1px solid #e3e6ee',
-          borderRadius: '10px',
-          boxShadow: '0 6px 20px rgba(31, 36, 48, 0.12)',
-        },
-      },
-      [
-        h('strong', {style: {display: 'block', marginBottom: '6px', fontSize: '14px'}}, '连接定位面板'),
-        h(
-          'p',
-          {style: {margin: '0 0 12px', color: '#6b7280', fontSize: '12px'}},
-          '候选位置放不下时自动翻转；开启 push 后回推回屏，开启 flexible 后可压缩尺寸。',
-        ),
-        h(
-          'button',
-          {class: 'doc-btn primary', onClick: close},
-          '关闭',
-        ),
-      ],
-    ),
-  );
+  ref.attach(new ComponentPortal(ConnectedTooltipContent, {props: {onClose: close}}));
   open.value = true;
 }
 

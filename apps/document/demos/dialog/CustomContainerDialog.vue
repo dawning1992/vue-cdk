@@ -1,51 +1,15 @@
 <script setup lang="ts">
-import {defineComponent, h, ref} from 'vue';
-import {useDialog, useDialogData, useDialogRef} from 'vue-cdk/dialog';
+import {ref} from 'vue';
+import {useDialog} from 'vue-cdk/dialog';
 import CustomContainer from './CustomContainer.vue';
+import CustomContainerContent from './CustomContainerContent.vue';
 
 const dialog = useDialog();
 const result = ref('');
 
-/** 内容组件：通过 useDialogData / useDialogRef 消费自定义容器注入的数据与关闭能力。 */
-const Content = defineComponent({
-  name: 'CustomContainerContent',
-  props: {
-    fromProps: {type: String, default: ''},
-  },
-  setup(props) {
-    const data = useDialogData<{label?: string}>();
-    const dialogRef = useDialogRef<string>();
-    return () =>
-      h('div', {style: {padding: '8px 4px'}}, [
-        h('h3', {style: {margin: '0 0 10px', fontSize: '16px'}}, '内容区（自定义容器内）'),
-        h(
-          'p',
-          {style: {margin: '0 0 8px', color: '#6b7280', fontSize: '13px'}},
-          `props 通道（contentProps）：${props.fromProps || '（未传）'}`,
-        ),
-        h(
-          'p',
-          {style: {margin: '0 0 18px', color: '#6b7280', fontSize: '13px'}},
-          `inject 通道（useDialogData）：${data?.label ?? '（未传）'}`,
-        ),
-        h(
-          'div',
-          {style: {display: 'flex', justifyContent: 'flex-end'}},
-          [
-            h(
-              'button',
-              {class: 'doc-btn primary', onClick: () => dialogRef.close('自定义容器已关闭')},
-              '关闭并返回',
-            ),
-          ],
-        ),
-      ]);
-  },
-});
-
 /** 通过 config.container 传入自定义容器，数据仍走 contentProps / DIALOG_DATA 双通道。 */
 function openWithCustomContainer(): void {
-  const dialogRef = dialog.open(Content, {
+  const dialogRef = dialog.open(CustomContainerContent, {
     container: CustomContainer,
     data: {label: 'inject 通道：useDialogData()'},
     contentProps: {fromProps: 'props 通道：contentProps'},

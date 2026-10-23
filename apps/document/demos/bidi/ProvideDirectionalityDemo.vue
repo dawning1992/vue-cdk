@@ -1,23 +1,10 @@
-<script lang="ts">
-import {defineComponent, h, ref} from 'vue';
-import {provideDirectionality, useDirectionality, type Direction} from 'vue-cdk/bidi';
+<script setup lang="ts">
+import {ref} from 'vue';
+import {provideDirectionality, type Direction} from 'vue-cdk/bidi';
+import DirectionConsumer from './DirectionConsumer.vue';
 
-const DirectionConsumer = defineComponent({
-  name: 'DirectionConsumer',
-  setup() {
-    const directionality = useDirectionality();
-    return () => h('strong', directionality.valueSignal.value.toUpperCase());
-  },
-});
-
-export default defineComponent({
-  name: 'ProvideDirectionalityDemo',
-  setup() {
-    const direction = ref<Direction>('ltr');
-    provideDirectionality(direction);
-    return {direction, DirectionConsumer};
-  },
-});
+const direction = ref<Direction>('ltr');
+provideDirectionality(direction);
 </script>
 
 <template>

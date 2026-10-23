@@ -1,5 +1,9 @@
 import {afterEach, describe, expect, it, vi} from 'vitest';
 import {
+  effectScope,
+  computed,
+  reactive,
+  shallowRef,
   createApp,
   defineComponent,
   getCurrentInstance,
@@ -200,6 +204,115 @@ describe('BasePortalOutlet', () => {
 });
 
 describe('ComponentPortal + DomPortalOutlet', () => {
+  it.each(['reactive', 'ref', 'computed', 'getter'] as const)('%s 输入更新时保留组件实例与本地状态', async kind => {
+    const state = reactive({name: 'Alice'});
+    const source = kind === 'reactive' ? state
+      : kind === 'ref' ? ref(state)
+      : kind === 'computed' ? computed(() => ({name: state.name}))
+      : () => ({name: state.name});
+    const setup = vi.fn(() => {
+      const local = ref(7);
+      return {local};
+    });
+    const component = defineComponent({
+      props: {name: String},
+      setup,
+      render() { return h('p', `${this.name}:${this.local}`); },
+    });
+    const host = document.createElement('div');
+    const outlet = new DomPortalOutlet(host);
+    const instance = outlet.attach(new ComponentPortal(component, {props: source}));
+    expect(host.textContent).toBe('Alice:7');
+    state.name = 'Bob';
+    await nextTick();
+    expect(host.textContent).toBe('Bob:7');
+    expect(((instance as ComponentPublicInstance).$props as {name: string}).name).toBe('Bob');
+    expect(setup).toHaveBeenCalledTimes(1);
+    outlet.dispose();
+  });
+
+  it('响应式输入的生命周期独立于创建调用方的作用域', async () => {
+    const name = ref('Alice');
+    const scope = effectScope();
+    const host = document.createElement('div');
+    const outlet = new DomPortalOutlet(host);
+    scope.run(() => outlet.attach(new ComponentPortal(PropsComponent, {
+      props: () => ({name: name.value}),
+    })));
+    scope.stop();
+    name.value = 'Bob';
+    await nextTick();
+    expect(host.textContent).toBe('hello Bob');
+    outlet.dispose();
+  });
+
+  it('reactive 属性新增和删除同步为组件默认值及 attrs', async () => {
+    const props = reactive<Record<string, unknown>>({name: 'Alice'});
+    const component = defineComponent({
+      props: {name: {type: String, default: '默认'}},
+      setup: props => () => h('p', props.name),
+    });
+    const host = document.createElement('div');
+    const outlet = new DomPortalOutlet(host);
+    outlet.attach(new ComponentPortal(component, {props}));
+    props.title = '提示';
+    await nextTick();
+    expect(host.querySelector('p')?.title).toBe('提示');
+    delete props.name;
+    delete props.title;
+    await nextTick();
+    expect(host.textContent).toBe('默认');
+    expect(host.querySelector('p')?.hasAttribute('title')).toBe(false);
+    outlet.dispose();
+  });
+
+  it('ref 可整体替换、清空，事件监听器随输入替换', async () => {
+    const first = vi.fn();
+    const second = vi.fn();
+    const props = shallowRef<Record<string, unknown> | null | undefined>({title: '初始', onClick: first});
+    const component = defineComponent({setup: () => () => h('button', '按钮')});
+    const host = document.createElement('div');
+    const outlet = new DomPortalOutlet(host);
+    outlet.attach(new ComponentPortal(component, {props}));
+    host.querySelector('button')!.click();
+    props.value = {title: '替换', onClick: second};
+    await nextTick();
+    host.querySelector('button')!.click();
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(host.querySelector('button')!.title).toBe('替换');
+    for (const empty of [null, undefined]) {
+      props.value = empty;
+      await nextTick();
+      expect(host.querySelector('button')!.hasAttribute('title')).toBe(false);
+      host.querySelector('button')!.click();
+      expect(second).toHaveBeenCalledTimes(1);
+    }
+    outlet.dispose();
+  });
+
+  it.each(['detach', 'dispose'] as const)('%s 取消排队更新并停止 getter，再挂载读取最新输入', async cleanup => {
+    const name = ref('Alice');
+    const getter = vi.fn(() => ({name: name.value}));
+    const portal = new ComponentPortal(PropsComponent, {props: getter});
+    const host = document.createElement('div');
+    const outlet = new DomPortalOutlet(host);
+    outlet.attach(portal);
+    name.value = 'Bob';
+    outlet[cleanup]();
+    const calls = getter.mock.calls.length;
+    await nextTick();
+    name.value = 'Carol';
+    await nextTick();
+    expect(getter).toHaveBeenCalledTimes(calls);
+    expect(host.innerHTML).toBe('');
+    expect(portal.isAttached).toBe(false);
+    const nextOutlet = new DomPortalOutlet(document.createElement('div'));
+    nextOutlet.attach(portal);
+    expect(nextOutlet.outletElement.textContent).toBe('hello Carol');
+    nextOutlet.dispose();
+  });
+
   it('挂载组件并返回公共实例，props 生效', () => {
     const host = document.createElement('div');
     document.body.appendChild(host);

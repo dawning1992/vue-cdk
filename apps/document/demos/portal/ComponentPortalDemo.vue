@@ -6,6 +6,8 @@ import UserCard from './UserCard.vue';
 const outletEl = ref<HTMLElement | null>(null);
 const instanceInfo = ref('');
 const mounted = ref(false);
+const name = ref('小明');
+const level = ref(7);
 let outlet: DomPortalOutlet | null = null;
 
 /** 捕获当前应用上下文，使挂载的 .vue 组件可访问 app 级 provide/inject。 */
@@ -18,7 +20,7 @@ function mountCard(): void {
   }
   outlet ??= new DomPortalOutlet(outletEl.value, {appContext});
   const instance = outlet.attach(
-    new ComponentPortal(UserCard, {props: {name: '小明', level: 7}}),
+    new ComponentPortal(UserCard, {props: () => ({name: name.value, level: level.value})}),
   );
   mounted.value = true;
   instanceInfo.value = `attach 返回实例：${typeof instance === 'object' ? 'ComponentPublicInstance' : instance}`;
@@ -39,6 +41,11 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="wrap column">
+    <div class="controls">
+      <label>姓名 <input v-model="name" aria-label="用户名" /></label>
+      <label>等级 <input v-model.number="level" type="number" min="1" aria-label="用户等级" /></label>
+    </div>
+    <p class="result">修改姓名或等级会更新已挂载的组件；卸载后再次挂载使用最新值。</p>
     <div class="controls">
       <button type="button" class="doc-btn primary" :disabled="mounted" @click="mountCard">
         挂载组件 Portal

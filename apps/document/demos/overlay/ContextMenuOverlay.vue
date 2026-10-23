@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import {defineComponent, h, onBeforeUnmount, ref, type PropType} from 'vue';
+import {onBeforeUnmount, ref} from 'vue';
 import {ListKeyManager} from 'vue-cdk/a11y';
 import {useOverlay, type OverlayRef} from 'vue-cdk/overlay';
+import {ComponentPortal} from 'vue-cdk/portal';
+import ContextMenuContent from './ContextMenuContent.vue';
 
 /** 右键菜单条目：action 在点击或按 Enter 激活时执行。 */
 interface MenuItem {
@@ -25,38 +27,6 @@ const items = ref<MenuItem[]>([
 /** 菜单键盘管理器：换行 + Home/End；每次打开时复位高亮。 */
 const manager = new ListKeyManager(items).withWrap().withHomeAndEnd();
 manager.tabOut.subscribe(() => closeMenu());
-
-/**
- * 菜单面板组件：overlay.attach 只渲染一次，必须借助组件渲染的响应式
- * （读取 manager.activeItemIndex）才能在键盘导航时更新高亮。
- * 面板经 overlay 容器渲染进 body，其样式只能放在非 scoped 的 <style> 块中。
- */
-const MenuPanel = defineComponent({
-  name: 'ContextMenuPanel',
-  props: {
-    items: {type: Array as PropType<MenuItem[]>, required: true},
-    manager: {type: Object as PropType<ListKeyManager<MenuItem>>, required: true},
-    onChoose: {type: Function as PropType<(item: MenuItem) => void>, required: true},
-  },
-  setup(props) {
-    return () =>
-      h(
-        'div',
-        {class: 'doc-ctx-menu'},
-        props.items.map((item, index) =>
-          h(
-            'div',
-            {
-              class: ['doc-ctx-item', {active: index === props.manager.activeItemIndex}],
-              onMouseenter: () => props.manager.setActiveItem(index),
-              onClick: () => props.onChoose(item),
-            },
-            item.label,
-          ),
-        ),
-      );
-  },
-});
 
 /** 激活条目：执行动作后统一关闭菜单。 */
 function activate(item: MenuItem) {
@@ -107,7 +77,9 @@ function onContextMenu(event: MouseEvent) {
   overlayRef.outsidePointerEvents().subscribe(() => closeMenu());
   // 订阅后 overlay 键盘分发器才会把 body 上的 keydown 派发给本菜单。
   keydownUnsubscribe = overlayRef.keydownEvents().subscribe(onMenuKeydown);
-  overlayRef.attach(() => h(MenuPanel, {items: items.value, manager, onChoose: activate}));
+  overlayRef.attach(new ComponentPortal(ContextMenuContent, {
+    props: {items: items.value, manager, onChoose: activate},
+  }));
 }
 
 function closeMenu() {

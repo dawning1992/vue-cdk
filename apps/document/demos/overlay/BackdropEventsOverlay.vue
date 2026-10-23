@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import {h, onBeforeUnmount, ref, shallowRef} from 'vue';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {type OverlayRef, useOverlay} from 'vue-cdk/overlay';
+import {ComponentPortal} from 'vue-cdk/portal';
+import BackdropEventsContent from './BackdropEventsContent.vue';
 
 const overlay = useOverlay();
 const open = ref(false);
@@ -40,99 +42,9 @@ function openPanel(): void {
   ref.attachments().subscribe(() => push('attachments：已挂载内容'));
   ref.detachments().subscribe(() => push('detachments：已卸载内容'));
 
-  ref.attach(() =>
-    h(
-      'div',
-      {
-        class: 'events-panel',
-        style: {
-          padding: '20px 24px',
-          width: '300px',
-          background: '#fff',
-          border: '1px solid #e3e6ee',
-          borderRadius: '10px',
-          boxShadow: '0 6px 20px rgba(31, 36, 48, 0.12)',
-          transition: 'width 0.2s',
-        },
-      },
-      [
-        h('h3', {style: {margin: '0 0 8px', fontSize: '15px'}}, '遮罩与事件流'),
-        h(
-          'p',
-          {style: {margin: '0 0 14px', color: '#6b7280', fontSize: '12px'}},
-          '点击遮罩、按 ESC 或点击浮层外部，事件流都会在下方输出；也可以动态操作面板。',
-        ),
-        h(
-          'div',
-          {style: {display: 'flex', flexWrap: 'wrap', gap: '8px'}},
-          [
-            h(
-              'button',
-              {
-                class: 'doc-btn',
-                onClick: () => {
-                  wide.value = !wide.value;
-                  ref.updateSize({width: wide.value ? '460px' : '300px'});
-                  push(wide.value ? 'updateSize → 460px' : 'updateSize → 300px');
-                },
-              },
-              '切换宽度',
-            ),
-            h(
-              'button',
-              {
-                class: 'doc-btn',
-                onClick: () => {
-                  ref.updatePosition();
-                  push('updatePosition：重新应用定位');
-                },
-              },
-              '重新定位',
-            ),
-            h(
-              'button',
-              {
-                class: 'doc-btn',
-                onClick: () => {
-                  ref.addPanelClass('doc-events-highlight');
-                  push('addPanelClass：添加高亮类');
-                },
-              },
-              '加面板类',
-            ),
-            h(
-              'button',
-              {
-                class: 'doc-btn',
-                onClick: () => {
-                  ref.removePanelClass('doc-events-highlight');
-                  push('removePanelClass：移除高亮类');
-                },
-              },
-              '删面板类',
-            ),
-            h(
-              'button',
-              {
-                class: 'doc-btn primary',
-                onClick: () => {
-                  ref.dispose();
-                  open.value = false;
-                  push('dispose：销毁浮层');
-                },
-              },
-              'dispose',
-            ),
-            h(
-              'button',
-              {class: 'doc-btn', onClick: close},
-              '关闭（detach）',
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+  ref.attach(new ComponentPortal(BackdropEventsContent, {
+    props: {overlayRef: ref, onClose: close, onPush: push, wide},
+  }));
   open.value = true;
   push('已打开（attach）');
 }

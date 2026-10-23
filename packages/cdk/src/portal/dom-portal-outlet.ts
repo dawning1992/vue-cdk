@@ -1,4 +1,4 @@
-import {h, render, type AppContext, type Component, type ComponentPublicInstance, type VNode} from 'vue';
+import {defineComponent, h, render, toValue, type AppContext, type Component, type ComponentPublicInstance, type VNode} from 'vue';
 import {
   BasePortalOutlet,
   ComponentPortal,
@@ -37,14 +37,22 @@ export class DomPortalOutlet extends BasePortalOutlet {
   }
 
   /**
-   * 挂载组件 Portal：以 `h(component, props)` 渲染到出口元素，
-   * 返回组件公共实例（经 vnode.component.proxy 获取，可读 exposed 能力）。
+   * 挂载组件 Portal：通过内部组件的渲染作用域追踪 props 输入源，
+   * 同步返回目标组件公共实例（函数组件为 null），保持原有返回约定。
+   * 更新由 Vue 调度，detach/dispose 卸载包装组件时自动停止依赖追踪。
+   * 前置条件与 attach 相同：出口未销毁且未挂载内容。
    */
   attachComponentPortal<T extends Component>(portal: ComponentPortal<T>): ComponentPublicInstance | null {
-    const vnode = h(portal.component, portal.props ?? undefined);
+    // 依赖属于包装组件，避免在调用方 setup 中创建会随调用方提前停止的 watcher。
+    // 每次复制顶层属性，既追踪 reactive 的增删，也避免新旧 VNode 共用可变 props。
+    const content = defineComponent({
+      name: 'PortalComponent',
+      setup: () => () => h(portal.component, {...toValue(portal.props)}),
+    });
+    const vnode = h(content);
     this._applyAppContext(vnode, portal.appContext);
     render(vnode, this.outletElement);
-    const instance = vnode.component?.proxy ?? null;
+    const instance = vnode.component?.subTree.component?.proxy ?? null;
     portal.setAttachedHost(this);
     this._attachedPortal = portal;
     this.setDisposeFn(() => render(null, this.outletElement));

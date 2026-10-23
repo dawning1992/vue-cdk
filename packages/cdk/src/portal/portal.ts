@@ -1,4 +1,4 @@
-import type {AppContext, Component, ComponentPublicInstance, VNode} from 'vue';
+import type {AppContext, Component, ComponentPublicInstance, MaybeRefOrGetter, VNode} from 'vue';
 import {
   throwNoPortalAttachedError,
   throwNullPortalError,
@@ -13,8 +13,14 @@ export type TemplateRenderFn<C = unknown> = (context: C) => VNode | VNode[] | nu
 
 /** ComponentPortal 构造选项（Vue 特有：props 与应用上下文）。 */
 export interface ComponentPortalOptions {
-  /** 传给挂载组件的 props。 */
-  props?: Record<string, unknown> | null;
+  /**
+   * 组件输入，支持普通对象、reactive 对象、ref/computed 或 getter；缺省及 null 表示不传。
+   * 响应式依赖变化后在 Vue 更新周期内同步，读取更新后的 DOM 请等待 nextTick()。
+   * getter 应无副作用；对象内的 ref 不会逐项解包，请通过 getter 显式读取。
+   * 普通对象的直接修改不会触发更新；detach/dispose 后停止追踪，再次 attach 读取最新值。
+   * @example `new ComponentPortal(Card, {props: () => ({name: name.value})})`
+   */
+  props?: MaybeRefOrGetter<Record<string, unknown> | null | undefined>;
   /**
    * 渲染组件时使用的应用上下文（提供 provide/inject 能力）。
    * 缺省时回退到出口（PortalOutlet）自身的 appContext。
@@ -88,8 +94,8 @@ export abstract class Portal<T> {
 export class ComponentPortal<T extends Component = Component> extends Portal<ComponentPublicInstance | null> {
   /** 待实例化的组件定义。 */
   readonly component: T;
-  /** 传给组件的 props；null 表示不传。 */
-  readonly props: Record<string, unknown> | null;
+  /** 组件输入源；保留响应式引用，解析和依赖追踪由出口渲染负责，规则同 ComponentPortalOptions.props。 */
+  readonly props: MaybeRefOrGetter<Record<string, unknown> | null | undefined>;
   /** 渲染时使用的应用上下文；null 表示回退到出口上下文。 */
   readonly appContext: AppContext | null;
 

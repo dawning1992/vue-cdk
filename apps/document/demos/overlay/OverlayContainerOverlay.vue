@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import {h, onBeforeUnmount, ref, shallowRef} from 'vue';
+import {onBeforeUnmount, ref, shallowRef} from 'vue';
 import {OverlayContainer, createOverlayRef, type OverlayRef, useOverlay} from 'vue-cdk/overlay';
+import {ComponentPortal} from 'vue-cdk/portal';
+import OverlayContainerContent from './OverlayContainerContent.vue';
 
 const overlay = useOverlay();
 const regionRef = ref<HTMLElement | null>(null);
@@ -62,44 +64,7 @@ function openOverlay(): void {
   open.value = true;
   ref.backdropClick().subscribe(() => closeOverlay());
 
-  // 命令式内容脱离组件模板渲染，样式以内联形式给出，保证在自定义区域中生效。
-  const content = h(
-    'div',
-    {
-      style: {
-        padding: '18px 22px',
-        minWidth: '240px',
-        background: '#fff',
-        border: '1px solid #e3e6ee',
-        borderRadius: '10px',
-        boxShadow: '0 6px 20px rgba(31, 36, 48, 0.12)',
-      },
-    },
-    [
-      h('h3', {style: {margin: '0 0 8px', fontSize: '16px'}}, '区域内的浮层'),
-      h(
-        'p',
-        {style: {margin: '0 0 16px', color: '#6b7280', fontSize: '13px'}},
-        '本面板挂载在自定义 div 容器中，定位范围被限制在该区域内。',
-      ),
-      h(
-        'div',
-        {style: {display: 'flex', justifyContent: 'flex-end'}},
-        [
-          h(
-            'button',
-            {
-              class: 'doc-btn primary',
-              onClick: () => closeOverlay(),
-            },
-            '关闭',
-          ),
-        ],
-      ),
-    ],
-  );
-
-  ref.attach(content);
+  ref.attach(new ComponentPortal(OverlayContainerContent, {props: {onClose: closeOverlay}}));
   refreshStatus();
   log.value = '已打开（attach）：浮层 host 挂载到自定义 div';
 }
