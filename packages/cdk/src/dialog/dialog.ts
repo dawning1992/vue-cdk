@@ -8,6 +8,7 @@ import {scrollStrategies} from '../overlay/scroll/scroll-strategy-options';
 import {Emitter} from '../emitter';
 import {DialogConfig, type DialogContainerInstance, type DialogContent} from './dialog-config';
 import {DialogRef} from './dialog-ref';
+import {isDialogTemplateRef} from './dialog-template';
 import {DialogBackdropManager} from './dialog-backdrop-manager';
 import {VDialogContainer} from './dialog-container';
 import {DEFAULT_DIALOG_CONFIG} from './dialog-injectors';
@@ -108,7 +109,8 @@ export class Dialog implements DialogApi {
    * @param config 打开配置。
    * @param options Vue 特有附加选项（应用上下文与默认配置）。
    * @returns 对话框引用。
-   * @throws 当 id 与已打开对话框重复时抛出错误。
+   * @throws 当 id 与已打开对话框重复或 TemplateRef 来源已卸载时抛出错误。
+   * TemplateRef 来源卸载会立即销毁对话框，跳过关闭谓词及动画；内容继承来源应用上下文。
    */
   open<R = unknown, D = unknown, C = unknown>(
     content: DialogContent,
@@ -132,13 +134,31 @@ export class Dialog implements DialogApi {
       throw new Error(`Dialog with id "${id}" exists already. The dialog id must be unique.`);
     }
 
-    const overlayConfig = this._getOverlayConfig(merged);
-    const overlayRef = createOverlayRef(overlayConfig, {appContext: options.appContext ?? null});
+    const template = isDialogTemplateRef(content) ? content : null;
+    // 在创建浮层前验证来源有效性；已卸载的句柄抛错时不会产生 DOM 或滚动锁定。
+    let stopTemplate = template?.subscribe(() => dialogRef._closeOnTemplateDestroyed());
+    /** 失败回收与正常销毁可能重入；来源订阅仅释放一次。 */
+    const unsubscribeTemplate = () => {
+      const stop = stopTemplate;
+      stopTemplate = undefined;
+      stop?.();
+    };
+    let overlayRef: OverlayRef;
+    try {
+      overlayRef = createOverlayRef(this._getOverlayConfig(merged), {
+        appContext: template?.appContext ?? options.appContext ?? null,
+      });
+    } catch (error) {
+      unsubscribeTemplate();
+      throw error;
+    }
     const dialogRef = new DialogRef(overlayRef, merged);
+    dialogRef._beforeDisposed.subscribe(() => unsubscribeTemplate());
     try {
       dialogRef.containerInstance = this._attachContainer(overlayRef, dialogRef, merged, content);
     } catch (error) {
       // 容器挂载失败时回收 overlay，避免残留已 attach 的浮层污染分发器与 DOM。
+      unsubscribeTemplate();
       overlayRef.dispose();
       throw error;
     }
@@ -152,8 +172,11 @@ export class Dialog implements DialogApi {
 
     (this.openDialogs as DialogRef<R, C>[]).push(dialogRef);
     dialogRef.closed.subscribe(() => this._removeOpenDialog(dialogRef, true));
+    dialogRef._beforeDisposed.subscribe(() => this._backdropManager.prepareForDetach(dialogRef, this.openDialogs));
+    dialogRef._closing.subscribe(() => this._backdropManager.sync(this.openDialogs));
     this._afterOpened.next(dialogRef);
     this._backdropManager.sync(this.openDialogs);
+    dialogRef._startEnter();
 
     return dialogRef;
   }

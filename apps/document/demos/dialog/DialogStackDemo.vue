@@ -130,6 +130,7 @@ function openDialog(id: DialogId): void {
     {
       id,
       panelClass: 'doc-dialog-panel',
+      animation: 'scale',
       positionStrategy: dialogPositions[id](),
       ...(id === 'dialog-c' ? {hasBackdrop: false} : {}),
     },

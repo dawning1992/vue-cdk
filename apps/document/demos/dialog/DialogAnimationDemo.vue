@@ -2,6 +2,7 @@
 import {ref} from 'vue';
 import {useLocale} from '../../composables/useLocale';
 import {useAnimatedAppDialog, type DialogOrigin} from './useAnimatedAppDialog';
+import {createOriginAnimation} from './createOriginAnimation';
 import AnimatedConfirmDialog from './AnimatedConfirmDialog.vue';
 
 const dialog = useAnimatedAppDialog();
@@ -30,7 +31,7 @@ async function openFromEvent(event: MouseEvent): Promise<void> {
   result.value = value === undefined ? 'undefined' : String(value);
 }
 
-/** 也可传入视口坐标；适合菜单项、画布或自定义触发器。 */
+/** 动画工厂接收 x、y，可直接赋给任意 dialog.open() 的 animation 配置。 */
 async function openFromPoint(origin: DialogOrigin): Promise<void> {
   const dialogRef = dialog.open<boolean, {title: string; message: string}>(AnimatedConfirmDialog, {
     data: {
@@ -41,7 +42,8 @@ async function openFromPoint(origin: DialogOrigin): Promise<void> {
           : '此弹窗使用明确指定的视口坐标作为动画起点。',
     },
     ariaLabel: locale.value === 'en-US' ? 'Point-origin dialog' : '指定位置弹窗',
-  }, origin);
+    animation: createOriginAnimation(origin.x, origin.y),
+  });
 
   const value = await dialogRef.closedPromise;
   result.value = value === undefined ? 'undefined' : String(value);

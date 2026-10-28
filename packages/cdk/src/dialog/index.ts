@@ -11,3 +11,5 @@ export * from './dialog-ref';
 export * from './dialog-container';
 export * from './dialog';
 export * from './style-inject';
+
+export type {DialogAnimation, DialogAnimationPreset, DialogAnimationContext, DialogAnimationHook, DialogPresetAnimation, DialogCustomAnimation} from './dialog-animation';

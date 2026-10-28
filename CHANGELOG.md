@@ -1,3 +1,16 @@
+# 未发布
+
+### dialog
+
+- feat：支持将 portal 的 `TemplateRefHandle` 直接传入 `dialog.open()`，保留模板响应式状态，合并 `data`、`dialogRef` 与 `templateContext`，继承来源应用上下文；来源卸载时立即销毁对应对话框并清理订阅，失效句柄再次打开时抛错。
+- feat：新增可选窗口动画配置 `animation`，支持 `fade`、`scale`、`slide-up`、`slide-down`、分阶段时长与缓动，以及返回 `Animation` 或 `Promise<void>` 的自定义钩子；支持禁用动画与系统减少动态效果设置。
+- fix：关闭获准后保留首次结果，等待窗口真实退场完成再释放内容、焦点陷阱并回传关闭结果；统一处理动画取消、失败与外部卸载。
+- fix：共享遮罩与最后一个参与窗口同步开始退场，完善多窗口堆叠、过渡完成检测及 Popover 宿主移除前的遮罩迁移。
+
+### overlay
+
+- fix：复用已挂载的宿主时仍激活原生 Popover，避免浮层内容无法显示。
+
 # 0.1.0-beta.8 (2026-10-23)
 
 ### portal

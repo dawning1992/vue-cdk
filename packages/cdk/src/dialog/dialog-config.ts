@@ -1,4 +1,6 @@
 import type {Component, VNode} from 'vue';
+import type {TemplateRefHandle} from '../portal/template-ref';
+import type {DialogAnimation} from './dialog-animation';
 import type {FocusOrigin} from '../a11y/focus-monitor/focus-monitor';
 import type {PositionStrategy} from '../overlay/position/position-strategy';
 import type {Direction} from '../overlay/position/connected-position';
@@ -22,12 +24,15 @@ export type RestoreFocusValue = boolean | string | HTMLElement;
  * 可放入对话框的内容（对应 Angular 的 ComponentType / TemplateRef 二选一）。
  *
  * - 组件：SFC 或 `defineComponent` 结果，通过 `contentProps` 与 provide/inject 双通道接收数据；
- * - 渲染函数：等价 Angular 的 TemplateRef，调用参数为上下文对象
+ * - TemplateRef 句柄：模板 ref 就绪后传入；上下文与渲染函数一致，来源卸载时立即销毁对话框，
+ *   跳过关闭谓词与退场动画。继承来源应用上下文，不保证来源组件局部 provide；
+ * - 渲染函数：调用参数为上下文对象
  *   （含 `$implicit`（data）与 `dialogRef`，并合并 `templateContext`）；
  * - VNode：直接渲染的虚拟节点。
  */
 export type DialogContent =
   | Component
+  | TemplateRefHandle<any>
   | ((context: Record<string, unknown>) => VNode | VNode[] | null)
   | VNode;
 
@@ -54,7 +59,7 @@ export interface DialogContainerInstance {
  * - Angular 的 `injector` / `viewContainerRef` / `providers` / `bindings`
  *   属依赖注入概念，不移植；由 `provide/inject` 通道（DIALOG_DATA / DIALOG_REF）
  *   与 `contentProps`（Vue 特有 props 通道）替代；
- * - 内容类型统一为 `DialogContent`（组件 / 渲染函数 / VNode）。
+ * - 内容类型统一为 `DialogContent`（组件 / TemplateRef 句柄 / 渲染函数 / VNode）。
  */
 export class DialogConfig<D = unknown, R = unknown> {
   /** 对话框 id；省略时由服务自动生成唯一 id。 */
@@ -152,11 +157,17 @@ export class DialogConfig<D = unknown, R = unknown> {
   /** overlay 被外部 detach 时是否关闭对话框。 */
   closeOnOverlayDetachments?: boolean = true;
 
-  /** 是否禁用内置动画（遮罩淡入淡出）。 */
+  /**
+   * 窗口动画；默认不播放。支持 fade / scale / slide-up / slide-down、内置参数或自定义钩子。
+   * false 可覆盖全局动画；启用后 close 的资源释放与结果回传等待真实退场完成。
+   */
+  animation?: DialogAnimation;
+
+  /** 是否禁用窗口（含自定义钩子）与遮罩动画；系统减少动态效果设置同样生效。 */
   disableAnimations?: boolean = false;
 
   /**
-   * 渲染函数内容的额外上下文；函数形式在打开时惰性求值，
+   * TemplateRef 与渲染函数内容的额外上下文；函数形式在打开时惰性求值，
    * 与内置的 `$implicit`（data）和 `dialogRef` 合并后作为渲染函数参数。
    */
   templateContext?: Record<string, unknown> | (() => Record<string, unknown>);
