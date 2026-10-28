@@ -7,6 +7,8 @@ import ComponentDialogSource from '../demos/dialog/ComponentDialog.vue?raw';
 import ClosedPromiseDialog from '../demos/dialog/ClosedPromiseDialog.vue';
 import ClosedPromiseDialogSource from '../demos/dialog/ClosedPromiseDialog.vue?raw';
 import ConfirmContentSource from '../demos/dialog/ConfirmContent.vue?raw';
+import TemplateRefDialog from '../demos/dialog/TemplateRefDialog.vue';
+import TemplateRefDialogSource from '../demos/dialog/TemplateRefDialog.vue?raw';
 import RenderFnDialog from '../demos/dialog/RenderFnDialog.vue';
 import RenderFnDialogSource from '../demos/dialog/RenderFnDialog.vue?raw';
 import VNodeDialog from '../demos/dialog/VNodeDialog.vue';
@@ -26,18 +28,24 @@ import ConfirmDialogSource from '../demos/dialog/app-dialog/ConfirmDialog.vue?ra
 import AppDialogTitleSource from '../demos/dialog/app-dialog/AppDialogTitle.vue?raw';
 import AppDialogContentSource from '../demos/dialog/app-dialog/AppDialogContent.vue?raw';
 import AppDialogActionsSource from '../demos/dialog/app-dialog/AppDialogActions.vue?raw';
+import BuiltinDialogAnimationDemo from '../demos/dialog/BuiltinDialogAnimationDemo.vue';
+import BuiltinDialogAnimationDemoSource from '../demos/dialog/BuiltinDialogAnimationDemo.vue?raw';
+import DrawerDialogDemo from '../demos/dialog/DrawerDialogDemo.vue';
+import DrawerDialogDemoSource from '../demos/dialog/DrawerDialogDemo.vue?raw';
+import DrawerDialogContentSource from '../demos/dialog/DrawerDialogContent.vue?raw';
 import DialogAnimationDemo from '../demos/dialog/DialogAnimationDemo.vue';
 import DialogAnimationDemoSource from '../demos/dialog/DialogAnimationDemo.vue?raw';
 import AnimatedConfirmDialogSource from '../demos/dialog/AnimatedConfirmDialog.vue?raw';
 import AnimatedAppDialogSource from '../demos/dialog/useAnimatedAppDialog.ts?raw';
+import CreateOriginAnimationSource from '../demos/dialog/createOriginAnimation.ts?raw';
 </script>
 
 <template>
   <ModulePage
     module-name="dialog"
     zh-name="对话框"
-    intro="模态对话框：命令式 useDialog() 打开组件、渲染函数或 VNode 内容；DialogRef 携带关闭结果与事件流，焦点陷阱、autoFocus / restoreFocus、ARIA 与滚动锁定由内置容器完成；多个对话框共享唯一遮罩，由服务统一管理 z-index 栈（后开对话框的遮罩遮住下层窗口，关闭顶层后下一层浮出）。"
-    intro-en="Modal dialogs opened imperatively with useDialog() can render components, render functions, or VNodes. DialogRef provides close results and event streams; the built-in container handles focus trapping, autoFocus / restoreFocus, ARIA, and scroll locking. Dialogs share one backdrop and a managed z-index stack."
+    intro="模态对话框：命令式 useDialog() 打开组件、TemplateRef、渲染函数或 VNode 内容；DialogRef 携带关闭结果与事件流，焦点陷阱、autoFocus / restoreFocus、ARIA 与滚动锁定由内置容器完成；多个对话框共享唯一遮罩，由服务统一管理 z-index 栈（后开对话框的遮罩遮住下层窗口，关闭顶层后下一层浮出）。"
+    intro-en="Modal dialogs opened imperatively with useDialog() can render components, TemplateRef handles, render functions, or VNodes. DialogRef provides close results and event streams; the built-in container handles focus trapping, autoFocus / restoreFocus, ARIA, and scroll locking. Dialogs share one backdrop and a managed z-index stack."
     :api-groups="apiGroups"
   >
     <DemoCard
@@ -62,6 +70,40 @@ import AnimatedAppDialogSource from '../demos/dialog/useAnimatedAppDialog.ts?raw
       :extra-sources="[{filename: 'ConfirmContent.vue', code: ConfirmContentSource}]"
     >
       <ClosedPromiseDialog />
+    </DemoCard>
+
+    <DemoCard
+      title="内置弹窗动画"
+      title-en="Built-in dialog animations"
+      description="animation 可选 fade、scale、slide-up、slide-down，并可分别配置进退场时长与缓动。默认不启用窗口动画；animation: false 可覆盖全局默认值。disableAnimations 或系统减少动态效果设置会跳过窗口与遮罩动画。"
+      description-en="Choose fade, scale, slide-up, or slide-down and configure enter/leave duration and easing. Window animation is opt-in; animation: false overrides global defaults. disableAnimations and reduced-motion preferences skip both window and backdrop animations."
+      :source="BuiltinDialogAnimationDemoSource"
+      filename="BuiltinDialogAnimationDemo.vue"
+    >
+      <BuiltinDialogAnimationDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="侧滑抽屉窗口"
+      title-en="Sliding drawer dialog"
+      description="通过 positionStrategy 将全高抽屉固定在左右侧边，使用自定义 animation 钩子滑入与滑出；正文独立滚动，支持遮罩、ESC 关闭与焦点恢复，并遵循系统减少动态效果设置。"
+      description-en="Pin a full-height drawer to either side with positionStrategy and slide it in and out with custom animation hooks. Content scrolls independently; backdrop dismissal, Escape, focus restoration, and reduced-motion preferences are supported."
+      :source="DrawerDialogDemoSource"
+      filename="DrawerDialogDemo.vue"
+      :extra-sources="[{filename: 'DrawerDialogContent.vue', code: DrawerDialogContentSource}]"
+    >
+      <DrawerDialogDemo />
+    </DemoCard>
+
+    <DemoCard
+      title="TemplateRef 模板对话框"
+      title-en="TemplateRef dialog"
+      description="把 portal 的 TemplateRef 句柄直接传入 open；插槽接收 $implicit（data）、dialogRef 与 templateContext，保留响应式状态。来源卸载时立即销毁对话框，跳过关闭谓词和动画；继承来源应用上下文，不保证来源局部 provide。"
+      description-en="Pass a portal TemplateRef handle directly to open. The slot receives $implicit (data), dialogRef, and templateContext and retains reactive state. Source unmount immediately destroys the dialog, bypassing close predicates and animations. Source app context is inherited; local provides are not guaranteed."
+      :source="TemplateRefDialogSource"
+      filename="TemplateRefDialog.vue"
+    >
+      <TemplateRefDialog />
     </DemoCard>
 
     <DemoCard
@@ -142,11 +184,12 @@ import AnimatedAppDialogSource from '../demos/dialog/useAnimatedAppDialog.ts?raw
     <DemoCard
       title="项目最佳实践：自定义弹窗动画"
       title-en="Project best practice: custom dialog animation"
-      description="沿用 AppDialog 的项目级配置封装，只需额外传入点击事件或视口坐标。弹窗从起点淡入放大至屏幕中央，关闭时淡出缩小回到起点；ESC、遮罩、内容按钮及 closeAll 关闭路径均复用同一动画。"
-      description-en="Builds on the AppDialog project wrapper. Pass a click event or viewport point; the dialog expands from that origin and shrinks back when closed, including ESC, backdrop, content-button, and closeAll paths."
+      description="通过可复用工厂 createOriginAnimation(x, y) 创建动画配置，直接赋给 animation；项目级封装同样复用该工厂，支持传入点击事件或视口坐标。弹窗从起点淡入放大至屏幕中央，关闭时淡出缩小回到起点；通过 animation.enter/leave 返回 Animation，由库等待 finished；也可返回由真实动画结束事件结算的 Promise，不能用定时器模拟完成。ESC、遮罩、内容按钮及 closeAll 复用同一生命周期；最后一个窗口与遮罩同步退场，closedPromise 在窗口动画完成后回传结果。"
+      description-en="Use createOriginAnimation(x, y) as the animation config. The project wrapper reuses this factory and accepts a click event or viewport point; the dialog expands from that origin and shrinks back when closed, through animation.enter/leave hooks returning an Animation or a Promise settled by real animation events, never a timer. ESC, backdrop, buttons and closeAll share this lifecycle. The last window and backdrop leave together; closedPromise resolves after the window animation finishes."
       :source="DialogAnimationDemoSource"
       filename="DialogAnimationDemo.vue"
       :extra-sources="[
+        {filename: 'createOriginAnimation.ts', code: CreateOriginAnimationSource, lang: 'ts'},
         {filename: 'useAnimatedAppDialog.ts', code: AnimatedAppDialogSource, lang: 'ts'},
         {filename: 'AnimatedConfirmDialog.vue', code: AnimatedConfirmDialogSource},
       ]"

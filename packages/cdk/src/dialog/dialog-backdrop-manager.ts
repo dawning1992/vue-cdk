@@ -1,3 +1,4 @@
+import {dialogAnimationsDisabled} from './dialog-animation';
 import {coerceArray} from '../coercion';
 import type {DialogRef} from './dialog-ref';
 
@@ -31,7 +32,7 @@ type BackdropAnimation = 'enter' | 'leave';
  * 遮罩点击只派发给当前顶层参与对话框，下层对话框不会收到；
  * backdropClass 跟随顶层参与对话框，动画禁用规则为“任一参与者禁用即 noop”。
  *
- * 生命周期约定：sync() 在 open/close 后调用；首个参与对话框打开时
+ * 生命周期约定：sync() 在打开、关闭获准及关闭完成时调用；首个参与对话框打开时
  * 淡入遮罩，最后一个关闭时等待真实 transition 生命周期后移除。
  */
 export class DialogBackdropManager {
@@ -53,7 +54,7 @@ export class DialogBackdropManager {
    * @param dialogs 当前已打开的对话框列表（后打开的排末尾）。
    */
   sync(dialogs: readonly DialogRef[]): void {
-    this._participants = dialogs.filter(dialog => dialog.config.hasBackdrop !== false);
+    this._participants = dialogs.filter(dialog => dialog.config.hasBackdrop !== false && !dialog._isClosing);
     const containerElement = dialogs[0]?.overlayRef.hostElement.parentElement ?? null;
     if (containerElement) {
       this._containerElement = containerElement;
@@ -69,10 +70,13 @@ export class DialogBackdropManager {
     });
 
     const participants = this._participants;
-    const topParticipant = participants[participants.length - 1] ?? null;
-    this._topParticipant = topParticipant;
+    // 需求集合决定是否退场；视觉集合保留关闭中的顶层，直到其窗口真正销毁。
+    const visualParticipants = dialogs.filter(dialog => dialog.config.hasBackdrop !== false);
+    const topParticipant = visualParticipants[visualParticipants.length - 1] ?? null;
+    this._topParticipant = topParticipant && !topParticipant._isClosing ? topParticipant : null;
 
-    if (!topParticipant) {
+    if (!participants.length || !topParticipant) {
+      if (this._element && visualParticipants.length) this._syncAnimationMode(this._element, visualParticipants);
       this._startLeave();
       return;
     }
@@ -104,11 +108,50 @@ export class DialogBackdropManager {
     }
   }
 
+  /**
+   * 在 Popover host 销毁前转移共享遮罩，防止尚未完成的退场被一并移出 DOM。
+   * 约定：由 DialogRef 的销毁前通知调用，element 自身的过渡继续由真实完成信号管理。
+   */
+  prepareForDetach(dialog: DialogRef<any, any>, dialogs: readonly DialogRef[]): void {
+    const element = this._element;
+    if (!element || element.parentElement !== dialog.overlayRef.hostElement) return;
+    // 跨父节点迁移会取消 CSS transition。先读取浏览器实际关键帧和时间轴，
+    // 再用等价 WAAPI 动画续播剩余进度，不以配置时长估算或重新开始完整动画。
+    const continuations = this._state === 'leaving' && typeof element.getAnimations === 'function'
+      ? element.getAnimations().filter(animation => 'transitionProperty' in animation).map(animation => ({
+          frames: (animation.effect as KeyframeEffect).getKeyframes(),
+          timing: animation.effect!.getTiming(),
+          currentTime: animation.currentTime,
+        }))
+      : [];
+    const next = [...dialogs].reverse().find(other => other !== dialog && other.overlayRef.hasAttached());
+    if (next?.overlayRef.getConfig().usePopover) {
+      next.overlayRef.hostElement.prepend(element);
+    } else if (this._containerElement?.isConnected) {
+      this._containerElement.appendChild(element);
+      element.style.zIndex = String(this._resolveBaseZIndex(this._containerElement) + 1);
+    }
+    if (continuations.length) {
+      this._cancelAnimation();
+      const version = ++this._animationVersion;
+      this._animation = 'leave';
+      const animations = continuations.map(({frames, timing, currentTime}) => {
+        const animation = element.animate(frames, timing);
+        animation.currentTime = currentTime;
+        return animation;
+      });
+      this._animationCleanup = () => animations.forEach(animation => animation.cancel());
+      void Promise.allSettled(animations.map(animation => animation.finished)).then(() => {
+        this._finishAnimation(version, 'leave');
+      });
+    }
+  }
+
   /** 开始遮罩淡入；离场中的元素会被复用并通过版本号取消旧回调。 */
   private _startEnter(element: HTMLElement, participants: readonly DialogRef[]): void {
     this._cancelAnimation();
     const version = ++this._animationVersion;
-    const noAnimation = participants.some(dialog => dialog.config.disableAnimations === true);
+    const noAnimation = participants.some(dialog => dialogAnimationsDisabled(dialog.config, element));
     this._state = 'entering';
     this._animation = 'enter';
 
@@ -165,7 +208,21 @@ export class DialogBackdropManager {
     version: number,
     animation: BackdropAnimation,
   ): void {
+    // 浏览器可直接枚举实际 CSS transition；空集合表示样式没有产生过渡（如进场前关闭）。
+    // 只观察遮罩自身，避免子节点或无限动画阻塞共享遮罩回收。
+    if (typeof element.getAnimations === 'function') {
+      const transitions = element.getAnimations().filter(effect => 'transitionProperty' in effect);
+      if (!transitions.length) {
+        this._finishAnimation(version, animation);
+        return;
+      }
+      void Promise.allSettled(transitions.map(effect => effect.finished)).then(() => {
+        this._finishAnimation(version, animation);
+      });
+      return;
+    }
     const transitionEndProperties = this._getTransitionEndProperties(element);
+    const pending = new Set(transitionEndProperties);
     const onEnd = (event: TransitionEvent) => {
       if (
         event.target !== element ||
@@ -176,12 +233,13 @@ export class DialogBackdropManager {
       ) {
         return;
       }
-      this._finishAnimation(version, animation);
-    };
-    const onCancel = (event: TransitionEvent) => {
-      if (event.target === element) {
+      pending.delete(event.propertyName);
+      if (!event.propertyName || pending.size === 0 || pending.has('all')) {
         this._finishAnimation(version, animation);
       }
+    };
+    const onCancel = (event: TransitionEvent) => {
+      onEnd(event);
     };
     element.addEventListener('transitionend', onEnd);
     element.addEventListener('transitioncancel', onCancel);
@@ -321,7 +379,7 @@ export class DialogBackdropManager {
 
   /** 任一参与对话框禁用动画时，共享遮罩全程使用 noop 模式。 */
   private _syncAnimationMode(element: HTMLElement, participants: readonly DialogRef[]): void {
-    const noAnimation = participants.some(dialog => dialog.config.disableAnimations === true);
+    const noAnimation = participants.some(dialog => dialogAnimationsDisabled(dialog.config, element));
     element.classList.toggle(BACKDROP_NOOP_CLASS, noAnimation);
   }
 

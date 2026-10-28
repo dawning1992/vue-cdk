@@ -12,6 +12,7 @@ import {
   type VNode,
 } from 'vue';
 import {DialogConfig, type DialogContainerInstance, type DialogContent} from './dialog-config';
+import {isDialogTemplateRef} from './dialog-template';
 import {DIALOG_DATA, DIALOG_REF} from './dialog-injectors';
 import {useFocusTrap} from '../a11y/focus-trap/use-focus-trap';
 import {InteractivityChecker} from '../a11y/focus-trap/interactivity-checker';
@@ -25,7 +26,7 @@ export interface VDialogContainerProps {
   config: DialogConfig;
   /** 当前对话框引用。 */
   dialogRef: DialogRef;
-  /** 对话框内容（组件 / 渲染函数 / VNode）。 */
+  /** 对话框内容（组件 / TemplateRef 句柄 / 渲染函数 / VNode）。 */
   content: DialogContent;
   /** 容器实例就绪回调；服务据此绑定 DialogRef.containerInstance。 */
   onContainerReady?: (instance: DialogContainerInstance) => void;
@@ -34,7 +35,7 @@ export interface VDialogContainerProps {
 /**
  * 把对话框内容归一化为单根 VNode。
  *
- * - 渲染函数：以上下文（`$implicit`=data、`dialogRef`，合并 `templateContext`）为参数调用；
+ * - TemplateRef 句柄与渲染函数：以上下文（`$implicit`=data、`dialogRef`，合并 `templateContext`）为参数调用；
  * - VNode：原样返回；
  * - 组件：通过 `contentProps` 透传 props，并捕获组件实例供 DialogRef.componentInstance 使用。
  *   注意：函数类型一律按渲染函数处理，因此函数式组件请改用 `defineComponent` 包装。
@@ -45,8 +46,8 @@ export function normalizeDialogContent(
   dialogRef: DialogRef,
   onComponentInstance?: (instance: unknown) => void,
 ): VNode {
-  if (typeof content === 'function') {
-    const renderFn = content as (
+  if (isDialogTemplateRef(content) || typeof content === 'function') {
+    const renderFn = (isDialogTemplateRef(content) ? content.render : content) as (
       context: Record<string, unknown>,
     ) => VNode | VNode[] | null;
     const context: Record<string, unknown> = {

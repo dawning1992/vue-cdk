@@ -17,7 +17,9 @@ function open(): void {
   if (!tpl.value || panel?.hasAttached()) {
     return;
   }
-  panel ??= overlay.create({hasBackdrop: true});
+  // 文档示例只验证 TemplateRef 的挂载与响应式更新；关闭 Popover 路径，
+  // 避免浏览器对顶层 Popover 宿主的实现差异遮蔽示例内容。
+  panel ??= overlay.create({hasBackdrop: true, usePopover: false});
   panel.attach(new TemplatePortal(tpl.value, {label: t('计数', 'Count')}));
 }
 

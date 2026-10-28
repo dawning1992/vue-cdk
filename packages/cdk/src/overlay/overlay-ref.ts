@@ -381,22 +381,22 @@ export class OverlayRef {
     this._pane.style.pointerEvents = enablePointer ? '' : 'none';
   }
 
+  /** 挂载或复用 host；即使创建阶段已插入 DOM，也必须激活原生 Popover。 */
   private _attachHost(): void {
-    if (this._host.parentElement) {
-      return;
-    }
-    const customInsertionPoint = this._config.usePopover
-      ? this._positionStrategy?.getPopoverInsertionPoint?.()
-      : null;
+    if (!this._host.parentElement) {
+      const customInsertionPoint = this._config.usePopover
+        ? this._positionStrategy?.getPopoverInsertionPoint?.()
+        : null;
 
-    if (customInsertionPoint instanceof Element) {
-      customInsertionPoint.after(this._host);
-    } else if (customInsertionPoint?.type === 'parent') {
-      customInsertionPoint.element.appendChild(this._host);
-    } else if (this._previousHostParent) {
-      this._previousHostParent.appendChild(this._host);
-    } else {
-      this._container.getContainerElement().appendChild(this._host);
+      if (customInsertionPoint instanceof Element) {
+        customInsertionPoint.after(this._host);
+      } else if (customInsertionPoint?.type === 'parent') {
+        customInsertionPoint.element.appendChild(this._host);
+      } else if (this._previousHostParent) {
+        this._previousHostParent.appendChild(this._host);
+      } else {
+        this._container.getContainerElement().appendChild(this._host);
+      }
     }
 
     if (this._config.usePopover && supportsPopover()) {
